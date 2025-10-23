@@ -31,6 +31,10 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            var clicks by remember { mutableStateOf(0) }
+            Button(onClick = { clicks++ }) {
+                Text("You have clicked $clicks times")
+            }
             Button(onClick = { showContent = !showContent }) {
                 Text("Click me!")
             }
