@@ -1,53 +1,49 @@
 package org.example.indoor.navigation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import di.createKoinConfiguration
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinMultiplatformApplication
+import org.koin.core.annotation.KoinExperimentalAPI
 
-import indoornav.composeapp.generated.resources.Res
-import indoornav.composeapp.generated.resources.compose_multiplatform
-
+@OptIn(KoinExperimentalAPI::class)
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            var clicks by remember { mutableStateOf(0) }
-            Button(onClick = { clicks++ }) {
-                Text("You have clicked $clicks times")
-            }
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+    KoinMultiplatformApplication(
+        config = createKoinConfiguration(),
+    ) {
+        MaterialTheme {
+            NavHost(
+                navController = rememberNavController(),
+                startDestination = "home"
+            ) {
+                composable("home") {
+                    MainScreen()
                 }
             }
         }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Witaj świecie!"
+        )
     }
 }
