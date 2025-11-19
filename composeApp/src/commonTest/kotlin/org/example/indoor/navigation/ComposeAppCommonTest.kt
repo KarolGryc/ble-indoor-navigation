@@ -9,4 +9,10 @@ class ComposeAppCommonTest {
     fun example() {
         assertEquals(3, 1 + 2)
     }
+
+    @Test
+    fun anotherExample() {
+        val now = nowMillis()
+        assertEquals(false,         hasPassedMillis(now, 500))
+    }
 }

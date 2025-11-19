@@ -6,10 +6,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
 
 class BleSimpleViewModel(
     private val bluetoothScanner: BluetoothScanner
 ) : ViewModel(), BluetoothScanListener {
+    private val _cutOffTime = 5000L
+
     private val _currentBleDevices = MutableStateFlow<List<BleScanResult>>(emptyList())
     val currentBleDevices = _currentBleDevices.asStateFlow()
 
@@ -22,10 +25,18 @@ class BleSimpleViewModel(
     init {
         viewModelScope.launch {
             while(true) {
-                pruneOldDevices(5000L)
+                pruneOldDevices(_cutOffTime)
                 delay(1000)
             }
         }
+    }
+
+    fun startScan() {
+        bluetoothScanner.startScan(this)
+    }
+
+    fun stopScan() {
+        bluetoothScanner.stopScan()
     }
 
     override fun onNewScan(result: ScanCallbackResult) {
@@ -50,16 +61,11 @@ class BleSimpleViewModel(
         _numOfScans.value += 1
     }
 
-    private fun pruneOldDevices(cutOffTime: Long) {
-        val prunedList = _currentBleDevices.value.filter { it.timestamp >= cutOffTime }
+    @OptIn(ExperimentalTime::class)
+    private fun pruneOldDevices(cutOffTimeMs: Long) {
+        val prunedList = _currentBleDevices.value.filter {
+            !hasPassedMillis(it.timestamp, cutOffTimeMs)
+        }
         _currentBleDevices.value = prunedList
-    }
-
-    fun startScan() {
-        bluetoothScanner.startScan(this)
-    }
-
-    fun stopScan() {
-        bluetoothScanner.stopScan()
     }
 }

@@ -13,6 +13,7 @@ composeMultiplatform = "1.9.3"
 junit = "4.13.2"
 kotlin = "2.2.21"
 moko = "0.20.1"
+kotlinx-datetime = "0.7.1"
 
 koin = "4.1.1"
 koinComposeMultiplatform = "4.1.1"
@@ -44,6 +45,9 @@ moko-permissions = { module = "dev.icerock.moko:permissions", version.ref = "mok
 moko-permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko" }
 moko-permissions-bluetooth = { module = "dev.icerock.moko:permissions-bluetooth", version.ref = "moko" }
 moko-permissions-location = { module = "dev.icerock.moko:permissions-location", version.ref = "moko" }
+
+# Date and Time library
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

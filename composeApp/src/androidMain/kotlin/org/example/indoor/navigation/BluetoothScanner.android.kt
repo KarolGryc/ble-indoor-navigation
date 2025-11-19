@@ -11,6 +11,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import androidx.core.util.forEach
+import kotlin.time.ExperimentalTime
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class BluetoothScanner (
@@ -21,6 +22,7 @@ actual class BluetoothScanner (
     private val _leScanner = _bluetoothAdapter?.bluetoothLeScanner
     private var _listener: BluetoothScanListener? = null
 
+    @OptIn(ExperimentalTime::class)
     private var _scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             if (!canReadBleDeviceName(context)) {
@@ -32,7 +34,7 @@ actual class BluetoothScanner (
             val name = device.name
             val macAddress = device.address
             val rssi = result.rssi
-            val now = System.currentTimeMillis()
+            val timestamp = nowMillis()
             val manufacturerData = buildList {
                 result.scanRecord?.manufacturerSpecificData?.forEach { companyId, data ->
                     add(Pair(companyId, data))
@@ -44,7 +46,7 @@ actual class BluetoothScanner (
                 identifier = macAddress,
                 manufacturerData = manufacturerData,
                 rssi = rssi,
-                timestamp = now
+                timestamp = timestamp
             )
             _listener?.onNewScan(ScanCallbackResult.Success(scannedDevice))
         }

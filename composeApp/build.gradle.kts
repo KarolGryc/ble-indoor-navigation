@@ -49,6 +49,8 @@ kotlin {
             implementation(libs.moko.permissions.compose)
             implementation(libs.moko.permissions.bluetooth)
             implementation(libs.moko.permissions.location)
+
+            api(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
