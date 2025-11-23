@@ -1,6 +1,6 @@
 from PySide6.QtCore import QObject
-from node import Node
-from wall import Wall
+from model.node import Node
+from model.wall import Wall
 from PySide6.QtCore import Signal
 
 class MapModel(QObject):

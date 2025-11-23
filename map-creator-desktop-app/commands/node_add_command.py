@@ -1,7 +1,7 @@
 from PySide6.QtGui import QUndoCommand
 
-from map_model import MapModel
-from node import Node
+from model.map_model import MapModel
+from model.node import Node
 
 class NodeAddCommand(QUndoCommand):
     def __init__(self, model: MapModel, node: Node):

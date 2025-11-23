@@ -1,5 +1,5 @@
-from node import Node
-from PySide6.QtWidgets import QGraphicsEllipseItem, QGraphicsItem
+from model.node import Node
+from PySide6.QtWidgets import QGraphicsEllipseItem
 from PySide6.QtGui import QColor
 
 class NodeGraphicsItem(QGraphicsEllipseItem):

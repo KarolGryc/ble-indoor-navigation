@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Signal
-from node import Node
+from model.node import Node
 
 class Wall(QObject):
     def __init__(self, start_node: Node, end_node: Node):

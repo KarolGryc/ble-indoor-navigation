@@ -1,4 +1,4 @@
-from wall import Wall
+from model.wall import Wall
 from PySide6.QtWidgets import QGraphicsLineItem
 from PySide6.QtGui import QPen, QColor
 
