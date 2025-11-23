@@ -3,7 +3,7 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QUndoStack
 
 from model.map_model import MapModel
-from node_item import NodeGraphicsItem
+from view.node_item import NodeGraphicsItem
 from tools.tool import Tool
 from view.wall_graphics_item import WallGraphicsItem
 from model.wall import Wall

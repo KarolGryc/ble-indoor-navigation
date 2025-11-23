@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QMainWindow, QGraphicsScene, QPushButton, QWidget,
 from PySide6.QtGui import QColor
 
 from model.map_model import MapModel
-from map_view import MapView
+from view.map_view import MapView
 from map_presenter import MapPresenter
 from tools.node_add_tool import NodeAddTool
 from tools.wall_add_tool import WallAddTool

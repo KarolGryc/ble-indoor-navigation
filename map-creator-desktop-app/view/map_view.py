@@ -1,4 +1,4 @@
-from PySide6.QtGui import QMouseEvent, QPainter
+from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter
 from PySide6.QtWidgets import QGraphicsView, QGraphicsScene
 from PySide6.QtCore import Qt
 from map_presenter import MapPresenter
@@ -15,10 +15,18 @@ class MapView(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setResizeAnchor(QGraphicsView.AnchorUnderMouse)
+
         self.setMouseTracking(True)
 
         self._is_panning = False
         self._pan_start_pos = None
+
+        self._zoom_factor = 1.0
+        self._zoom_scale = 1.1
+        self._min_zoom = 0.1
+        self._max_zoom = 10.0
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MiddleButton:
@@ -27,11 +35,8 @@ class MapView(QGraphicsView):
             self.setCursor(Qt.ClosedHandCursor)
             return
 
-        # map the mouse event to graphics scene coordinates
         pos = self.mapToScene(event.position().toPoint())
         self.presenter.on_canvas_click(pos)
-
-        return super().mousePressEvent(event)
     
     def mouseReleaseEvent(self, event: QMouseEvent):
         if event.button() == Qt.MiddleButton:
@@ -40,17 +45,20 @@ class MapView(QGraphicsView):
             event.accept()
             return
 
-        super().mouseReleaseEvent(event)
+    def wheelEvent(self, event: QWheelEvent):
+        factor = self._zoom_scale if event.angleDelta().y() > 0 else 1 / self._zoom_scale
+        new_zoom = self._zoom_factor * factor
+        if new_zoom < self._min_zoom or new_zoom > self._max_zoom:
+            return
+
+        self._zoom_factor = new_zoom
+        self.scale(factor, factor)
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        # --- LOGIKA PRZESUWANIA WIDOKU ---
         if self._is_panning:
-            # Obliczamy o ile przesunęła się myszka od ostatniej klatki
             delta = event.position() - self._pan_start_pos
             self._pan_start_pos = event.position()
 
-            # Przesuwamy paski przewijania (scrollbary)
-            # Odejmujemy deltę, żeby ruch był naturalny ("ciągniemy papier")
             h_bar = self.horizontalScrollBar()
             v_bar = self.verticalScrollBar()
             
@@ -61,7 +69,5 @@ class MapView(QGraphicsView):
             return
         else:
             self.presenter.on_canvas_move(self.mapToScene(event.position().toPoint()))
-        # --- LOGIKA NARZĘDZI (PREZENTER) ---
-        # scene_pos = self.mapToScene(event.pos())
-        # self.presenter.on_canvas_move(scene_pos)
+
         super().mouseMoveEvent(event)
