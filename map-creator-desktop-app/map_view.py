@@ -9,12 +9,13 @@ class MapView(QGraphicsView):
         self.presenter = presenter
         self.scene: QGraphicsScene = presenter.scene
         self.setScene(self.scene)
-        self.scene.setSceneRect(-50000, -50000, 100000, 100000)
 
         self.setRenderHint(QPainter.Antialiasing)
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        self.setMouseTracking(True)
 
         self._is_panning = False
         self._pan_start_pos = None
@@ -52,15 +53,14 @@ class MapView(QGraphicsView):
             # Odejmujemy deltę, żeby ruch był naturalny ("ciągniemy papier")
             h_bar = self.horizontalScrollBar()
             v_bar = self.verticalScrollBar()
-
-            print(f"Delta: {delta.x()}, {delta.y()}")  # Debugging line
             
             h_bar.setValue(h_bar.value() - delta.x())
             v_bar.setValue(v_bar.value() - delta.y())
             
             event.accept()
             return
-
+        else:
+            self.presenter.on_canvas_move(self.mapToScene(event.position().toPoint()))
         # --- LOGIKA NARZĘDZI (PREZENTER) ---
         # scene_pos = self.mapToScene(event.pos())
         # self.presenter.on_canvas_move(scene_pos)
