@@ -1,6 +1,4 @@
 from tools.tool import Tool
-from model.wall import Wall
-from model.node import Node
 from map_presenter import MapPresenter
 from commands.wall_add_command import WallAddCommand
 from PySide6.QtWidgets import QGraphicsScene
@@ -10,42 +8,57 @@ class WallAddTool(Tool):
     def __init__(self, presenter: MapPresenter, scene: QGraphicsScene, name="Wall Add Tool"):
         super().__init__(presenter, scene, name)
 
-        self._first_click_pos = None
-        self._click_point_preview = None
+        self._start_point = None
+
+        # Preview items
+        self._start_point_preview = None
         self._preview_line = None
+        self._end_point_preview = None
+
+    def deactivate(self):
+        self._start_point = None
+        self._cleanup_preview()
 
     def mouse_click(self, pos):
-        if self._first_click_pos is None:
-            self._first_click_pos = pos
-            self._click_point_preview = self.scene.addEllipse(
+        if self._start_point is None:
+            self._start_point = pos
+            self._start_point_preview = self.scene.addEllipse(
                 pos.x() - 3, pos.y() - 3, 6, 6,
             )
             self._preview_line = self.scene.addLine(
                 pos.x(), pos.y(), pos.x(), pos.y()
             )
+            self._end_point_preview = self.scene.addEllipse(
+                pos.x() - 3, pos.y() - 3, 6, 6,
+            )
         else:
-            command = WallAddCommand(self.presenter.model, self._first_click_pos, pos)
+            command = WallAddCommand(self.presenter.model, self._start_point, pos)
             self.presenter.execute_command(command)
-            self._reset_tool()
+            self.deactivate()
 
-    def _reset_tool(self):
-        self._first_click_pos = None
-        self._cleanup_preview()
+    def mouse_move(self, pos):
+        if self._preview_line is not None:    
+            self._preview_line.setLine(
+                self._start_point.x(),
+                self._start_point.y(),
+                pos.x(),
+                pos.y()
+            )
+
+        if self._end_point_preview is not None:
+            self._end_point_preview.setRect(
+                pos.x() - 3, pos.y() - 3, 6, 6,
+            )
 
     def _cleanup_preview(self):
-        if self._click_point_preview:
-            self.scene.removeItem(self._click_point_preview)
-            self._click_point_preview = None
+        if self._start_point_preview:
+            self.scene.removeItem(self._start_point_preview)
+            self._start_point_preview = None
 
         if self._preview_line:
             self.scene.removeItem(self._preview_line)
             self._preview_line = None
 
-    def mouse_move(self, pos):
-        if self._first_click_pos is not None and self._preview_line is not None:
-            self._preview_line.setLine(
-                self._first_click_pos.x(),
-                self._first_click_pos.y(),
-                pos.x(),
-                pos.y()
-            )
+        if self._end_point_preview:
+            self.scene.removeItem(self._end_point_preview)
+            self._end_point_preview = None

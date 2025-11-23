@@ -15,3 +15,7 @@ class Tool(ABC):
     @abstractmethod
     def mouse_move(self, pos):
         pass
+
+    @abstractmethod
+    def deactivate(self):
+        pass

@@ -2,6 +2,7 @@ from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter
 from PySide6.QtWidgets import QGraphicsView, QGraphicsScene
 from PySide6.QtCore import Qt
 from map_presenter import MapPresenter
+from view.zoom import GraphicsViewZoom
 
 class MapView(QGraphicsView):
     def __init__(self, presenter: MapPresenter):
@@ -23,10 +24,7 @@ class MapView(QGraphicsView):
         self._is_panning = False
         self._pan_start_pos = None
 
-        self._zoom_factor = 1.0
-        self._zoom_scale = 1.1
-        self._min_zoom = 0.2
-        self._max_zoom = 10.0
+        self._zoom = GraphicsViewZoom(min_zoom=0.2, max_zoom=10.0, scale=1.15)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MiddleButton:
@@ -46,13 +44,10 @@ class MapView(QGraphicsView):
             return
 
     def wheelEvent(self, event: QWheelEvent):
-        factor = self._zoom_scale if event.angleDelta().y() > 0 else 1 / self._zoom_scale
-        new_zoom = self._zoom_factor * factor
-        if new_zoom < self._min_zoom or new_zoom > self._max_zoom:
-            return
-
-        self._zoom_factor = new_zoom
-        self.scale(factor, factor)
+        if event.angleDelta().y() > 0:
+            self._zoom.zoom_in(self)
+        else:
+            self._zoom.zoom_out(self)
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if self._is_panning:
