@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QPointF
 from PySide6.QtGui import QUndoStack
 
 from model.map_model import MapModel
@@ -12,10 +12,11 @@ from model.node import Node
 class MapPresenter(QObject):
     current_tool_changed = Signal(Tool)
 
-    def __init__(self, model: MapModel, scene: QGraphicsScene):
+    def __init__(self, model: MapModel, scene: QGraphicsScene, grid_size: int = 50):
         super().__init__()
         self.model = model
         self.scene = scene
+        self._grid_size = grid_size
 
         self._undo_stack = QUndoStack()
 
@@ -27,16 +28,31 @@ class MapPresenter(QObject):
         self.model.wall_removed.connect(self._on_wall_removed)
         self._item_map = {}
 
+    # ------------------------------------
+    # ---------- Grid methods ------------
+    # ------------------------------------
+    @property
+    def grid_size(self) -> int:
+        return self._grid_size
+    
+    @grid_size.setter
+    def grid_size(self, size: int):
+        self._grid_size = size if size > 0 else 0
+
+    def snap_to_grid(self, pos: QPointF) -> QPointF:
+        x = round(pos.x() / self._grid_size) * self._grid_size
+        y = round(pos.y() / self._grid_size) * self._grid_size
+        return QPointF(x, y)
 
     # ------------------------------------
     # --------- Tool management ----------
     # ------------------------------------
     @property
-    def current_tool(self):
+    def current_tool(self) -> Tool:
         return self._current_tool
 
     @current_tool.setter
-    def current_tool(self, tool):
+    def current_tool(self, tool: Tool):
         if type(tool) == type(self._current_tool):
             return
         
@@ -86,10 +102,12 @@ class MapPresenter(QObject):
     # ------------------------------------
     def on_canvas_click(self, pos):
         if self._current_tool:
+            pos = self.snap_to_grid(pos)
             self._current_tool.mouse_click(pos)
         else:
             print("No tool selected.")
 
     def on_canvas_move(self, pos):
         if self._current_tool:
+            pos = self.snap_to_grid(pos)
             self._current_tool.mouse_move(pos)

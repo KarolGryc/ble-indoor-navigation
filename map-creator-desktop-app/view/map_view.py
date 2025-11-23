@@ -25,7 +25,7 @@ class MapView(QGraphicsView):
 
         self._zoom_factor = 1.0
         self._zoom_scale = 1.1
-        self._min_zoom = 0.1
+        self._min_zoom = 0.2
         self._max_zoom = 10.0
 
     def mousePressEvent(self, event: QMouseEvent):
