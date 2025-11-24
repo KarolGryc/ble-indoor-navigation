@@ -10,6 +10,7 @@ class SelectTool(Tool):
 
         self._is_dragging = False
         self._dragged_item = None
+        self._dragged_model = None
         self._start_pos = None
         self._last_pos = None
 
@@ -33,6 +34,7 @@ class SelectTool(Tool):
             return
 
         self._dragged_item = item
+        self._dragged_model = self.presenter.get_model_for_item(item)
         self._is_dragging = True
         self._start_pos = item.pos()
         self._last_pos = item.pos()
@@ -46,19 +48,19 @@ class SelectTool(Tool):
             if delta.manhattanLength() < 0.1:
                 return
 
-            self._dragged_item.moveBy(delta.x(), delta.y())
-            self._last_pos = self.presenter.snap_to_grid(self._dragged_item.pos())
+            curr_pos = self._dragged_model.position
+            self._dragged_model.position = curr_pos + delta
+            self._last_pos = self.presenter.snap_to_grid(self._dragged_model.position)
 
     def mouse_release(self, pos):
         if self._is_dragging and self._dragged_item is not None:
             self._dragged_item.setOpacity(1)
-            self._dragged_item.setPos(self._start_pos)
+            self._dragged_model.position = self._start_pos
 
             if self._last_pos != self._start_pos:
-                model_element = self.presenter.get_model_for_item(self._dragged_item)
                 delta = self._last_pos - self._start_pos
-                cmd = MoveElementsCommand(self.presenter.model, [model_element], delta)
-                self.presenter.execute_command(cmd)
+                cmd = MoveElementsCommand(self.presenter.model, [self._dragged_model], delta)
+                self.presenter.execute(cmd)
 
         self._is_dragging = False
         self._dragged_item = None

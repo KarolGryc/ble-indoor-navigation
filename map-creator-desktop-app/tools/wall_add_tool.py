@@ -34,7 +34,7 @@ class WallAddTool(Tool):
             )
         else:
             command = WallAddCommand(self.presenter.model, self._start_point, pos)
-            self.presenter.execute_command(command)
+            self.presenter.execute(command)
             self.deactivate()
 
     def mouse_move(self, pos):

@@ -19,7 +19,7 @@ class NodeAddTool(Tool):
     def mouse_click(self, pos):
         pos = self.presenter.snap_to_grid(pos)
         command = NodeAddCommand(self.presenter.model, Node(pos.x(), pos.y()))
-        self.presenter.execute_command(command)
+        self.presenter.execute(command)
 
         if self.node_add_preview:
             self.scene.removeItem(self.node_add_preview)

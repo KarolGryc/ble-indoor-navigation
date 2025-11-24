@@ -82,7 +82,7 @@ class MapPresenter(QObject):
     # ------------------------------------
     # ---- QUndoStack related methods ----
     # ------------------------------------
-    def execute_command(self, command: QUndoStack):
+    def execute(self, command: QUndoStack):
         self._undo_stack.push(command)
 
     def undo(self):
@@ -115,6 +115,7 @@ class MapPresenter(QObject):
         self.scene.addItem(new_wall_item)
         self._model_to_view_map[wall] = new_wall_item
         self._view_to_model_map[new_wall_item] = wall
+        wall.geometry_changed.connect(lambda: new_wall_item.update_geometry())
 
     def _on_wall_removed(self, wall: Wall):
         item = self._model_to_view_map.pop(wall, None)
