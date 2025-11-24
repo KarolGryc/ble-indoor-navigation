@@ -18,16 +18,11 @@ class SelectTool(Tool):
         self._selected_models_start_pos = dict()
 
     def deactivate(self):
-        if self._dragged_item is not None:
-            self._dragged_item.setOpacity(1)
-
-        if self._is_dragging and self._dragged_item is not None:
-            self._dragged_item.setPos(self._start_pos)
-            pass
-
-        self._is_dragging = False
-        self._start_pos = None
-        self._last_pos = None
+        for model, pos in self._selected_models_start_pos.items():
+            model.position = pos
+        
+        self.clear_selection()
+        self._reset_dragging()
 
     def mouse_click(self, pos, modifier=None):
         ctrl_active = modifier == Qt.ControlModifier
