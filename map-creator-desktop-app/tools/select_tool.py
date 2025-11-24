@@ -62,7 +62,7 @@ class SelectTool(Tool):
             pass
 
     def mouse_release(self, pos):
-        if self._is_dragging and not self._selected_models_start_pos:
+        if self._is_dragging and self._selected_models_start_pos:
             start_pos = self._selected_models_start_pos[self._reference_model] 
             delta = self._last_pos - start_pos
 
@@ -75,6 +75,7 @@ class SelectTool(Tool):
                 self.presenter.execute(cmd)
 
         self._reset_dragging()
+        self.clear_selection()
 
     def _reset_dragging(self):
         self._is_dragging = False
