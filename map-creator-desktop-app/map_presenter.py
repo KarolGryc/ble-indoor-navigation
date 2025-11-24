@@ -26,7 +26,8 @@ class MapPresenter(QObject):
 
         self.model.wall_added.connect(self._on_wall_added)
         self.model.wall_removed.connect(self._on_wall_removed)
-        self._item_map = {}
+        self._model_to_view_map = {}
+        self._view_to_model_map = {}
 
     # ------------------------------------
     # ---------- Grid methods ------------
@@ -56,6 +57,9 @@ class MapPresenter(QObject):
         if type(tool) == type(self._current_tool):
             return
         
+        if self._current_tool is not None:
+            self._current_tool.deactivate()
+
         self._current_tool = tool
         self.current_tool_changed.emit(tool)
 
@@ -74,40 +78,49 @@ class MapPresenter(QObject):
     # ------------------------------------
     # ------ Model change handlers -------
     # ------------------------------------
+    def get_model_for_item(self, item):
+        return self._view_to_model_map.get(item, None)
+
     def _on_node_added(self, node: Node):
         new_node = NodeGraphicsItem(node)
         self.scene.addItem(new_node)
-        self._item_map[node] = new_node
+        self._model_to_view_map[node] = new_node
+        self._view_to_model_map[new_node] = node
 
     def _on_node_removed(self, node: Node):
-        item = self._item_map.get(node)
+        item = self._model_to_view_map.pop(node, None)
         if item:
             self.scene.removeItem(item)
-            del self._item_map[node]
+            del self._view_to_model_map[item]
 
     def _on_wall_added(self, wall: Wall):
         new_wall_item = WallGraphicsItem(wall)
-        self._item_map[wall] = new_wall_item
         self.scene.addItem(new_wall_item)
+        self._model_to_view_map[wall] = new_wall_item
+        self._view_to_model_map[new_wall_item] = wall
 
     def _on_wall_removed(self, wall: Wall):
-        item = self._item_map.get(wall)
+        item = self._model_to_view_map.pop(wall, None)
         if item:
             self.scene.removeItem(item)
-            del self._item_map[wall]
-
+            del self._view_to_model_map[item]
 
     # ------------------------------------
     # ------- View event handling --------
     # ------------------------------------
     def on_canvas_click(self, pos):
-        if self._current_tool:
-            pos = self.snap_to_grid(pos)
-            self._current_tool.mouse_click(pos)
+        if self._current_tool is not None:
+            if hasattr(self._current_tool, 'mouse_click'):
+                self._current_tool.mouse_click(pos)
         else:
             print("No tool selected.")
 
     def on_canvas_move(self, pos):
-        if self._current_tool:
-            pos = self.snap_to_grid(pos)
-            self._current_tool.mouse_move(pos)
+        if self._current_tool is not None:
+            if hasattr(self._current_tool, 'mouse_move'):
+                self._current_tool.mouse_move(pos)
+
+    def on_canvas_release(self, pos):
+        if self._current_tool is not None:
+            if hasattr(self._current_tool, 'mouse_release'):
+                self._current_tool.mouse_release(pos)

@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QMainWindow, QGraphicsScene, QPushButton, QWidget,
 from PySide6.QtGui import QColor
 
 from model.map_model import MapModel
+from tools.select_tool import SelectTool
 from view.map_view import MapView
 from map_presenter import MapPresenter
 from tools.node_add_tool import NodeAddTool
@@ -23,7 +24,8 @@ class MapCreatorApp(QMainWindow):
         self.presenter = MapPresenter(model, scene)
 
         tools = [NodeAddTool(self.presenter, scene),
-                 WallAddTool(self.presenter, scene)]
+                 WallAddTool(self.presenter, scene),
+                 SelectTool(self.presenter, scene)]
         toolbar = Toolbar(self.presenter, tools)
         self.addToolBar(toolbar)
 

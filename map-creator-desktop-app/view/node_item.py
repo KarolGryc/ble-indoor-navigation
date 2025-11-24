@@ -9,3 +9,4 @@ class NodeGraphicsItem(QGraphicsEllipseItem):
         self.setBrush(QColor("blue"))
         self.node = node
         self.setPos(node.position)
+        self.setFlag(QGraphicsEllipseItem.ItemIsSelectable, True)

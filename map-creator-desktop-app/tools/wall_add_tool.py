@@ -20,6 +20,7 @@ class WallAddTool(Tool):
         self._cleanup_preview()
 
     def mouse_click(self, pos):
+        pos = self.presenter.snap_to_grid(pos)
         if self._start_point is None:
             self._start_point = pos
             self._start_point_preview = self.scene.addEllipse(
@@ -37,6 +38,7 @@ class WallAddTool(Tool):
             self.deactivate()
 
     def mouse_move(self, pos):
+        pos = self.presenter.snap_to_grid(pos)
         if self._preview_line is not None:    
             self._preview_line.setLine(
                 self._start_point.x(),

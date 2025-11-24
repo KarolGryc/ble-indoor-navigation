@@ -37,7 +37,12 @@ class MapView(QGraphicsView):
         self.presenter.on_canvas_click(pos)
     
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.MiddleButton:
+        if event.button() == Qt.LeftButton:
+            pos = self.mapToScene(event.position().toPoint())
+            self.presenter.on_canvas_release(pos)
+            event.accept()
+            return
+        elif event.button() == Qt.MiddleButton:
             self._is_panning = False
             self.setCursor(Qt.ArrowCursor)
             event.accept()

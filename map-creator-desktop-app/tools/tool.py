@@ -8,14 +8,14 @@ class Tool(ABC):
         self.scene = scene
         self.name = name
 
-    @abstractmethod
     def mouse_click(self, pos):
         pass
 
-    @abstractmethod
     def mouse_move(self, pos):
         pass
 
-    @abstractmethod
+    def mouse_release(self, pos):
+        pass
+
     def deactivate(self):
         pass
