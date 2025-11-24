@@ -96,6 +96,9 @@ class MapPresenter(QObject):
     # ------------------------------------
     def get_model_for_item(self, item):
         return self._view_to_model_map.get(item, None)
+    
+    def get_graphics_item_for_model(self, model):
+        return self._model_to_view_map.get(model, None)
 
     def _on_node_added(self, node: Node):
         new_node = NodeGraphicsItem(node)
@@ -126,10 +129,10 @@ class MapPresenter(QObject):
     # ------------------------------------
     # ------- View event handling --------
     # ------------------------------------
-    def on_canvas_click(self, pos):
+    def on_canvas_click(self, pos, modifier=None):
         if self._current_tool is not None:
             if hasattr(self._current_tool, 'mouse_click'):
-                self._current_tool.mouse_click(pos)
+                self._current_tool.mouse_click(pos, modifier)
         else:
             print("No tool selected.")
 

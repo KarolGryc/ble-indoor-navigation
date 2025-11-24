@@ -8,7 +8,7 @@ class Tool(ABC):
         self.scene = scene
         self.name = name
 
-    def mouse_click(self, pos):
+    def mouse_click(self, pos, modifier=None):
         pass
 
     def mouse_move(self, pos):

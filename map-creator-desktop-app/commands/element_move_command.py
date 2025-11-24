@@ -2,9 +2,8 @@ from PySide6.QtGui import QUndoCommand
 from model.map_model import MapModel
 
 class MoveElementsCommand(QUndoCommand):
-    def __init__(self, model: MapModel, elements, delta_pos):
+    def __init__(self, elements, delta_pos):
         super().__init__("Move Element")
-        self._model = model
         self._elements = elements
         self._delta_pos = delta_pos
 

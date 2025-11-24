@@ -19,7 +19,7 @@ class WallAddTool(Tool):
         self._start_point = None
         self._cleanup_preview()
 
-    def mouse_click(self, pos):
+    def mouse_click(self, pos, modifier=None):
         pos = self.presenter.snap_to_grid(pos)
         if self._start_point is None:
             self._start_point = pos

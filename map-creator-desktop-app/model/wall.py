@@ -1,5 +1,6 @@
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QPointF
 from model.node import Node
+
 
 class Wall(QObject):
     geometry_changed = Signal()
@@ -11,7 +12,7 @@ class Wall(QObject):
 
         self.start_node.position_changed.connect(self._on_node_changed)
         self.end_node.position_changed.connect(self._on_node_changed)
-
+        
     def _on_node_changed(self):
         self.geometry_changed.emit()
 

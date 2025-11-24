@@ -33,7 +33,8 @@ class MapView(QGraphicsView):
             self.setCursor(Qt.ClosedHandCursor)
         if event.button() == Qt.LeftButton:
             pos = self.mapToScene(event.position().toPoint())
-            self.presenter.on_canvas_click(pos)
+            modifier = event.modifiers()
+            self.presenter.on_canvas_click(pos, modifier)
     
     def mouseReleaseEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
