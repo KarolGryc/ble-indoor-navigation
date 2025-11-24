@@ -145,3 +145,9 @@ class MapPresenter(QObject):
         if self._current_tool is not None:
             if hasattr(self._current_tool, 'mouse_release'):
                 self._current_tool.mouse_release(pos)
+
+    def on_keyboard_button_press(self, key):
+        if self._current_tool is not None:
+            if hasattr(self._current_tool, 'key_press'):
+                self._current_tool.key_press(key)
+        pass

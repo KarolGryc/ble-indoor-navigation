@@ -69,3 +69,7 @@ class MapView(QGraphicsView):
             self.presenter.on_canvas_move(self.mapToScene(event.position().toPoint()))
 
         super().mouseMoveEvent(event)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        self.presenter.on_keyboard_button_press(key)

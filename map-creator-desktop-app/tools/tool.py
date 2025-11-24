@@ -19,3 +19,6 @@ class Tool(ABC):
 
     def deactivate(self):
         pass
+
+    def key_press(self, key):
+        pass

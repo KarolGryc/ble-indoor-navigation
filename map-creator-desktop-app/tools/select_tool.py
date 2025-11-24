@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from tools.tool import Tool
 from map_presenter import MapPresenter
 from commands.element_move_command import MoveElementsCommand
+from commands.delete_item_command import DeleteElementsCommand
 
 # Needs total cleanup
 class SelectTool(Tool):
@@ -75,7 +76,14 @@ class SelectTool(Tool):
                 self.presenter.execute(cmd)
 
         self._reset_dragging()
-        self.clear_selection()
+
+    def key_press(self, key):
+        if key == Qt.Key_Delete:
+            elements_to_delete = [model for model in self._selected_models_start_pos]
+            cmd = DeleteElementsCommand(self.presenter, elements_to_delete)
+            self.presenter.execute(cmd)
+
+            self._selected_models_start_pos.clear()
 
     def _reset_dragging(self):
         self._is_dragging = False
