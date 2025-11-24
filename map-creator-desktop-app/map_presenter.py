@@ -26,6 +26,7 @@ class MapPresenter(QObject):
 
         self.model.wall_added.connect(self._on_wall_added)
         self.model.wall_removed.connect(self._on_wall_removed)
+
         self._model_to_view_map = {}
         self._view_to_model_map = {}
 
@@ -86,6 +87,7 @@ class MapPresenter(QObject):
         self.scene.addItem(new_node)
         self._model_to_view_map[node] = new_node
         self._view_to_model_map[new_node] = node
+        node.position_changed.connect(lambda pos: new_node.setPos(pos))
 
     def _on_node_removed(self, node: Node):
         item = self._model_to_view_map.pop(node, None)

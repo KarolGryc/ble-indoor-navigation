@@ -19,9 +19,10 @@ class SelectTool(Tool):
 
     def mouse_click(self, pos):
         item = self.scene.itemAt(pos, QTransform())
-        print(f"SelectTool: Clicked at {pos}, item: {item}")
 
         if item is None:
+            self.scene.clearSelection()
+            self._moving_model_objects = []
             return
 
         if not item.isSelected():
@@ -32,10 +33,8 @@ class SelectTool(Tool):
         self._last_drag_pos = pos
 
         self._moving_model_objects = []
-        print("Selected items:", self.scene.selectedItems())
         for selected_item in self.scene.selectedItems():
             model_object = self.presenter.get_model_for_item(selected_item)
-            print("Model_object:", model_object)
             if model_object:
                 self._moving_model_objects.append(model_object)
 
@@ -48,14 +47,14 @@ class SelectTool(Tool):
                 item.moveBy(delta.x(), delta.y())
 
     def mouse_release(self, pos):
-        print(f"SelectTool: Mouse released at {pos}")
         if self._is_dragging:
+            pos = self.presenter.snap_to_grid(pos)
             total_delta = pos - self._drag_start_pos
 
             if total_delta.manhattanLength() > 0 and self._moving_model_objects:
-                back_vector = self._drag_start_pos - pos                
+                back_vector = self._drag_start_pos - pos             
                 for item in self.scene.selectedItems():
-                    item.moveBy(-back_vector.x(), back_vector.y())
+                    item.moveBy(back_vector.x(), back_vector.y())
 
                 move_command = MoveElementsCommand(
                     self.presenter.model,
@@ -67,3 +66,4 @@ class SelectTool(Tool):
             self._is_dragging = False
             self._drag_start_pos = None
             self._last_drag_pos = None
+            self._moving_model_objects = []

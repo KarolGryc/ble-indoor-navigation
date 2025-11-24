@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, QPointF, Signal
 from math import sqrt
 
 class Node(QObject):
-    position_changed = Signal()
+    position_changed = Signal(QPointF)
 
     def __init__(self, x: float, y: float):
         super().__init__()
@@ -16,7 +16,7 @@ class Node(QObject):
     def position(self, pos: QPointF):
         if self.pos != pos:
             self.pos = pos
-            self.position_changed.emit()
+            self.position_changed.emit(self.pos)
 
     @property
     def x(self) -> float:
@@ -26,7 +26,7 @@ class Node(QObject):
     def x(self, value: float):
         if self.pos.x() != value:
             self.pos.setX(value)
-            self.position_changed.emit()
+            self.position_changed.emit(self.pos)
 
     @property
     def y(self) -> float:
@@ -36,7 +36,7 @@ class Node(QObject):
     def y(self, value: float):
         if self.pos.y() != value:
             self.pos.setY(value)
-            self.position_changed.emit()
+            self.position_changed.emit(self.pos)
 
     def distance_to(self, other: 'Node') -> float:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
