@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QToolBar, QToolButton
+from PySide6.QtWidgets import QToolBar, QToolButton, QButtonGroup
 from map_presenter import MapPresenter
 
 from tools.tool import Tool
@@ -8,22 +8,28 @@ class Toolbar(QToolBar):
         super().__init__("Main Toolbar")
         self.presenter = presenter
         self.presenter.current_tool_changed.connect(self._on_current_tool_changed)
-        
+
+        group = QButtonGroup(self)
+        group.setExclusive(True)
+
         self._undo_button = QToolButton()
         self._undo_button.setText("Undo")
         self._undo_button.clicked.connect(self.presenter._undo_stack.undo)
         self.addWidget(self._undo_button)
+        group.addButton(self._undo_button)
 
         self._redo_button = QToolButton()
         self._redo_button.setText("Redo")
         self._redo_button.clicked.connect(self.presenter._undo_stack.redo)
         self.addWidget(self._redo_button)
+        group.addButton(self._redo_button)
 
         for tool in tool_set:
             button = QToolButton()
             self.addWidget(button)
             button.setText(type(tool).__name__)
             button.clicked.connect(lambda checked, t=tool: self._set_current_tool(t))
+            group.addButton(button)
 
     def _set_current_tool(self, tool):
         self.presenter.current_tool = tool

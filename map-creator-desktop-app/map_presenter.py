@@ -30,6 +30,8 @@ class MapPresenter(QObject):
         self._model_to_view_map = {}
         self._view_to_model_map = {}
 
+        self._show_grid = True
+
     # ------------------------------------
     # ---------- Grid methods ------------
     # ------------------------------------
@@ -45,6 +47,15 @@ class MapPresenter(QObject):
         x = round(pos.x() / self._grid_size) * self._grid_size
         y = round(pos.y() / self._grid_size) * self._grid_size
         return QPointF(x, y)
+    
+    @property
+    def show_grid(self) -> bool:
+        return self._show_grid
+    
+    @show_grid.setter
+    def show_grid(self, show: bool):
+        self._show_grid = show
+        self.scene.update()
 
     # ------------------------------------
     # --------- Tool management ----------
@@ -63,6 +74,10 @@ class MapPresenter(QObject):
 
         self._current_tool = tool
         self.current_tool_changed.emit(tool)
+
+    def reset_current_tool(self):
+        if self._current_tool is not None:
+            self._current_tool.deactivate()
 
     # ------------------------------------
     # ---- QUndoStack related methods ----
