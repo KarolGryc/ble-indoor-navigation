@@ -8,7 +8,6 @@ from tools.tool import Tool
 from view.wall_graphics_item import WallGraphicsItem
 from model.wall import Wall
 from model.node import Node
-from commands.delete_item_command import DeleteElementsCommand
 
 class MapPresenter(QObject):
     current_tool_changed = Signal(Tool)

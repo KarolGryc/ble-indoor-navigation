@@ -3,8 +3,8 @@ from PySide6.QtGui import QTransform
 from PySide6.QtCore import Qt
 from tools.tool import Tool
 from map_presenter import MapPresenter
-from commands.element_move_command import MoveElementsCommand
-from commands.delete_item_command import DeleteElementsCommand
+from commands.move_command import MoveElementsCommand
+from commands.delete_command import DeleteElementsCommand
 
 # Needs total cleanup
 class SelectTool(Tool):
