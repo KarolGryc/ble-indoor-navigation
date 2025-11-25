@@ -47,10 +47,8 @@ class SelectTool(Tool):
             self._is_dragging = True
             self._last_pos = model.position
             self._reference_model = model
-            print(f"Start pos: {self._last_pos}")
 
     def mouse_move(self, pos):
-        pass
         if self._is_dragging:
             delta = pos - self._last_pos
             delta = self.presenter.snap_to_grid(delta)
@@ -62,8 +60,6 @@ class SelectTool(Tool):
                 model.moveBy(delta)
                 
             self._last_pos = self._reference_model.position
-        else:
-            pass
 
     def mouse_release(self, pos):
         if self._is_dragging and self._selected_models_start_pos:

@@ -113,8 +113,11 @@ class MapView(QGraphicsView):
         self._zoom.reset_zoom()
 
     def reset_rotation(self):
+        previous_mode = self._transofmation_mode
+        self._set_cursor_mode(RotateMode(self))
         rotation_to_reset = -self._current_rotation
         self.rotate(rotation_to_reset)
+        self._set_cursor_mode(previous_mode)
         self._compass.set_angle(0.0)
 
     def _set_cursor_mode(self, mode: CursorMode):
