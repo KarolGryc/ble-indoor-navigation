@@ -22,27 +22,64 @@ class MapView(QGraphicsView):
         self.setMouseTracking(True)
 
         self._is_panning = False
-        self._pan_start_pos = None
+        self._is_rotating = False
+        self._last_mouse_pos = None 
 
         self._zoom = GraphicsViewZoom(min_zoom=0.2, max_zoom=10.0, scale=1.15)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MiddleButton:
-            self._is_panning = True
-            self._pan_start_pos = event.position()
-            self.setCursor(Qt.ClosedHandCursor)
+            self._last_mouse_pos = event.position()
+            if event.modifiers() & Qt.AltModifier: # Rotation
+                self._is_rotating = True
+                self._is_panning = False
+                self.setCursor(Qt.SizeAllCursor)
+            else: # Panning
+                self._is_panning = True
+                self._is_rotating = False
+                self.setCursor(Qt.ClosedHandCursor)
+    
+            event.accept()
+
         if event.button() == Qt.LeftButton:
             pos = self.mapToScene(event.position().toPoint())
             modifier = event.modifiers()
             self.presenter.on_canvas_click(pos, modifier)
+            super().mousePressEvent(event)
     
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self._is_panning or self._is_rotating:
+            delta = event.position() - self._last_mouse_pos
+            self._last_mouse_pos = event.position()
+
+            if self._is_rotating:
+                self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
+                angle = delta.x() * 0.5 
+                self.rotate(angle)
+            
+            elif self._is_panning:
+                self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+                h_bar = self.horizontalScrollBar()
+                v_bar = self.verticalScrollBar()
+                h_bar.setValue(h_bar.value() - delta.x())
+                v_bar.setValue(v_bar.value() - delta.y())
+            
+            event.accept()
+            return
+        
+        else:
+            self.presenter.on_canvas_move(self.mapToScene(event.position().toPoint()))
+
     def mouseReleaseEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
             pos = self.mapToScene(event.position().toPoint())
             self.presenter.on_canvas_release(pos)
             event.accept()
+
         if event.button() == Qt.MiddleButton:
             self._is_panning = False
+            self._is_rotating = False
             self.setCursor(Qt.ArrowCursor)
             event.accept()
 
@@ -51,24 +88,6 @@ class MapView(QGraphicsView):
             self._zoom.zoom_in(self)
         else:
             self._zoom.zoom_out(self)
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self._is_panning:
-            delta = event.position() - self._pan_start_pos
-            self._pan_start_pos = event.position()
-
-            h_bar = self.horizontalScrollBar()
-            v_bar = self.verticalScrollBar()
-            
-            h_bar.setValue(h_bar.value() - delta.x())
-            v_bar.setValue(v_bar.value() - delta.y())
-            
-            event.accept()
-            return
-        else:
-            self.presenter.on_canvas_move(self.mapToScene(event.position().toPoint()))
-
-        super().mouseMoveEvent(event)
 
     def keyPressEvent(self, event):
         key = event.key()
