@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from map_presenter import MapPresenter
 from view.zoom import GraphicsViewZoom
 from view.cursor_modes import *
+from view.compass import CompassWidget
 
 class MapView(QGraphicsView):
     def __init__(self, presenter: MapPresenter):
@@ -25,7 +26,23 @@ class MapView(QGraphicsView):
         self._last_mouse_pos = None
         self._transofmation_mode: CursorMode = NormalMode(self)
 
-        self._zoom = GraphicsViewZoom(min_zoom=0.2, max_zoom=10.0, scale=1.15)
+        self._zoom = GraphicsViewZoom(self, min_zoom=0.2, max_zoom=10.0, scale=1.15)
+
+        self._current_rotation = 0.0
+
+        self._compass = CompassWidget(self, scale = 1.25)
+        self._update_compass_position()
+        self._compass.clicked.connect(self.reset_rotation)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._update_compass_position()
+
+    def _update_compass_position(self):
+        margin = 20
+        x = self.width() - self._compass.width() - margin
+        y = margin
+        self._compass.move(x, y)
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MiddleButton:
@@ -71,12 +88,30 @@ class MapView(QGraphicsView):
 
     def wheelEvent(self, event: QWheelEvent):
         if event.angleDelta().y() > 0:
-            self._zoom.zoom_in(self)
+            self._zoom.zoom_in()
         else:
-            self._zoom.zoom_out(self)
+            self._zoom.zoom_out()
 
     def mouseDoubleClickEvent(self, event):
         pass
+
+    def rotate(self, angle):
+        self._current_rotation += angle
+        self._compass.set_angle(self._current_rotation)
+        return super().rotate(angle)
+
+    def reset_view(self):
+        self.resetTransform()
+        self._current_rotation = 0.0
+        self._compass.set_angle(self._current_rotation)
+
+    def reset_zoom(self):
+        self._zoom.reset_zoom()
+
+    def reset_rotation(self):
+        rotation_to_reset = -self._current_rotation
+        self.rotate(rotation_to_reset)
+        self._compass.set_angle(0.0)
 
     def _set_cursor_mode(self, mode: CursorMode):
         if type(self._transofmation_mode) != type(mode):

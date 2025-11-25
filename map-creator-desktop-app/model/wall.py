@@ -33,6 +33,12 @@ class Wall(QObject):
 
         self.geometry_changed.emit()
     
+    def move(self, delta: QPointF):
+        self.start_node.position = self.start_node.position + delta
+        self.end_node.position = self.end_node.position + delta
+
+        self.geometry_changed.emit()
+    
     def middle_point(self) -> QPointF:
         x = (self.start_node.x + self.end_node.x) / 2
         y = (self.start_node.y + self.end_node.y) / 2

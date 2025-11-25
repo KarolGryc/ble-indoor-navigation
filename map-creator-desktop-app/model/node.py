@@ -38,5 +38,9 @@ class Node(QObject):
             self.pos.setY(value)
             self.position_changed.emit(self.pos)
 
+    def move(self, delta: QPointF):
+        self.position = self.position + delta
+        self.position_changed.emit(self.position)
+
     def distance_to(self, other: 'Node') -> float:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)

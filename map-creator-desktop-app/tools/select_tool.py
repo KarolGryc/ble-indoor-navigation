@@ -29,15 +29,17 @@ class SelectTool(Tool):
         ctrl_active = modifier == Qt.ControlModifier
         item = self.scene.itemAt(pos, QTransform())
 
-        if not ctrl_active:
-            self.clear_selection()
-
         if item is None:
+            if not ctrl_active:
+                self.clear_selection()
             return
         else:
             model = self.presenter.get_model_for_item(item)
             if model is None:
                 return
+            
+            if not ctrl_active and model not in self._selected_models_start_pos:
+                self.clear_selection()
             
             self._selected_models_start_pos[model] = model.position
             item.setSelected(True)

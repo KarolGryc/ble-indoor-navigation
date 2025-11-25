@@ -133,8 +133,6 @@ class MapPresenter(QObject):
         if self._current_tool is not None:
             if hasattr(self._current_tool, 'mouse_click'):
                 self._current_tool.mouse_click(pos, modifier)
-        else:
-            print("No tool selected.")
 
     def on_canvas_move(self, pos):
         if self._current_tool is not None:

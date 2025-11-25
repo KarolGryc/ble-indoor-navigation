@@ -9,10 +9,8 @@ class MoveElementsCommand(QUndoCommand):
 
     def redo(self):
         for element in self._elements:
-            new_pos = element.position + self._delta_pos
-            element.position = new_pos
+            element.move(self._delta_pos)
 
     def undo(self):
         for element in self._elements:
-            new_pos = element.position - self._delta_pos
-            element.position = new_pos
+            element.move(-self._delta_pos)
