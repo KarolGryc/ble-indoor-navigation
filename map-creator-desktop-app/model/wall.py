@@ -1,17 +1,23 @@
-from PySide6.QtCore import QObject, Signal, QPointF
+from PySide6.QtCore import Signal, QPointF
 from model.node import Node
+from model.map_object import MapObject
 
-class Wall(QObject):
+class Wall(MapObject):
     geometry_changed = Signal()
 
     def __init__(self, start_node: Node, end_node: Node):
         super().__init__()
         self.start_node = start_node
         self.end_node = end_node
+        self.start_node.wall = self
+        self.end_node.wall = self
 
         self.start_node.position_changed.connect(self._on_node_changed)
         self.end_node.position_changed.connect(self._on_node_changed)
-        
+
+        self._notified_start_node_removal = False
+        self._notified_end_node_removal = False
+
     def _on_node_changed(self):
         self.geometry_changed.emit()
 
@@ -33,7 +39,7 @@ class Wall(QObject):
 
         self.geometry_changed.emit()
     
-    def move(self, delta: QPointF):
+    def moveBy(self, delta: QPointF):
         self.start_node.position = self.start_node.position + delta
         self.end_node.position = self.end_node.position + delta
 

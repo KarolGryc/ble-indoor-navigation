@@ -8,6 +8,7 @@ from tools.tool import Tool
 from view.wall_graphics_item import WallGraphicsItem
 from model.wall import Wall
 from model.node import Node
+from commands.delete_item_command import DeleteElementsCommand
 
 class MapPresenter(QObject):
     current_tool_changed = Signal(Tool)
@@ -144,7 +145,7 @@ class MapPresenter(QObject):
             if hasattr(self._current_tool, 'mouse_release'):
                 self._current_tool.mouse_release(pos)
 
-    def on_keyboard_button_press(self, key):
+    def on_keyboard_press(self, key):
         if self._current_tool is not None:
             if hasattr(self._current_tool, 'key_press'):
                 self._current_tool.key_press(key)

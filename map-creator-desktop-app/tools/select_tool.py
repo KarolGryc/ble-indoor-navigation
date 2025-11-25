@@ -47,8 +47,10 @@ class SelectTool(Tool):
             self._is_dragging = True
             self._last_pos = model.position
             self._reference_model = model
+            print(f"Start pos: {self._last_pos}")
 
     def mouse_move(self, pos):
+        pass
         if self._is_dragging:
             delta = pos - self._last_pos
             delta = self.presenter.snap_to_grid(delta)
@@ -57,10 +59,9 @@ class SelectTool(Tool):
                 return
 
             for model in self._selected_models_start_pos:
-                curr_pos = model.position
-                model.position = curr_pos + delta
+                model.moveBy(delta)
                 
-            self._last_pos = self.presenter.snap_to_grid(self._reference_model.position)
+            self._last_pos = self._reference_model.position
         else:
             pass
 
@@ -68,6 +69,7 @@ class SelectTool(Tool):
         if self._is_dragging and self._selected_models_start_pos:
             start_pos = self._selected_models_start_pos[self._reference_model] 
             delta = self._last_pos - start_pos
+            delta = self.presenter.snap_to_grid(delta)
 
             if delta.manhattanLength() > 0.1:
                 for model, pos in self._selected_models_start_pos.items():

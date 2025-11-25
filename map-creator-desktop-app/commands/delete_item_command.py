@@ -11,13 +11,29 @@ class DeleteElementsCommand(QUndoCommand):
     def undo(self):
         for element in self._elements:
             if isinstance(element, Node):
-                self.presenter.model.add_node(element)
+                if element.wall:
+                    self.presenter.model.add_wall(element.wall)
+                    self.presenter.model.add_node(element.wall.start_node)
+                    self.presenter.model.add_node(element.wall.end_node)
+                else:
+                    self.presenter.model.add_node(element)
+
             elif isinstance(element, Wall):
                 self.presenter.model.add_wall(element)
+                self.presenter.model.add_node(element.start_node)
+                self.presenter.model.add_node(element.end_node)
 
     def redo(self):
         for element in self._elements:
             if isinstance(element, Node):
-                self.presenter.model.remove_node(element)
+                if element.wall:
+                    self.presenter.model.remove_wall(element.wall)
+                    self.presenter.model.remove_node(element.wall.start_node)
+                    self.presenter.model.remove_node(element.wall.end_node)
+                else:
+                    self.presenter.model.remove_node(element)
+
             elif isinstance(element, Wall):
                 self.presenter.model.remove_wall(element)
+                self.presenter.model.remove_node(element.start_node)
+                self.presenter.model.remove_node(element.end_node)

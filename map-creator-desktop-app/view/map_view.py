@@ -92,6 +92,10 @@ class MapView(QGraphicsView):
         else:
             self._zoom.zoom_out()
 
+    def keyPressEvent(self, event):
+        self.presenter.on_keyboard_press(event.key())
+        return super().keyPressEvent(event)
+
     def mouseDoubleClickEvent(self, event):
         pass
 

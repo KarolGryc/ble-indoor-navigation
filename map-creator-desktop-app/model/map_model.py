@@ -16,6 +16,9 @@ class MapModel(QObject):
         self.walls: list[Wall] = []
 
     def add_node(self, node: Node):
+        if node in self.nodes:
+            return
+        
         self.nodes.append(node)
         self.node_added.emit(node)
 
@@ -25,6 +28,9 @@ class MapModel(QObject):
             self.node_removed.emit(node)
 
     def add_wall(self, wall: Wall):
+        if wall in self.walls:
+            return
+        
         self.walls.append(wall)
         self.wall_added.emit(wall)
 

@@ -1,12 +1,14 @@
-from PySide6.QtCore import QObject, QPointF, Signal
+from PySide6.QtCore import QPointF, Signal
 from math import sqrt
+from model.map_object import MapObject
 
-class Node(QObject):
+class Node(MapObject):
     position_changed = Signal(QPointF)
 
     def __init__(self, x: float, y: float):
         super().__init__()
         self.pos = QPointF(x, y)
+        self.wall = None
 
     @property
     def position(self) -> QPointF:
@@ -38,7 +40,7 @@ class Node(QObject):
             self.pos.setY(value)
             self.position_changed.emit(self.pos)
 
-    def move(self, delta: QPointF):
+    def moveBy(self, delta: QPointF):
         self.position = self.position + delta
         self.position_changed.emit(self.position)
 
