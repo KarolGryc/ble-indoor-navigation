@@ -10,4 +10,3 @@ class NodeGraphicsItem(QGraphicsEllipseItem):
         self.node = node
         self.setPos(node.position)
         self.setFlag(QGraphicsEllipseItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsEllipseItem.ItemIsMovable, False)

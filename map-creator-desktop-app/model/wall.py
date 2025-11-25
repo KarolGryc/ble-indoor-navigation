@@ -25,6 +25,10 @@ class Wall(MapObject):
         return self.start_node.distance_to(self.end_node)
     
     @property
+    def movables(self):
+        return [self.start_node, self.end_node]
+
+    @property
     def position(self) -> QPointF:
         return self.middle_point()
     

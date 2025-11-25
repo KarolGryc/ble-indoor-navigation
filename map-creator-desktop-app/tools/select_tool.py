@@ -12,14 +12,14 @@ class SelectTool(Tool):
         super().__init__(presenter, scene, name)
 
         self._is_dragging = False
-        self._start_pos = None
         self._last_pos = None
-        self._reference_model = None
+        self._reference_movable = None
 
-        self._selected_models_start_pos = dict()
+        self._selected_models = set()
+        self._movables_start_pos = dict()
 
     def deactivate(self):
-        for model, pos in self._selected_models_start_pos.items():
+        for model, pos in self._selected_models.items():
             model.position = pos
         
         self.clear_selection()
@@ -38,41 +38,47 @@ class SelectTool(Tool):
             if model is None:
                 return
             
-            if not ctrl_active and model not in self._selected_models_start_pos:
+            if not ctrl_active and model not in self._selected_models:
                 self.clear_selection()
             
-            self._selected_models_start_pos[model] = model.position
+            self._selected_models.add(model)
             item.setSelected(True)
+
+            movables = model.movables
+            for movable in movables:
+                self._movables_start_pos[movable] = movable.position
             
             self._is_dragging = True
-            self._last_pos = model.position
-            self._reference_model = model
+            self._last_pos = self.presenter.snap_to_grid(movables[0].position)
+            self._reference_movable = movables[0]
 
     def mouse_move(self, pos):
         if self._is_dragging:
-            delta = pos - self._last_pos
-            delta = self.presenter.snap_to_grid(delta)
+            pos = self.presenter.snap_to_grid(pos)
+            delta = pos - self.presenter.snap_to_grid(self._last_pos)
 
             if delta.manhattanLength() < 0.1:
                 return
 
-            for model in self._selected_models_start_pos:
+            for model in self._movables_start_pos.keys():
                 model.moveBy(delta)
                 
-            self._last_pos = self._reference_model.position
+            self._last_pos = self.presenter.snap_to_grid(self._reference_movable.position)
 
     def mouse_release(self, pos):
-        if self._is_dragging and self._selected_models_start_pos:
-            start_pos = self._selected_models_start_pos[self._reference_model] 
+        if self._is_dragging and self._movables_start_pos:
+            start_pos = self._movables_start_pos.get(self._reference_movable)
+            start_pos = self.presenter.snap_to_grid(start_pos)
+            
             delta = self._last_pos - start_pos
             delta = self.presenter.snap_to_grid(delta)
 
             if delta.manhattanLength() > 0.1:
-                for model, pos in self._selected_models_start_pos.items():
+                for model, pos in self._movables_start_pos.items():
                     model.position = pos
                     pos = pos + delta
 
-                cmd = MoveElementsCommand([x for x in self._selected_models_start_pos], delta)
+                cmd = MoveElementsCommand([x for x in self._movables_start_pos.keys()], delta)
                 self.presenter.execute(cmd)
                 
         else:
@@ -82,22 +88,23 @@ class SelectTool(Tool):
 
     def key_press(self, key):
         if key == Qt.Key_Delete:
-            elements_to_delete = [model for model in self._selected_models_start_pos]
+            elements_to_delete = [model for model in self._selected_models]
             cmd = DeleteElementsCommand(self.presenter, elements_to_delete)
             self.presenter.execute(cmd)
 
-            self._selected_models_start_pos.clear()
+            self._reset_dragging()
 
     def _reset_dragging(self):
         self._is_dragging = False
         self._start_pos = None
         self._last_pos = None
-        self._reference_model = None
+        self._reference_movable = None
 
     def clear_selection(self):
-        for model in self._selected_models_start_pos:
+        for model in self._selected_models:
             item = self.presenter.get_graphics_item_for_model(model)
             if item is not None:
                 item.setSelected(False)
 
-        self._selected_models_start_pos.clear()
+        self._selected_models.clear()
+        self._movables_start_pos.clear()

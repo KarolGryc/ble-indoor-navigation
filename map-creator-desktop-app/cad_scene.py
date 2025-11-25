@@ -9,10 +9,9 @@ class InteractiveScene(QGraphicsScene):
         self._presenter = presenter
         self.setBackgroundBrush(background_color)
         
-        # Proste kolory
-        self._grid_color = QColor(220, 220, 220)      # Jasny szary
-        self._axis_color = QColor(80, 80, 80)         # Ciemny szary
-        self._text_color = QColor(50, 50, 50)         # Prawie czarny
+        self._grid_color = QColor(220, 220, 220)
+        self._axis_color = QColor(80, 80, 80)
+        self._text_color = QColor(50, 50, 50)
 
     def set_presenter(self, presenter):
         self._presenter = presenter

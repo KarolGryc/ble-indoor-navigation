@@ -5,7 +5,7 @@ from PySide6.QtGui import QUndoStack
 from model.map_model import MapModel
 from view.node_item import NodeGraphicsItem
 from tools.tool import Tool
-from view.wall_graphics_item import WallGraphicsItem
+from view.wall_item import WallGraphicsItem
 from model.wall import Wall
 from model.node import Node
 

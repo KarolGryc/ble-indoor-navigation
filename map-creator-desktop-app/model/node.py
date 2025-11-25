@@ -11,6 +11,10 @@ class Node(MapObject):
         self.wall = None
 
     @property
+    def movables(self):
+        return [self]
+
+    @property
     def position(self) -> QPointF:
         return self.pos
     

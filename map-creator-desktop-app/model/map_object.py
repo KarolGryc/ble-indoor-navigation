@@ -6,3 +6,7 @@ class MapObject(QObject):
     
     def should_survive_deletion_of(self, item: 'MapObject') -> bool:
         return True
+    
+    @property
+    def movables(self):
+        pass

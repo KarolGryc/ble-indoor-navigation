@@ -9,6 +9,7 @@ class WallGraphicsItem(QGraphicsLineItem):
         pen = QPen(QColor("black"), 2)
         self.setPen(pen)
         self.wall = wall
+        self.setFlag(QGraphicsLineItem.ItemIsSelectable, True)
 
     def update_geometry(self):
         self.setLine(self.wall.start_node.x, self.wall.start_node.y,
