@@ -20,7 +20,7 @@ class MapCreatorApp(QMainWindow):
 
         model = MapModel()
         scene = InteractiveScene()
-        scene.setSceneRect(-50000, -50000, 100000, 100000)
+        scene.setSceneRect(-5000, -5000, 10000, 10000)
 
         self.presenter = MapPresenter(model, scene)
         scene.set_presenter(self.presenter)

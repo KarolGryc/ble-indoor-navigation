@@ -36,7 +36,10 @@ class MapView(QGraphicsView):
             pos = self.mapToScene(event.position().toPoint())
             modifier = event.modifiers()
             self.presenter.on_canvas_click(pos, modifier)
+            
+        super().mousePressEvent(event)
     
+
     def mouseMoveEvent(self, event: QMouseEvent):
         canva_pos = event.position()
         if event.buttons() & Qt.MiddleButton:
@@ -69,15 +72,17 @@ class MapView(QGraphicsView):
             self._set_cursor_mode(NormalMode(self))
             event.accept()
 
+        super().mouseReleaseEvent(event)
+
     def wheelEvent(self, event: QWheelEvent):
         if event.angleDelta().y() > 0:
             self._zoom.zoom_in(self)
         else:
             self._zoom.zoom_out(self)
 
-    def mouseDoubleClickEvent(self, event):
-        pass
+        super().wheelEvent(event)
 
     def _set_cursor_mode(self, mode: CursorMode):
         if type(self._transofmation_mode) != type(mode):
             self._transofmation_mode = mode
+            print(f"Cursor mode changed to: {type(mode).__name__}")

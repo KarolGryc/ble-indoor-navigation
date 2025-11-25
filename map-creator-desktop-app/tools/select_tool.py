@@ -74,7 +74,10 @@ class SelectTool(Tool):
 
                 cmd = MoveElementsCommand([x for x in self._selected_models_start_pos], delta)
                 self.presenter.execute(cmd)
-
+                
+        else:
+            self.clear_selection()
+        
         self._reset_dragging()
 
     def key_press(self, key):
