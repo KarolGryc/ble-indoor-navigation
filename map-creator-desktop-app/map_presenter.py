@@ -8,6 +8,7 @@ from tools.tool import Tool
 from view.wall_item import WallGraphicsItem
 from model.wall import Wall
 from model.node import Node
+from model.zone import Zone
 
 class MapPresenter(QObject):
     current_tool_changed = Signal(Tool)
@@ -26,6 +27,9 @@ class MapPresenter(QObject):
 
         self.model.wall_added.connect(self._on_wall_added)
         self.model.wall_removed.connect(self._on_wall_removed)
+
+        self.model.zone_added.connect(self._on_zone_added)
+        self.model.zone_removed.connect(self._on_zone_removed)
 
         self._model_to_view_map = {}
         self._view_to_model_map = {}
@@ -126,26 +130,32 @@ class MapPresenter(QObject):
             self.scene.removeItem(item)
             del self._view_to_model_map[item]
 
+    def _on_zone_added(self, zone: Zone):
+        print("Zone added")
+        # new_zone = ZoneGraphicsItem(zone)
+        pass
+
+    def _on_zone_removed(self, zone: Zone):
+        print("Zone removed")
+        # item = self._model_to_view_map.pop(zone, None)
+        pass
+
+
     # ------------------------------------
     # ------- View event handling --------
     # ------------------------------------
     def on_canvas_click(self, pos, modifier=None):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'mouse_click'):
-                self._current_tool.mouse_click(pos, modifier)
+            self._current_tool.mouse_click(pos, modifier)
 
     def on_canvas_move(self, pos):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'mouse_move'):
-                self._current_tool.mouse_move(pos)
+            self._current_tool.mouse_move(pos)
 
     def on_canvas_release(self, pos):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'mouse_release'):
-                self._current_tool.mouse_release(pos)
+            self._current_tool.mouse_release(pos)
 
     def on_keyboard_press(self, key):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'key_press'):
-                self._current_tool.key_press(key)
-        pass
+            self._current_tool.key_press(key)

@@ -19,7 +19,7 @@ class SelectTool(Tool):
         self._movables_start_pos = dict()
 
     def deactivate(self):
-        for model, pos in self._selected_models.items():
+        for model, pos in self._movables_start_pos.items():
             model.position = pos
         
         self.clear_selection()

@@ -15,9 +15,6 @@ class Wall(MapObject):
         self.start_node.position_changed.connect(self._on_node_changed)
         self.end_node.position_changed.connect(self._on_node_changed)
 
-        self._notified_start_node_removal = False
-        self._notified_end_node_removal = False
-
     def _on_node_changed(self):
         self.geometry_changed.emit()
 
@@ -38,10 +35,7 @@ class Wall(MapObject):
         dy = pos.y() - self.middle_point().y()
 
         delta = QPointF(dx, dy)
-        self.start_node.position = self.start_node.position + delta
-        self.end_node.position = self.end_node.position + delta
-
-        self.geometry_changed.emit()
+        self.moveBy(delta)
     
     def moveBy(self, delta: QPointF):
         self.start_node.position = self.start_node.position + delta
