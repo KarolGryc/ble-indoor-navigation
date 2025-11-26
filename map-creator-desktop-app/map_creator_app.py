@@ -39,5 +39,5 @@ class MapCreatorApp(QMainWindow):
         self.addToolBar(toolbar)
 
         self.view = MapView(self.presenter)
-        self.view.setViewport(QOpenGLWidget())
+        # self.view.setViewport(QOpenGLWidget())
         self.setCentralWidget(self.view)

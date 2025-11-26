@@ -23,17 +23,9 @@ class MapPresenter(QObject):
         self._undo_stack = QUndoStack()
 
         self._current_tool = None
-        # self.model.node_added.connect(self._on_node_added)
-        self.model.node_added.connect(self._on_item_added)
-        self.model.node_removed.connect(self._on_item_removed)
 
-        # self.model.wall_added.connect(self._on_wall_added)
-        self.model.wall_added.connect(self._on_item_added)
-        self.model.wall_removed.connect(self._on_item_removed)
-
-        # self.model.zone_added.connect(self._on_zone_added)
-        self.model.zone_added.connect(self._on_item_added)
-        self.model.zone_removed.connect(self._on_item_removed)
+        self.model.item_added.connect(self._on_item_added)
+        self.model.item_removed.connect(self._on_item_removed)
 
         self._model_to_view_map = {}
         self._view_to_model_map = {}
