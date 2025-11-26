@@ -6,7 +6,10 @@ def ask_zone_name(default_name="Example Zone"):
         None, "Enter zone name", "Zone Name:", text=default_name
     )
 
-    if not ok or name.strip() == "":
+    if not ok:
+        return None
+
+    if name.strip() == "":
         QMessageBox.critical(
             None, "Invalid Name", "Zone name cannot be empty."
         )

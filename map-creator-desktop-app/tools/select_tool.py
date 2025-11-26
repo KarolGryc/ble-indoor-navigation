@@ -57,9 +57,6 @@ class SelectTool(Tool):
             delta = pos - self._start_pos
             delta = self.presenter.snap_to_grid(delta)
 
-            if delta.manhattanLength() < 0.1:
-                return
-
             for model in self._movables_start_pos.keys():
                 model.position = self._movables_start_pos[model]
                 model.moveBy(delta)

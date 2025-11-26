@@ -82,19 +82,15 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
         painter.end()
 
         if self._avatar_item:
-            self.scene().removeItem(self._avatar_item)
-            self._avatar_item.setParentItem(None)
-            self._avatar_item = None
-
-        self._avatar_item = QGraphicsPixmapItem(circular_pixmap, parent=self)
-        self._avatar_item.setScale(0.5)
+            self._avatar_item.setPixmap(circular_pixmap)
+        else:
+            self._avatar_item = QGraphicsPixmapItem(circular_pixmap, parent=self)
+            self._avatar_item.setTransformationMode(Qt.SmoothTransformation)
+            self._avatar_item.setScale(0.5)
         
-        center_y_of_head = -40
-
-        real_width = self._avatar_item.pixmap().width() * self._avatar_item.scale()
-
-        self._avatar_item.setPos(-real_width / 2, center_y_of_head - (real_width / 2))
-        self._avatar_item.setTransformationMode(Qt.SmoothTransformation)
+            center_y_of_head = -40
+            real_width = self._avatar_item.pixmap().width() * self._avatar_item.scale()
+            self._avatar_item.setPos(-real_width / 2, center_y_of_head - (real_width / 2))
 
         self.setScale(0.6)
 
@@ -107,7 +103,7 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
             self._point_of_interest.type, "#D32C2C"
         )
         return QColor(color)
-    
+
     def _get_image_pixmap(self, default_size=64) -> QPixmap:
         path = PointOfInterestGraphicsItem.type_to_image.get(
             self._point_of_interest.type, "icons/generic.png"
