@@ -6,7 +6,6 @@ from map_presenter import MapPresenter
 from commands.move_command import MoveElementsCommand
 from commands.delete_command import DeleteElementsCommand
 
-# Needs total cleanup
 class SelectTool(Tool):
     def __init__(self, presenter: MapPresenter, scene: QGraphicsScene, name="Select Tool"):
         super().__init__(presenter, scene, name)

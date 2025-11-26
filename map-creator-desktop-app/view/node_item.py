@@ -11,7 +11,7 @@ class NodeGraphicsItem(QGraphicsEllipseItem):
         self.setPos(node.position)
         self.setFlag(QGraphicsEllipseItem.ItemIsSelectable, True)
 
-    def update(self):
+    def update_item(self):
         self.update_geometry()
 
     def update_geometry(self):

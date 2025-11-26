@@ -11,6 +11,7 @@ from tools.wall_add_tool import WallAddTool
 from tools.select_tool import SelectTool
 from tools.zone_add_tool import ZoneAddTool
 from tools.zone_renaming_tool import ZoneRenamingTool
+from tools.point_of_interest_add_tool import PointOfInterestAddTool
 
 from toolbar import Toolbar
 
@@ -33,10 +34,13 @@ class MapCreatorApp(QMainWindow):
         self.delete_shorcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         self.delete_shorcut.activated.connect(self.presenter.reset_current_tool)
 
-        tools = [WallAddTool(self.presenter, scene),
-                 SelectTool(self.presenter, scene),
-                 ZoneAddTool(self.presenter, scene),
-                 ZoneRenamingTool(self.presenter, scene)]
+        tools = [
+            WallAddTool(self.presenter, scene),
+            SelectTool(self.presenter, scene),
+            ZoneAddTool(self.presenter, scene),
+            ZoneRenamingTool(self.presenter, scene),
+            PointOfInterestAddTool(self.presenter, scene),
+        ]
         toolbar = Toolbar(self.presenter, tools)
         self.addToolBar(toolbar)
 

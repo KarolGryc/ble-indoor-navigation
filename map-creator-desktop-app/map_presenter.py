@@ -7,9 +7,11 @@ from tools.tool import Tool
 from view.node_item import NodeGraphicsItem
 from view.wall_item import WallGraphicsItem
 from view.zone_item import ZoneGraphicsItem
+from view.point_of_interest_item import PointOfInterestGraphicsItem
 from model.wall import Wall
 from model.node import Node
 from model.zone import Zone
+from model.point_of_interest import PointOfInterest
 
 class MapPresenter(QObject):
     current_tool_changed = Signal(Tool)
@@ -35,7 +37,8 @@ class MapPresenter(QObject):
         self._model_class_to_view_class = {
             Node: NodeGraphicsItem,
             Wall: WallGraphicsItem,
-            Zone: ZoneGraphicsItem
+            Zone: ZoneGraphicsItem,
+            PointOfInterest: PointOfInterestGraphicsItem,
         }
 
     # ------------------------------------
@@ -115,7 +118,7 @@ class MapPresenter(QObject):
         self.scene.addItem(new_item)
         self._model_to_view_map[item] = new_item
         self._view_to_model_map[new_item] = item
-        item.updated.connect(lambda : new_item.update())
+        item.updated.connect(lambda : new_item.update_item())
 
     def _on_item_removed(self, element):
         item = self._model_to_view_map.pop(element, None)

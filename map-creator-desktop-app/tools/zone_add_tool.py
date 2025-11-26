@@ -3,9 +3,8 @@ from PySide6.QtWidgets import QGraphicsScene, QInputDialog
 from PySide6.QtCore import QPointF
 from view.zone_preview import ZonePreview
 from map_presenter import MapPresenter
-from view.node_item import NodeGraphicsItem
-from model.node import Node
 from commands.zone_add_command import ZoneAddCommand
+from utils.general import ask_zone_name
 
 import utils.geometry_utils as geo
 
@@ -30,12 +29,10 @@ class ZoneAddTool(Tool):
         if len(self._corner_points) == 0 or pos != self._corner_points[0]:
             self._corner_points.append(pos)
         else:
-            name, ok = QInputDialog.getText(
-                None, "Enter zone name", "Zone Name:", text="Example Zone"
-            )
-            if not ok or name.strip() == "":
+            name = ask_zone_name("New Zone")
+            if name is None:
                 return
-            
+
             cmd = ZoneAddCommand(self.presenter.model, self._corner_points, name.strip())
             self.presenter.execute(cmd)
             self.deactivate()

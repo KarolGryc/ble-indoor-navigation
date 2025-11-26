@@ -29,7 +29,7 @@ class ZoneGraphicsItem(QGraphicsPolygonItem):
 
         self.update_geometry()
 
-    def update(self):
+    def update_item(self):
         self.update_text()
         self.update_geometry()
 

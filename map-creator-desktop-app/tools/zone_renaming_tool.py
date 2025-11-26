@@ -3,7 +3,7 @@ from tools.tool import Tool
 from PySide6.QtWidgets import QGraphicsScene
 from map_presenter import MapPresenter
 
-from utils.general import ask_for_zone_name
+from utils.general import ask_zone_name
 
 from model.zone import Zone
 from PySide6.QtGui import QTransform
@@ -20,7 +20,7 @@ class ZoneRenamingTool(Tool):
             return
         
         zone: Zone = item
-        new_name = ask_for_zone_name(zone.name)
+        new_name = ask_zone_name(zone.name)
 
         if new_name is None:
             return

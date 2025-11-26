@@ -11,7 +11,7 @@ class WallGraphicsItem(QGraphicsLineItem):
         self.wall = wall
         self.setFlag(QGraphicsLineItem.ItemIsSelectable, True)
 
-    def update(self):
+    def update_item(self):
         self.update_geometry()
 
     def update_geometry(self):
