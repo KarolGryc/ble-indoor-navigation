@@ -3,9 +3,10 @@ from PySide6.QtCore import QObject, Signal, QPointF
 from PySide6.QtGui import QUndoStack
 
 from model.map_model import MapModel
-from view.node_item import NodeGraphicsItem
 from tools.tool import Tool
+from view.node_item import NodeGraphicsItem
 from view.wall_item import WallGraphicsItem
+from view.zone_item import ZoneGraphicsItem
 from model.wall import Wall
 from model.node import Node
 from model.zone import Zone
@@ -22,19 +23,28 @@ class MapPresenter(QObject):
         self._undo_stack = QUndoStack()
 
         self._current_tool = None
-        self.model.node_added.connect(self._on_node_added)
-        self.model.node_removed.connect(self._on_node_removed)
+        # self.model.node_added.connect(self._on_node_added)
+        self.model.node_added.connect(self._on_item_added)
+        self.model.node_removed.connect(self._on_item_removed)
 
-        self.model.wall_added.connect(self._on_wall_added)
-        self.model.wall_removed.connect(self._on_wall_removed)
+        # self.model.wall_added.connect(self._on_wall_added)
+        self.model.wall_added.connect(self._on_item_added)
+        self.model.wall_removed.connect(self._on_item_removed)
 
-        self.model.zone_added.connect(self._on_zone_added)
-        self.model.zone_removed.connect(self._on_zone_removed)
+        # self.model.zone_added.connect(self._on_zone_added)
+        self.model.zone_added.connect(self._on_item_added)
+        self.model.zone_removed.connect(self._on_item_removed)
 
         self._model_to_view_map = {}
         self._view_to_model_map = {}
 
         self._show_grid = True
+
+        self._model_class_to_view_class = {
+            Node: NodeGraphicsItem,
+            Wall: WallGraphicsItem,
+            Zone: ZoneGraphicsItem
+        }
 
     # ------------------------------------
     # ---------- Grid methods ------------
@@ -104,42 +114,22 @@ class MapPresenter(QObject):
     def get_graphics_item_for_model(self, model):
         return self._model_to_view_map.get(model, None)
 
-    def _on_node_added(self, node: Node):
-        new_node = NodeGraphicsItem(node)
-        self.scene.addItem(new_node)
-        self._model_to_view_map[node] = new_node
-        self._view_to_model_map[new_node] = node
-        node.position_changed.connect(lambda pos: new_node.setPos(pos))
+    def _on_item_added(self, item):
+        view_class = self._model_class_to_view_class.get(type(item), None)
+        if view_class is None:
+            return
+        
+        new_item = view_class(item)
+        self.scene.addItem(new_item)
+        self._model_to_view_map[item] = new_item
+        self._view_to_model_map[new_item] = item
+        item.geometry_changed.connect(lambda : new_item.update_geometry())
 
-    def _on_node_removed(self, node: Node):
-        item = self._model_to_view_map.pop(node, None)
+    def _on_item_removed(self, element):
+        item = self._model_to_view_map.pop(element, None)
         if item:
             self.scene.removeItem(item)
             del self._view_to_model_map[item]
-
-    def _on_wall_added(self, wall: Wall):
-        new_wall_item = WallGraphicsItem(wall)
-        self.scene.addItem(new_wall_item)
-        self._model_to_view_map[wall] = new_wall_item
-        self._view_to_model_map[new_wall_item] = wall
-        wall.geometry_changed.connect(lambda: new_wall_item.update_geometry())
-
-    def _on_wall_removed(self, wall: Wall):
-        item = self._model_to_view_map.pop(wall, None)
-        if item:
-            self.scene.removeItem(item)
-            del self._view_to_model_map[item]
-
-    def _on_zone_added(self, zone: Zone):
-        print("Zone added")
-        # new_zone = ZoneGraphicsItem(zone)
-        pass
-
-    def _on_zone_removed(self, zone: Zone):
-        print("Zone removed")
-        # item = self._model_to_view_map.pop(zone, None)
-        pass
-
 
     # ------------------------------------
     # ------- View event handling --------

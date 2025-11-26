@@ -6,7 +6,7 @@ class WallGraphicsItem(QGraphicsLineItem):
     def __init__(self, wall: Wall):
         super().__init__(wall.start_node.x, wall.start_node.y,
                          wall.end_node.x, wall.end_node.y)
-        pen = QPen(QColor("black"), 2)
+        pen = QPen(QColor("black"), 6)
         self.setPen(pen)
         self.wall = wall
         self.setFlag(QGraphicsLineItem.ItemIsSelectable, True)

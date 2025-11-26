@@ -6,7 +6,6 @@ from PySide6.QtCore import Signal
 
 class MapModel(QObject):
     node_added = Signal(Node)
-
     node_removed = Signal(Node)
 
     wall_added = Signal(Wall)

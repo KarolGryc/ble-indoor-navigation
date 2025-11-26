@@ -47,9 +47,7 @@ class CompassWidget(QWidget):
         painter.scale(self._scale, self._scale)
 
         cx, cy = self.BASE_SIZE / 2, self.BASE_SIZE / 2
-        radius = 25  # Promień koła
-
-        painter.setPen(Qt.NoPen)
+        radius = 25
 
         # Background
         if self._is_hovered:

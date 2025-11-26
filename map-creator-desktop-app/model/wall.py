@@ -12,8 +12,8 @@ class Wall(MapObject):
         self.start_node.wall = self
         self.end_node.wall = self
 
-        self.start_node.position_changed.connect(self._on_node_changed)
-        self.end_node.position_changed.connect(self._on_node_changed)
+        self.start_node.geometry_changed.connect(self._on_node_changed)
+        self.end_node.geometry_changed.connect(self._on_node_changed)
 
     def _on_node_changed(self):
         self.geometry_changed.emit()

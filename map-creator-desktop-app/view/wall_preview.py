@@ -1,9 +1,14 @@
-from PySide6.QtCore import QPointF
+from PySide6.QtCore import QPointF, Qt
+from PySide6.QtGui import QPen, QColor
 from PySide6.QtWidgets import QGraphicsScene
 from view.node_item import NodeGraphicsItem
 from model.node import Node
 
 class WallPreview:
+    OPACITY = 0.5
+    LINE_WIDTH = 4
+    LINE_LOOKS = Qt.DashLine
+
     def __init__(self, scene: QGraphicsScene):
         self.scene = scene
         self._start_preview = None
@@ -15,20 +20,21 @@ class WallPreview:
 
         if start_pos is None:
             self._start_preview = NodeGraphicsItem(Node(cursor_pos.x(), cursor_pos.y()))
-            self._start_preview.setOpacity(0.5)
+            self._start_preview.setOpacity(self.OPACITY)
             self.scene.addItem(self._start_preview)
         else:
             self._start_preview = NodeGraphicsItem(Node(start_pos.x(), start_pos.y()))
-            self._start_preview.setOpacity(0.5)
+            self._start_preview.setOpacity(self.OPACITY)
             self.scene.addItem(self._start_preview)
 
             self._line_preview = self.scene.addLine(
                 start_pos.x(), start_pos.y(), cursor_pos.x(), cursor_pos.y()
             )
-            self._line_preview.setOpacity(0.5)
+            self._line_preview.setOpacity(self.OPACITY)
+            self._line_preview.setPen(QPen(QColor("black"), self.LINE_WIDTH, self.LINE_LOOKS))
 
             self._end_preview = NodeGraphicsItem(Node(cursor_pos.x(), cursor_pos.y()))
-            self._end_preview.setOpacity(0.5)
+            self._end_preview.setOpacity(self.OPACITY)
             self.scene.addItem(self._end_preview)
 
     def clear(self):

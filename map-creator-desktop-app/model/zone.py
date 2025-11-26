@@ -11,7 +11,7 @@ class Zone(MapObject):
         self._name = "Zone"
 
         for node in self.corner_nodes:
-            node.position_changed.connect(self._on_node_changed)
+            node.geometry_changed.connect(self._on_node_changed)
 
     def _on_node_changed(self):
         self.geometry_changed.emit()

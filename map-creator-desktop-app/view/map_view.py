@@ -39,6 +39,7 @@ class MapView(QGraphicsView):
         self._update_compass_position()
 
     def _update_compass_position(self):
+        print("crafting")
         margin = 20
         x = self.width() - self._compass.width() - margin
         y = margin

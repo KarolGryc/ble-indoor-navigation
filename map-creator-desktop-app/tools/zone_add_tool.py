@@ -5,8 +5,10 @@ from view.zone_preview import ZonePreview
 from map_presenter import MapPresenter
 from view.node_item import NodeGraphicsItem
 from model.node import Node
+from commands.zone_add_command import ZoneAddCommand
 
 import utils.geometry_utils as geo
+
 
 class ZoneAddTool(Tool):
     def __init__(self, presenter: MapPresenter, scene: QGraphicsScene, name="Zone Add Tool"):
@@ -21,14 +23,16 @@ class ZoneAddTool(Tool):
 
     def mouse_click(self, pos, modifier=None):
         pos = self.presenter.snap_to_grid(pos)
-
-        if pos in self._corner_points:
-            return
         
         if not self._is_polygon_valid(pos):
             return
         
-        self._corner_points.append(pos)
+        if len(self._corner_points) == 0 or pos != self._corner_points[0]:
+            self._corner_points.append(pos)
+        else:
+            cmd = ZoneAddCommand(self.presenter.model, self._corner_points)
+            self.presenter.execute(cmd)
+            self.deactivate()
 
     def mouse_move(self, pos):
         pos = self.presenter.snap_to_grid(pos)
