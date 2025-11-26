@@ -21,6 +21,7 @@ class Zone(MapObject):
     @name.setter
     def name(self, value: str):
         self._name = value
+        self.updated.emit()
 
     @property
     def movables(self) -> list[Node]:
@@ -39,6 +40,7 @@ class Zone(MapObject):
         delta = QPointF(dx, dy)
 
         self.moveBy(delta)
+        self.updated.emit()
 
     def moveBy(self, delta: QPointF) -> None:
         for node in self.corner_nodes:
