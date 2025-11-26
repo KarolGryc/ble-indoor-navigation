@@ -28,6 +28,8 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
 
         self._text_item = QGraphicsSimpleTextItem(self._point_of_interest.name, parent=self)
         
+        self._avatar_item = None
+
         font = self._text_item.font()
         font.setPointSize(25)
         font.setBold(True)
@@ -37,13 +39,12 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
         self._text_item.setPen(QPen(Qt.black, 2))
 
         self.setFlag(QGraphicsPathItem.ItemIsSelectable, True)
-        self._update_pin()
         self.update_item()
 
     def update_item(self):
         self._update_label()
-        self._update_geometry()
         self._update_pin()
+        self._update_geometry()
         self.setPos(self._point_of_interest.position)
 
     def _update_geometry(self):
@@ -60,13 +61,7 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
         self.setPen(QPen(Qt.black, 1))
 
         render_size = 64
-        
-        original_pixmap = self._get_image_pixmap()
-
-        if original_pixmap.isNull():
-            original_pixmap = QPixmap(render_size, render_size)
-            original_pixmap.fill(Qt.white)
-
+        original_pixmap = self._get_image_pixmap(render_size)
         original_pixmap = original_pixmap.scaled(render_size, 
                                                  render_size, 
                                                  Qt.KeepAspectRatioByExpanding, 
@@ -86,16 +81,20 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
         painter.drawPixmap(0, 0, original_pixmap)
         painter.end()
 
-        self.avatar_item = QGraphicsPixmapItem(circular_pixmap, parent=self)
+        if self._avatar_item:
+            self.scene().removeItem(self._avatar_item)
+            self._avatar_item.setParentItem(None)
+            self._avatar_item = None
+
+        self._avatar_item = QGraphicsPixmapItem(circular_pixmap, parent=self)
+        self._avatar_item.setScale(0.5)
         
         center_y_of_head = -40
-        
-        self.avatar_item.setScale(0.5)
 
-        real_width = self.avatar_item.pixmap().width() * self.avatar_item.scale()
+        real_width = self._avatar_item.pixmap().width() * self._avatar_item.scale()
 
-        self.avatar_item.setPos(-real_width / 2, center_y_of_head - (real_width / 2))
-        self.avatar_item.setTransformationMode(Qt.SmoothTransformation)
+        self._avatar_item.setPos(-real_width / 2, center_y_of_head - (real_width / 2))
+        self._avatar_item.setTransformationMode(Qt.SmoothTransformation)
 
         self.setScale(0.6)
 
@@ -109,11 +108,17 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
         )
         return QColor(color)
     
-    def _get_image_pixmap(self) -> QPixmap:
+    def _get_image_pixmap(self, default_size=64) -> QPixmap:
         path = PointOfInterestGraphicsItem.type_to_image.get(
             self._point_of_interest.type, "icons/generic.png"
         )
-        return QPixmap(path)
+
+        pixmap = QPixmap(path)
+        if pixmap.isNull():
+            pixmap = QPixmap(default_size, default_size)
+            pixmap.fill(Qt.white)
+
+        return pixmap
     
     def _get_pin_path(self) -> QPainterPath:
         path = QPainterPath()

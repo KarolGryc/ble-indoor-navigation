@@ -10,7 +10,7 @@ from cad_scene import InteractiveScene
 from tools.wall_add_tool import WallAddTool
 from tools.select_tool import SelectTool
 from tools.zone_add_tool import ZoneAddTool
-from tools.zone_renaming_tool import ZoneRenamingTool
+from tools.renaming_tool import RenamingTool
 from tools.point_of_interest_add_tool import PointOfInterestAddTool
 
 from toolbar import Toolbar
@@ -38,7 +38,7 @@ class MapCreatorApp(QMainWindow):
             WallAddTool(self.presenter, scene),
             SelectTool(self.presenter, scene),
             ZoneAddTool(self.presenter, scene),
-            ZoneRenamingTool(self.presenter, scene),
+            RenamingTool(self.presenter, scene),
             PointOfInterestAddTool(self.presenter, scene),
         ]
         toolbar = Toolbar(self.presenter, tools)

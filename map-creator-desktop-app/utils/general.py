@@ -14,11 +14,10 @@ def ask_zone_name(default_name="Example Zone"):
 
     return name.strip()
 
-def ask_poi_name_and_type(parent=None,
-                          window_name="Point of Interest Details",
+def ask_poi_name_and_type(window_name="Point of Interest Details",
                           default_name="Place",
                           default_type=PointOfInterestType.GENERIC):
-    dialog = QDialog(parent)
+    dialog = QDialog()
     dialog.setWindowTitle(window_name)
     dialog.setMaximumWidth(300)
     dialog.setMaximumHeight(200)
