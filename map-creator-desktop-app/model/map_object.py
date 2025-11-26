@@ -1,6 +1,8 @@
 from PySide6.QtCore import QObject, Signal
 
 class MapObject(QObject):
+    updated = Signal()
+
     def get_dependencies(self) -> list:
         return []
     

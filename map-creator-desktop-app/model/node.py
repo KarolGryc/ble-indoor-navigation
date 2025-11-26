@@ -3,8 +3,6 @@ from math import sqrt
 from model.map_object import MapObject
 
 class Node(MapObject):
-    geometry_changed = Signal(QPointF)
-
     def __init__(self, x: float, y: float):
         super().__init__()
         self.pos = QPointF(x, y)
@@ -22,7 +20,7 @@ class Node(MapObject):
     def position(self, pos: QPointF):
         if self.pos != pos:
             self.pos = pos
-            self.geometry_changed.emit(self.pos)
+            self.updated.emit()
 
     @property
     def x(self) -> float:
@@ -32,7 +30,7 @@ class Node(MapObject):
     def x(self, value: float):
         if self.pos.x() != value:
             self.pos.setX(value)
-            self.geometry_changed.emit(self.pos)
+            self.updated.emit()
 
     @property
     def y(self) -> float:
@@ -42,11 +40,11 @@ class Node(MapObject):
     def y(self, value: float):
         if self.pos.y() != value:
             self.pos.setY(value)
-            self.geometry_changed.emit(self.pos)
+            self.updated.emit()
 
     def moveBy(self, delta: QPointF):
         self.position = self.position + delta
-        self.geometry_changed.emit(self.position)
-
+        self.updated.emit()
+        
     def distance_to(self, other: 'Node') -> float:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)

@@ -3,12 +3,12 @@ from model.node import Node
 from PySide6.QtGui import QUndoCommand
 
 class ZoneAddCommand(QUndoCommand):
-    def __init__(self, model, corner_points):
+    def __init__(self, model, corner_points, name = ""):
         super().__init__("Add Zone")
         self._model = model
         self._corner_points = corner_points
-        self._zone = Zone([Node(pt.x(), pt.y()) for pt in corner_points])
-
+        self._zone = Zone([Node(pt.x(), pt.y()) for pt in corner_points], name)
+        
     def redo(self):
         self._model.add_zone(self._zone)
         for node in self._zone.corner_nodes:

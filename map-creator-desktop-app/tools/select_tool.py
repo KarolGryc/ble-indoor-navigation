@@ -12,15 +12,16 @@ class SelectTool(Tool):
         super().__init__(presenter, scene, name)
 
         self._is_dragging = False
-        self._last_pos = None
+        self._start_pos = None
         self._reference_movable = None
 
         self._selected_models = set()
         self._movables_start_pos = dict()
 
     def deactivate(self):
-        for model, pos in self._movables_start_pos.items():
-            model.position = pos
+        if self._is_dragging:
+            for model, pos in self._movables_start_pos.items():
+                model.position = pos
         
         self.clear_selection()
         self._reset_dragging()
@@ -49,28 +50,24 @@ class SelectTool(Tool):
                 self._movables_start_pos[movable] = movable.position
             
             self._is_dragging = True
-            self._last_pos = self.presenter.snap_to_grid(movables[0].position)
+            self._start_pos = pos
             self._reference_movable = movables[0]
 
     def mouse_move(self, pos):
         if self._is_dragging:
-            pos = self.presenter.snap_to_grid(pos)
-            delta = pos - self.presenter.snap_to_grid(self._last_pos)
+            delta = pos - self._start_pos
+            delta = self.presenter.snap_to_grid(delta)
 
             if delta.manhattanLength() < 0.1:
                 return
 
             for model in self._movables_start_pos.keys():
+                model.position = self._movables_start_pos[model]
                 model.moveBy(delta)
                 
-            self._last_pos = self.presenter.snap_to_grid(self._reference_movable.position)
-
     def mouse_release(self, pos):
         if self._is_dragging and self._movables_start_pos:
-            start_pos = self._movables_start_pos.get(self._reference_movable)
-            start_pos = self.presenter.snap_to_grid(start_pos)
-            
-            delta = self._last_pos - start_pos
+            delta = pos - self._start_pos
             delta = self.presenter.snap_to_grid(delta)
 
             if delta.manhattanLength() > 0.1:
@@ -96,6 +93,7 @@ class SelectTool(Tool):
 
     def _reset_dragging(self):
         self._is_dragging = False
+        self._start_pos = None
         self._start_pos = None
         self._last_pos = None
         self._reference_movable = None

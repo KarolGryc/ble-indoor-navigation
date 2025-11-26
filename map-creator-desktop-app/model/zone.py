@@ -3,18 +3,16 @@ from model.node import Node
 from model.map_object import MapObject
 
 class Zone(MapObject):
-    geometry_changed = Signal()
-
     def __init__(self, corner_nodes: list[Node], name="Zone"):
         super().__init__()
         self.corner_nodes = corner_nodes
-        self._name = "Zone"
+        self._name = name
 
         for node in self.corner_nodes:
-            node.geometry_changed.connect(self._on_node_changed)
+            node.updated.connect(self._on_node_changed)
 
     def _on_node_changed(self):
-        self.geometry_changed.emit()
+        self.updated.emit()
 
     @property
     def name(self) -> str:
@@ -46,4 +44,4 @@ class Zone(MapObject):
         for node in self.corner_nodes:
             node.position = node.position + delta
 
-        self.geometry_changed.emit()
+        self.updated.emit()

@@ -3,8 +3,6 @@ from model.node import Node
 from model.map_object import MapObject
 
 class Wall(MapObject):
-    geometry_changed = Signal()
-
     def __init__(self, start_node: Node, end_node: Node):
         super().__init__()
         self.start_node = start_node
@@ -12,11 +10,11 @@ class Wall(MapObject):
         self.start_node.wall = self
         self.end_node.wall = self
 
-        self.start_node.geometry_changed.connect(self._on_node_changed)
-        self.end_node.geometry_changed.connect(self._on_node_changed)
+        self.start_node.updated.connect(self._on_node_changed)
+        self.end_node.updated.connect(self._on_node_changed)
 
     def _on_node_changed(self):
-        self.geometry_changed.emit()
+        self.updated.emit()
 
     def length(self) -> float:
         return self.start_node.distance_to(self.end_node)
@@ -41,7 +39,7 @@ class Wall(MapObject):
         self.start_node.position = self.start_node.position + delta
         self.end_node.position = self.end_node.position + delta
 
-        self.geometry_changed.emit()
+        self.updated.emit()
     
     def middle_point(self) -> QPointF:
         x = (self.start_node.x + self.end_node.x) / 2

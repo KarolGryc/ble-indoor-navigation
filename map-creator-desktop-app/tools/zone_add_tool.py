@@ -1,5 +1,5 @@
 from tools.tool import Tool
-from PySide6.QtWidgets import QGraphicsScene
+from PySide6.QtWidgets import QGraphicsScene, QInputDialog
 from PySide6.QtCore import QPointF
 from view.zone_preview import ZonePreview
 from map_presenter import MapPresenter
@@ -30,7 +30,13 @@ class ZoneAddTool(Tool):
         if len(self._corner_points) == 0 or pos != self._corner_points[0]:
             self._corner_points.append(pos)
         else:
-            cmd = ZoneAddCommand(self.presenter.model, self._corner_points)
+            name, ok = QInputDialog.getText(
+                None, "Enter zone name", "Zone Name:", text="Example Zone"
+            )
+            if not ok or name.strip() == "":
+                return
+            
+            cmd = ZoneAddCommand(self.presenter.model, self._corner_points, name.strip())
             self.presenter.execute(cmd)
             self.deactivate()
 

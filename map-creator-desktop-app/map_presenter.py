@@ -115,7 +115,7 @@ class MapPresenter(QObject):
         self.scene.addItem(new_item)
         self._model_to_view_map[item] = new_item
         self._view_to_model_map[new_item] = item
-        item.geometry_changed.connect(lambda : new_item.update_geometry())
+        item.updated.connect(lambda : new_item.update())
 
     def _on_item_removed(self, element):
         item = self._model_to_view_map.pop(element, None)
