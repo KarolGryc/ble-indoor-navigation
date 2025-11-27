@@ -17,6 +17,10 @@ class Wall(MapObject):
         return self.start_node.distance_to(self.end_node)
     
     @property
+    def dependencies(self) -> list[MapObject]:
+        return [self.start_node, self.end_node]
+
+    @property
     def movables(self) -> list[Node]:
         return [self.start_node, self.end_node]
 

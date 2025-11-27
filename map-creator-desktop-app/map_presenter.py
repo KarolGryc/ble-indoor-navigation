@@ -12,10 +12,9 @@ from model.wall import Wall
 from model.node import Node
 from model.zone import Zone
 from model.point_of_interest import PointOfInterest
+from model.map_object import MapObject
 
 class MapPresenter(QObject):
-    current_tool_changed = Signal(Tool)
-
     def __init__(self, model: MapModel, scene: QGraphicsScene, grid_size: int = 50):
         super().__init__()
         self.model = model
@@ -82,7 +81,6 @@ class MapPresenter(QObject):
             self._current_tool.deactivate()
 
         self._current_tool = tool
-        self.current_tool_changed.emit(tool)
 
     def reset_current_tool(self):
         if self._current_tool is not None:
@@ -103,10 +101,10 @@ class MapPresenter(QObject):
     # ------------------------------------
     # ------ Model change handlers -------
     # ------------------------------------
-    def get_model_for_item(self, item):
+    def get_model_for_item(self, item) -> MapObject:
         return self._view_to_model_map.get(item, None)
     
-    def get_graphics_item_for_model(self, model):
+    def get_item_for_model(self, model):
         return self._model_to_view_map.get(model, None)
 
     def _on_item_added(self, item):
@@ -115,9 +113,9 @@ class MapPresenter(QObject):
             return
         
         new_item = view_class(item)
-        self.scene.addItem(new_item)
         self._model_to_view_map[item] = new_item
         self._view_to_model_map[new_item] = item
+        self.scene.addItem(new_item)
         item.updated.connect(lambda : new_item.update_item())
 
     def _on_item_removed(self, element):

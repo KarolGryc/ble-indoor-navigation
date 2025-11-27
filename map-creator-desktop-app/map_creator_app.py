@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QMainWindow
-from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtWidgets import QMainWindow, QToolBar
+from PySide6.QtGui import QShortcut, QKeySequence, QActionGroup
 from PySide6.QtCore import Qt
 
 from model.map_model import MapModel
@@ -18,6 +18,10 @@ from toolbar import Toolbar
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
 from app_menu import AppMenu
+
+from model.wall import Wall
+from model.zone import Zone
+from model.point_of_interest import PointOfInterest
 
 class MapCreatorApp(QMainWindow):
     def __init__(self,
@@ -57,6 +61,30 @@ class MapCreatorApp(QMainWindow):
         toolbar = Toolbar(self.presenter, tools, tool_icon_map)
 
         self.addToolBar(Qt.LeftToolBarArea, toolbar)
+
+        right_toolbar = QToolBar("Right Toolbar", self)
+        right_toolbar.setOrientation(Qt.Vertical)
+        right_toolbar.setMovable(False) 
+        self.addToolBar(Qt.RightToolBarArea, right_toolbar)
+
+        layer_group = QActionGroup(self)
+        layer_group.setExclusive(True)
+
+        def add_layer_action(name, item_type):
+            action = right_toolbar.addAction(name)
+            action.setCheckable(True)
+            layer_group.addAction(action)
+            action.triggered.connect(lambda ch: ch and scene.set_active_item_type(item_type))
+            
+            return action
+
+        act_wall = add_layer_action("Walls", Wall)
+        act_zone = add_layer_action("Zones", Zone)
+        act_poi  = add_layer_action("POIs", PointOfInterest)
+
+
+        act_wall.setChecked(True)
+        scene.set_active_item_type(Wall)
 
         self.view = MapView(self.presenter)
         # self.view.setViewport(QOpenGLWidget())

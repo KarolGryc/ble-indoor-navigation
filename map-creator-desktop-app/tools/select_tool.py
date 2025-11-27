@@ -96,7 +96,7 @@ class SelectTool(Tool):
 
     def clear_selection(self):
         for model in self._selected_models:
-            item = self.presenter.get_graphics_item_for_model(model)
+            item = self.presenter.get_item_for_model(model)
             if item is not None:
                 item.setSelected(False)
 

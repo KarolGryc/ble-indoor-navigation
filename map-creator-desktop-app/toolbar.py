@@ -11,8 +11,7 @@ class Toolbar(QToolBar):
                  tool_icon_map: dict[type, str] = {}):
         super().__init__("Main Toolbar")
         self.presenter = presenter
-        self.presenter.current_tool_changed.connect(self._on_current_tool_changed)
-
+        
         group = QButtonGroup(self)
         group.setExclusive(True)
 

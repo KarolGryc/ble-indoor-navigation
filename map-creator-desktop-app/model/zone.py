@@ -24,6 +24,10 @@ class Zone(MapObject):
             node.updated.connect(self.updated)
 
     @property
+    def dependencies(self) -> list[MapObject]:
+        return self.corner_nodes
+
+    @property
     def name(self) -> str:
         return self._name
     
