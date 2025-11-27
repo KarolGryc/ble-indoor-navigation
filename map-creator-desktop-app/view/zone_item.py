@@ -35,7 +35,17 @@ class ZoneGraphicsItem(QGraphicsPolygonItem):
         self._text_item.setPen(QPen(QColor("black"), 2))
         self._text_item.setFont(font)
 
+        self._zone.updated.connect(self.update_item)
         self.update_item()
+
+    def itemChange(self, change, value):
+        if change == QGraphicsPolygonItem.ItemSceneHasChanged and value is None:
+            try:
+                self._zone.updated.disconnect(self.update_item)
+            except TypeError:
+                pass
+
+
 
     def update_item(self):
         self._update_text()

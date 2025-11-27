@@ -40,7 +40,18 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
 
         self.setFlag(QGraphicsPathItem.ItemIsSelectable, True)
         self.setZValue(2)
+
+        self._point_of_interest.updated.connect(self.update_item)
+        
         self.update_item()
+
+    def itemChange(self, change, value):
+        if change == QGraphicsPathItem.ItemSceneHasChanged and value is None:
+            try:
+                self._point_of_interest.updated.disconnect(self.update_item)
+            except TypeError:
+                pass
+
 
     def update_item(self):
         self._update_label()

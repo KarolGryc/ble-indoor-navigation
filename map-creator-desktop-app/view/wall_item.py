@@ -11,6 +11,18 @@ class WallGraphicsItem(QGraphicsLineItem):
         self.wall = wall
         self.setFlag(QGraphicsLineItem.ItemIsSelectable, True)
 
+
+        self.wall.updated.connect(self.update_item)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsLineItem.ItemSceneHasChanged and value is None:
+            try:
+                self.wall.updated.disconnect(self.update_item)
+            except TypeError:
+                pass
+
+        return super().itemChange(change, value)
+
     def update_item(self):
         self.update_geometry()
 
