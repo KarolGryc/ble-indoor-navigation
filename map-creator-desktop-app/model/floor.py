@@ -7,12 +7,13 @@ from PySide6.QtCore import Signal
 
 from model.map_object import MapObject
 
-class MapModel(QObject):
+class Floor(QObject):
     item_added = Signal(MapObject)
     item_removed = Signal(MapObject)
 
-    def __init__(self):
+    def __init__(self, name: str = "Unnamed Floor"):
         super().__init__()
+        self._name = name
         self.nodes: list[Node] = []
         self.walls: list[Wall] = []
         self.zones: list[Zone] = []
@@ -24,6 +25,14 @@ class MapModel(QObject):
             Zone: self.zones,
             PointOfInterest: self.points_of_interest,
         }
+
+    @property
+    def name(self) -> str:
+        return self._name
+    
+    @name.setter
+    def name(self, new_name: str):
+        self._name = new_name
 
     def add(self, element: MapObject):
         el_type = type(element)

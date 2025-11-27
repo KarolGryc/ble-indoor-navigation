@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QToolBar
+from PySide6.QtWidgets import QMainWindow, QToolBar, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QDockWidget
 from PySide6.QtGui import QShortcut, QKeySequence, QActionGroup
 from PySide6.QtCore import Qt
 
-from model.map_model import MapModel
+from model.floor import Floor
 from view.map_view import MapView
 from map_presenter import MapPresenter
 from cad_scene import InteractiveScene
@@ -22,6 +22,9 @@ from app_menu import AppMenu
 from model.wall import Wall
 from model.zone import Zone
 from model.point_of_interest import PointOfInterest
+from model.building import Building
+
+from view.floor_list import AutoSyncFloorList
 
 class MapCreatorApp(QMainWindow):
     def __init__(self,
@@ -31,18 +34,21 @@ class MapCreatorApp(QMainWindow):
         super().__init__(parent)
         self.setWindowTitle(window_title)
         self.setGeometry(0, 0, *screen_size)
-
-        model = MapModel()
+        
         scene = InteractiveScene()
         scene.setSceneRect(-5000, -5000, 10000, 10000)
 
-        self.presenter = MapPresenter(model, scene)
+        building_model = self._create_model()
+        self.presenter = MapPresenter(building_model, scene)
         scene.set_presenter(self.presenter)
 
         # Tool deactivation shortcut
         self.delete_shorcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         self.delete_shorcut.activated.connect(self.presenter.reset_current_tool)
 
+        ###############################
+        # TOOLS TOOLBAR
+        ###############################
         tools = [
             WallAddTool(self.presenter, scene),
             SelectTool(self.presenter, scene),
@@ -50,6 +56,7 @@ class MapCreatorApp(QMainWindow):
             RenamingTool(self.presenter, scene),
             PointOfInterestAddTool(self.presenter, scene),
         ]
+
         tool_icon_map = {
             WallAddTool: "icons/generic.png",
             SelectTool: "icons/generic.png",
@@ -67,6 +74,11 @@ class MapCreatorApp(QMainWindow):
         right_toolbar.setMovable(False) 
         self.addToolBar(Qt.RightToolBarArea, right_toolbar)
 
+
+
+        ###############################
+        # LAYER SELECTOR TOOLBAR
+        ###############################
         layer_group = QActionGroup(self)
         layer_group.setExclusive(True)
 
@@ -82,14 +94,53 @@ class MapCreatorApp(QMainWindow):
         act_zone = add_layer_action("Zones", Zone)
         act_poi  = add_layer_action("POIs", PointOfInterest)
 
-
         act_wall.setChecked(True)
         scene.set_active_item_type(Wall)
 
+
+        ###############################
+        # MAIN VIEW
+        ################################
         self.view = MapView(self.presenter)
         # self.view.setViewport(QOpenGLWidget())
         self.setCentralWidget(self.view)
 
+
+        ###############################
+        # MENU BAR
+        ###############################
+        self._create_menu_bar()
+
+
+        ###############################
+        # FLOOR LIST
+        ###############################
+        right_panel = QWidget()
+        layout = QVBoxLayout(right_panel)
+
+        floor_list = AutoSyncFloorList(building_model)
+        layout.addWidget(floor_list)
+
+        floor_list.floor_selected.connect(lambda floor: print(f"Selected floor: {floor.name}"))
+        floor_list.add_floor_requested.connect(lambda: print("Add floor requested"))
+        floor_list.remove_floor_requested.connect(lambda index: print(f"Remove floor at index requested: {index}"))
+
+        dock = QDockWidget("Floors", self)
+
+        dock.setFeatures(QDockWidget.DockWidgetMovable)
+
+        dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+
+        dock.setWidget(right_panel)
+
+        self.addDockWidget(Qt.RightDockWidgetArea, dock)
+
+    def _create_model(self) -> Building:
+        model = Building()
+        model.add_floor()
+        return model
+    
+    def _create_menu_bar(self):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
         self.menu_bar.undo_triggered.connect(self.presenter.undo)
