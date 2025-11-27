@@ -25,12 +25,15 @@ class RenamingTool(Tool):
         
         if isinstance(item, Zone):
             zone: Zone = item
-            new_name = ask_zone_name(zone.name)
+            new_name, zone_type = ask_zone_name("Edit Zone", 
+                                               default_name=zone.name,
+                                               default_type=zone.type)
 
-            if new_name is None:
+            if new_name is None or zone_type is None:
                 return
             
             zone.name = new_name.strip()
+            zone.type = zone_type
 
         if isinstance(item, PointOfInterest):
             poi: PointOfInterest = item

@@ -1,27 +1,44 @@
-from PySide6.QtCore import Signal, QPointF
+from PySide6.QtCore import QPointF
 from model.node import Node
 from model.map_object import MapObject
 
+from enum import Enum
+
+class ZoneType(Enum):
+    GENERIC = 1
+    STAIRS = 2
+    ELEVATOR = 3
+
 class Zone(MapObject):
-    def __init__(self, corner_nodes: list[Node], name="Zone"):
+    def __init__(self, 
+                 corner_nodes: list[Node], 
+                 name="Zone", 
+                 type=ZoneType.GENERIC):
         super().__init__()
         self.corner_nodes = corner_nodes
         self._name = name
+        self._type = type if type is not None else ZoneType.GENERIC
 
         for node in self.corner_nodes:
             node.owner = self
-            node.updated.connect(self._on_node_changed)
-
-    def _on_node_changed(self):
-        self.updated.emit()
+            node.updated.connect(self.updated)
 
     @property
     def name(self) -> str:
         return self._name
     
     @name.setter
-    def name(self, value: str):
+    def name(self, value: str) -> None:
         self._name = value
+        self.updated.emit()
+
+    @property
+    def type(self) -> ZoneType:
+        return self._type
+    
+    @type.setter
+    def type(self, value: ZoneType) -> None:
+        self._type = value
         self.updated.emit()
 
     @property
@@ -45,6 +62,6 @@ class Zone(MapObject):
 
     def moveBy(self, delta: QPointF) -> None:
         for node in self.corner_nodes:
-            node.position = node.position + delta
+            node.moveBy(delta)
 
         self.updated.emit()

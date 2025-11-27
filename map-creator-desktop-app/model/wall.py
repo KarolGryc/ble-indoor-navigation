@@ -1,4 +1,4 @@
-from PySide6.QtCore import Signal, QPointF
+from PySide6.QtCore import QPointF
 from model.node import Node
 from model.map_object import MapObject
 
@@ -10,17 +10,14 @@ class Wall(MapObject):
         self.start_node.owner = self
         self.end_node.owner = self
 
-        self.start_node.updated.connect(self._on_node_changed)
-        self.end_node.updated.connect(self._on_node_changed)
-
-    def _on_node_changed(self):
-        self.updated.emit()
+        self.start_node.updated.connect(self.updated)
+        self.end_node.updated.connect(self.updated)
 
     def length(self) -> float:
         return self.start_node.distance_to(self.end_node)
     
     @property
-    def movables(self):
+    def movables(self) -> list[Node]:
         return [self.start_node, self.end_node]
 
     @property
@@ -35,7 +32,7 @@ class Wall(MapObject):
         delta = QPointF(dx, dy)
         self.moveBy(delta)
     
-    def moveBy(self, delta: QPointF):
+    def moveBy(self, delta: QPointF) -> None:
         self.start_node.position = self.start_node.position + delta
         self.end_node.position = self.end_node.position + delta
 

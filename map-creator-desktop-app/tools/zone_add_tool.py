@@ -29,11 +29,11 @@ class ZoneAddTool(Tool):
         if len(self._corner_points) == 0 or pos != self._corner_points[0]:
             self._corner_points.append(pos)
         else:
-            name = ask_zone_name("New Zone")
-            if name is None:
+            name, zone_type = ask_zone_name("New Zone")
+            if name is None or zone_type is None:
                 return
 
-            cmd = ZoneAddCommand(self.presenter.model, self._corner_points, name.strip())
+            cmd = ZoneAddCommand(self.presenter.model, self._corner_points, name.strip(), zone_type)
             self.presenter.execute(cmd)
             self.deactivate()
 

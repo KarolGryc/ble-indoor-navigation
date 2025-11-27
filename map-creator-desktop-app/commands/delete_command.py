@@ -34,6 +34,11 @@ class DeleteElementsCommand(QUndoCommand):
                 self._presenter.model.add_node(element.start_node)
                 self._presenter.model.add_node(element.end_node)
 
+            elif isinstance(element, Zone):
+                self._presenter.model.add_zone(element)
+                for node in element.corner_nodes:
+                    self._presenter.model.add_node(node)
+
     def redo(self):
         for element in self._elements:
             if isinstance(element, Node):
@@ -58,3 +63,8 @@ class DeleteElementsCommand(QUndoCommand):
                 self._presenter.model.remove_wall(element)
                 self._presenter.model.remove_node(element.start_node)
                 self._presenter.model.remove_node(element.end_node)
+
+            elif isinstance(element, Zone):
+                self._presenter.model.remove_zone(element)
+                for node in element.corner_nodes:
+                    self._presenter.model.remove_node(node)

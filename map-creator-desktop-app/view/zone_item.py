@@ -4,7 +4,15 @@ from PySide6.QtGui import QBrush, QPen, QColor, QPolygonF
 from PySide6.QtCore import QPointF
 from PySide6.QtWidgets import QGraphicsSimpleTextItem
 
+from model.zone import ZoneType
+
 class ZoneGraphicsItem(QGraphicsPolygonItem):
+    EMOTE_TYPE_MAP = {
+        ZoneType.GENERIC: "",
+        ZoneType.STAIRS: "𓊍",
+        ZoneType.ELEVATOR: "↕",
+    }
+
     def __init__(self, zone: Zone):
         polygon = QPolygonF([QPointF(node.x, node.y) for node in zone.corner_nodes])   
         super().__init__(polygon)
@@ -27,17 +35,19 @@ class ZoneGraphicsItem(QGraphicsPolygonItem):
         self._text_item.setPen(QPen(QColor("black"), 2))
         self._text_item.setFont(font)
 
-        self.update_geometry()
+        self.update_item()
 
     def update_item(self):
-        self.update_text()
-        self.update_geometry()
+        self._update_text()
+        self._update_geometry()
 
-    def update_text(self):
-        self._text_item.setText(self._zone.name)
-        self.setToolTip(self._zone.name)
+    def _update_text(self):
+        emote = self.EMOTE_TYPE_MAP.get(self._zone.type, "")
+        name = f"{emote} {self._zone.name}" if emote else self._zone.name
+        self._text_item.setText(name)
+        self.setToolTip(name)
 
-    def update_geometry(self):
+    def _update_geometry(self):
         polygon = QPolygonF([QPointF(node.x, node.y) for node in self._zone.corner_nodes])
         self.setPolygon(polygon)
 

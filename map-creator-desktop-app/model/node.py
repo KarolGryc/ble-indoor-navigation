@@ -1,4 +1,4 @@
-from PySide6.QtCore import QPointF, Signal
+from PySide6.QtCore import QPointF
 from math import sqrt
 from model.map_object import MapObject
 
@@ -9,7 +9,7 @@ class Node(MapObject):
         self.owner = owner
 
     @property
-    def movables(self):
+    def movables(self) -> list["Node"]:
         return [self]
 
     @property
@@ -27,7 +27,7 @@ class Node(MapObject):
         return self.pos.x()
     
     @x.setter
-    def x(self, value: float):
+    def x(self, value: float) -> None:
         if self.pos.x() != value:
             self.pos.setX(value)
             self.updated.emit()
@@ -37,12 +37,12 @@ class Node(MapObject):
         return self.pos.y()
     
     @y.setter
-    def y(self, value: float):
+    def y(self, value: float) -> None:
         if self.pos.y() != value:
             self.pos.setY(value)
             self.updated.emit()
 
-    def moveBy(self, delta: QPointF):
+    def moveBy(self, delta: QPointF) -> None:
         self.position = self.position + delta
         self.updated.emit()
         
