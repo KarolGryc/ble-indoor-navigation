@@ -16,8 +16,6 @@ from model.map_object import MapObject
 from model.building import Building
 
 class MapPresenter(QObject):
-    scene_changed = Signal(QGraphicsScene)
-
     def __init__(self, 
                  model: Building, 
                  scene: QGraphicsScene, 
@@ -31,8 +29,8 @@ class MapPresenter(QObject):
 
         self._current_tool = None
 
-        self_current_floor = self.model.get_floor(0)
-        if self_current_floor is None:
+        self._current_floor = self.model.get_floor(0)
+        if self._current_floor is None:
             raise ValueError("Building must have at least one floor.")
         
 
@@ -112,6 +110,14 @@ class MapPresenter(QObject):
     # ------------------------------------
     # ------ Model change handlers -------
     # ------------------------------------
+    @property
+    def current_floor(self) -> Floor:
+        return self._current_floor
+    
+    @current_floor.setter
+    def current_floor(self, floor: Floor):
+        self._current_floor = floor
+
     def get_model_for_item(self, item) -> MapObject:
         return self._view_to_model_map.get(item, None)
     

@@ -27,6 +27,9 @@ from model.building import Building
 from view.floor_list import AutoSyncFloorList
 from view.layers_panel import LayersPanel
 
+from commands.floor_add_command import FloorAddCommand
+from commands.floor_remove_command import FloorRemoveCommand
+
 class MapCreatorApp(QMainWindow):
     def __init__(self,
                  parent=None,
@@ -40,22 +43,22 @@ class MapCreatorApp(QMainWindow):
         scene.setSceneRect(-5000, -5000, 10000, 10000)
 
         building_model = self._create_model()
-        self.presenter = MapPresenter(building_model, scene)
-        scene.set_presenter(self.presenter)
+        presenter = MapPresenter(building_model, scene)
+        scene.set_presenter(presenter)
 
         # Tool deactivation shortcut
-        self.delete_shorcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
-        self.delete_shorcut.activated.connect(self.presenter.reset_current_tool)
+        delete_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        delete_shortcut.activated.connect(presenter.reset_current_tool)
 
         ###############################
         # TOOLS TOOLBAR
         ###############################
         tools = [
-            WallAddTool(self.presenter, scene),
-            SelectTool(self.presenter, scene),
-            ZoneAddTool(self.presenter, scene),
-            RenamingTool(self.presenter, scene),
-            PointOfInterestAddTool(self.presenter, scene),
+            WallAddTool(presenter, scene),
+            SelectTool(presenter, scene),
+            ZoneAddTool(presenter, scene),
+            RenamingTool(presenter, scene),
+            PointOfInterestAddTool(presenter, scene),
         ]
 
         tool_icon_map = {
@@ -66,14 +69,14 @@ class MapCreatorApp(QMainWindow):
             PointOfInterestAddTool: "icons/generic.png",
         }
 
-        toolbar = Toolbar(self.presenter, tools, tool_icon_map)
+        toolbar = Toolbar(presenter, tools, tool_icon_map)
 
         self.addToolBar(Qt.LeftToolBarArea, toolbar)
 
         ###############################
         # MAIN VIEW
         ################################
-        self.view = MapView(self.presenter)
+        self.view = MapView(presenter)
         # self.view.setViewport(QOpenGLWidget())
         self.setCentralWidget(self.view)
 
@@ -89,32 +92,29 @@ class MapCreatorApp(QMainWindow):
 
         floor_list = AutoSyncFloorList(building_model)
         floor_list.floor_selected.connect(lambda floor: print(f"Selected floor: {floor.name}"))
-        floor_list.add_floor_requested.connect(lambda: print("Add floor requested"))
-        floor_list.remove_floor_requested.connect(lambda index: print(f"Remove floor at index requested: {index}"))
+        floor_list.add_floor_requested.connect(lambda: presenter.execute(FloorAddCommand(building_model)))
+        floor_list.remove_floor_requested.connect(lambda floor: presenter.execute(FloorRemoveCommand(building_model, floor)))
         layout.addWidget(floor_list)
 
         dock = QDockWidget("Floors", self)
-
         dock.setFeatures(QDockWidget.DockWidgetMovable)
-
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-
         dock.setWidget(right_panel)
 
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
 
-            ###############################
+        ###############################
         # MENU BAR
         ###############################
-        self._create_menu_bar()
+        self._create_menu_bar(presenter)
 
     def _create_model(self) -> Building:
         model = Building()
         model.add_floor()
         return model
     
-    def _create_menu_bar(self):
+    def _create_menu_bar(self, presenter: MapPresenter):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
-        self.menu_bar.undo_triggered.connect(self.presenter.undo)
-        self.menu_bar.redo_triggered.connect(self.presenter.redo)
+        self.menu_bar.undo_triggered.connect(presenter.undo)
+        self.menu_bar.redo_triggered.connect(presenter.redo)
