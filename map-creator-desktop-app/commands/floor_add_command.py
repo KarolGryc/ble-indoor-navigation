@@ -4,7 +4,7 @@ from model.floor import Floor
 from PySide6.QtGui import QUndoCommand
 
 class FloorAddCommand(QUndoCommand):
-    def __init__(self, building: Building, floor: Floor = None):
+    def __init__(self, building: Building, floor: Floor):
         super().__init__("Add Floor")
         self._building = building
         self._floor = floor if floor is not None else Floor()

@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QButtonGroup, QSizePolicy
-from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QButtonGroup, QSizePolicy, QLabel
+from PySide6.QtCore import Qt, Signal
 
 from model.wall import Wall
 from model.zone import Zone
@@ -16,6 +16,9 @@ class LayersPanel(QWidget):
         layout.setSpacing(5)
         layout.setContentsMargins(5, 5, 5, 5)
         
+        title_label = QLabel("Choose active layer type:")
+        layout.addWidget(title_label) 
+
         layout.addStretch() 
 
         self.btn_group = QButtonGroup(self)

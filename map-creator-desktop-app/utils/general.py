@@ -101,3 +101,10 @@ def ask_poi_name_and_type(window_name="Point of Interest Details",
         return selected_name, selected_type
     
     return None, None
+
+def ask_floor_name(window_name="Floor Name",
+                    default_name="Unnamed Floor") -> str | None:
+    text, ok = QInputDialog.getText(None, window_name, "Enter new floor name:", text=default_name)
+    if ok and text.strip():
+        return text.strip()
+    return None

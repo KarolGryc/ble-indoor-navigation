@@ -10,6 +10,7 @@ from model.map_object import MapObject
 class Floor(QObject):
     item_added = Signal(MapObject)
     item_removed = Signal(MapObject)
+    name_changed = Signal(str)
 
     def __init__(self, name: str = "Unnamed Floor"):
         super().__init__()
@@ -33,6 +34,7 @@ class Floor(QObject):
     @name.setter
     def name(self, new_name: str):
         self._name = new_name
+        self.name_changed.emit(new_name)
 
     def add(self, element: MapObject):
         el_type = type(element)
