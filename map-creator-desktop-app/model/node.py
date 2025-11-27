@@ -3,10 +3,10 @@ from math import sqrt
 from model.map_object import MapObject
 
 class Node(MapObject):
-    def __init__(self, x: float, y: float):
+    def __init__(self, x: float, y: float, owner=None):
         super().__init__()
         self.pos = QPointF(x, y)
-        self.wall = None
+        self.owner = owner
 
     @property
     def movables(self):

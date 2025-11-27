@@ -7,8 +7,8 @@ class Wall(MapObject):
         super().__init__()
         self.start_node = start_node
         self.end_node = end_node
-        self.start_node.wall = self
-        self.end_node.wall = self
+        self.start_node.owner = self
+        self.end_node.owner = self
 
         self.start_node.updated.connect(self._on_node_changed)
         self.end_node.updated.connect(self._on_node_changed)

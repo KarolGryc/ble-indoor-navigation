@@ -9,6 +9,7 @@ class Zone(MapObject):
         self._name = name
 
         for node in self.corner_nodes:
+            node.owner = self
             node.updated.connect(self._on_node_changed)
 
     def _on_node_changed(self):

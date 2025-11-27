@@ -45,7 +45,8 @@ class ZoneAddTool(Tool):
         if len(self._corner_points) < 1:
             return True
 
+        start = self._corner_points[0]
         intersection = geo.get_self_intersetion(self._corner_points + [new_point])
-        if intersection == self._corner_points[0] and len(self._corner_points) >= 3 and new_point == self._corner_points[0]:
+        if intersection == start and len(self._corner_points) >= 3 and new_point == start:
             return True
         return intersection is None
