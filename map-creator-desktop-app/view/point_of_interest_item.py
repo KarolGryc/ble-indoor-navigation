@@ -1,7 +1,7 @@
 from model.point_of_interest import PointOfInterestType
 from PySide6.QtWidgets import QGraphicsPathItem, QGraphicsPixmapItem, QGraphicsSimpleTextItem
 from PySide6.QtGui import QPainterPath, QBrush, QColor, QPen, QPixmap, QPainter
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt
 
 class PointOfInterestGraphicsItem(QGraphicsPathItem):
     type_to_image = {

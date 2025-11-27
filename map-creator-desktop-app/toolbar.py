@@ -1,10 +1,14 @@
 from PySide6.QtWidgets import QToolBar, QToolButton, QButtonGroup
+from PySide6.QtGui import QIcon
 from map_presenter import MapPresenter
 
 from tools.tool import Tool
 
 class Toolbar(QToolBar):
-    def __init__(self, presenter: MapPresenter, tool_set: list[Tool]):
+    def __init__(self, 
+                 presenter: MapPresenter, 
+                 tool_set: list[Tool],
+                 tool_icon_map: dict[type, str] = {}):
         super().__init__("Main Toolbar")
         self.presenter = presenter
         self.presenter.current_tool_changed.connect(self._on_current_tool_changed)
@@ -12,22 +16,15 @@ class Toolbar(QToolBar):
         group = QButtonGroup(self)
         group.setExclusive(True)
 
-        self._undo_button = QToolButton()
-        self._undo_button.setText("Undo")
-        self._undo_button.clicked.connect(self.presenter._undo_stack.undo)
-        self.addWidget(self._undo_button)
-        group.addButton(self._undo_button)
-
-        self._redo_button = QToolButton()
-        self._redo_button.setText("Redo")
-        self._redo_button.clicked.connect(self.presenter._undo_stack.redo)
-        self.addWidget(self._redo_button)
-        group.addButton(self._redo_button)
-
         for tool in tool_set:
             button = QToolButton()
             self.addWidget(button)
             button.setText(type(tool).__name__)
+
+            path = tool_icon_map.get(type(tool), None)
+            icon = QIcon(path) if path else QIcon()
+            button.setIcon(icon)
+            button.setToolTip(tool.name)
             button.clicked.connect(lambda checked, t=tool: self._set_current_tool(t))
             group.addButton(button)
 

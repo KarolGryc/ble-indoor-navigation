@@ -17,10 +17,15 @@ from toolbar import Toolbar
 
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 
+from app_menu import AppMenu
+
 class MapCreatorApp(QMainWindow):
-    def __init__(self, screen_size=(1280, 720)):
-        super().__init__()
-        self.setWindowTitle("Map Creator App")
+    def __init__(self,
+                 parent=None,
+                 screen_size=(1280, 720), 
+                 window_title="Map Creator App"):
+        super().__init__(parent)
+        self.setWindowTitle(window_title)
         self.setGeometry(0, 0, *screen_size)
 
         model = MapModel()
@@ -41,9 +46,23 @@ class MapCreatorApp(QMainWindow):
             RenamingTool(self.presenter, scene),
             PointOfInterestAddTool(self.presenter, scene),
         ]
-        toolbar = Toolbar(self.presenter, tools)
-        self.addToolBar(toolbar)
+        tool_icon_map = {
+            WallAddTool: "icons/generic.png",
+            SelectTool: "icons/generic.png",
+            ZoneAddTool: "icons/generic.png",
+            RenamingTool: "icons/generic.png",
+            PointOfInterestAddTool: "icons/generic.png",
+        }
+
+        toolbar = Toolbar(self.presenter, tools, tool_icon_map)
+
+        self.addToolBar(Qt.LeftToolBarArea, toolbar)
 
         self.view = MapView(self.presenter)
         # self.view.setViewport(QOpenGLWidget())
         self.setCentralWidget(self.view)
+
+        self.menu_bar = AppMenu(self)
+        self.setMenuBar(self.menu_bar)
+        self.menu_bar.undo_triggered.connect(self.presenter.undo)
+        self.menu_bar.redo_triggered.connect(self.presenter.redo)
