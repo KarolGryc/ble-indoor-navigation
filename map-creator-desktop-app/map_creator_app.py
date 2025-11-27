@@ -25,6 +25,7 @@ from model.point_of_interest import PointOfInterest
 from model.building import Building
 
 from view.floor_list import AutoSyncFloorList
+from view.layers_panel import LayersPanel
 
 class MapCreatorApp(QMainWindow):
     def __init__(self,
@@ -69,35 +70,6 @@ class MapCreatorApp(QMainWindow):
 
         self.addToolBar(Qt.LeftToolBarArea, toolbar)
 
-        right_toolbar = QToolBar("Right Toolbar", self)
-        right_toolbar.setOrientation(Qt.Vertical)
-        right_toolbar.setMovable(False) 
-        self.addToolBar(Qt.RightToolBarArea, right_toolbar)
-
-
-
-        ###############################
-        # LAYER SELECTOR TOOLBAR
-        ###############################
-        layer_group = QActionGroup(self)
-        layer_group.setExclusive(True)
-
-        def add_layer_action(name, item_type):
-            action = right_toolbar.addAction(name)
-            action.setCheckable(True)
-            layer_group.addAction(action)
-            action.triggered.connect(lambda ch: ch and scene.set_active_item_type(item_type))
-            
-            return action
-
-        act_wall = add_layer_action("Walls", Wall)
-        act_zone = add_layer_action("Zones", Zone)
-        act_poi  = add_layer_action("POIs", PointOfInterest)
-
-        act_wall.setChecked(True)
-        scene.set_active_item_type(Wall)
-
-
         ###############################
         # MAIN VIEW
         ################################
@@ -105,25 +77,21 @@ class MapCreatorApp(QMainWindow):
         # self.view.setViewport(QOpenGLWidget())
         self.setCentralWidget(self.view)
 
-
         ###############################
-        # MENU BAR
-        ###############################
-        self._create_menu_bar()
-
-
-        ###############################
-        # FLOOR LIST
+        # RIGHT PANEL
         ###############################
         right_panel = QWidget()
         layout = QVBoxLayout(right_panel)
 
-        floor_list = AutoSyncFloorList(building_model)
-        layout.addWidget(floor_list)
+        layers_panel = LayersPanel(scene)
+        layers_panel.active_class_changed.connect(scene.set_active_item_type)
+        layout.addWidget(layers_panel)
 
+        floor_list = AutoSyncFloorList(building_model)
         floor_list.floor_selected.connect(lambda floor: print(f"Selected floor: {floor.name}"))
         floor_list.add_floor_requested.connect(lambda: print("Add floor requested"))
         floor_list.remove_floor_requested.connect(lambda index: print(f"Remove floor at index requested: {index}"))
+        layout.addWidget(floor_list)
 
         dock = QDockWidget("Floors", self)
 
@@ -134,6 +102,11 @@ class MapCreatorApp(QMainWindow):
         dock.setWidget(right_panel)
 
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
+
+            ###############################
+        # MENU BAR
+        ###############################
+        self._create_menu_bar()
 
     def _create_model(self) -> Building:
         model = Building()
