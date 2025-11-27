@@ -18,50 +18,31 @@ class MapModel(QObject):
         self.zones: list[Zone] = []
         self.points_of_interest: list[PointOfInterest] = []
 
-    def add_node(self, node: Node):
-        if node in self.nodes:
-            return
+        self._type_to_list = {
+            Node: self.nodes,
+            Wall: self.walls,
+            Zone: self.zones,
+            PointOfInterest: self.points_of_interest,
+        }
+
+    def add(self, element: MapObject):
+        el_type = type(element)
+        type_list = self._type_to_list.get(el_type, None)
         
-        self.nodes.append(node)
-        self.item_added.emit(node)
+        if type_list is not None and element not in type_list:
+            for dependency in element.dependencies:
+                self.add(dependency)
+                
+            type_list.append(element)
+            self.item_added.emit(element)
 
-    def remove_node(self, node: Node):
-        if node in self.nodes:
-            self.nodes.remove(node)
-            self.item_removed.emit(node)
-
-    def add_wall(self, wall: Wall):
-        if wall in self.walls:
-            return
+    def remove(self, element: MapObject):
+        el_type = type(element)
+        type_list = self._type_to_list.get(el_type, None)
         
-        self.walls.append(wall)
-        self.item_added.emit(wall)
+        if type_list is not None and element in type_list:
+            type_list.remove(element)
+            for dependency in element.dependencies:
+                self.remove(dependency)
 
-    def remove_wall(self, wall: Wall):
-        if wall in self.walls:
-            self.walls.remove(wall)
-            self.item_removed.emit(wall)
-
-    def add_zone(self, zone: Zone):
-        if zone in self.zones:
-            return
-        
-        self.zones.append(zone)
-        self.item_added.emit(zone)
-
-    def remove_zone(self, zone: Zone):
-        if zone in self.zones:
-            self.zones.remove(zone)
-            self.item_removed.emit(zone)
-
-    def add_point_of_interest(self, poi: PointOfInterest):
-        if poi in self.points_of_interest:
-            return
-        
-        self.points_of_interest.append(poi)
-        self.item_added.emit(poi)
-
-    def remove_point_of_interest(self, poi: PointOfInterest):
-        if poi in self.points_of_interest:
-            self.points_of_interest.remove(poi)
-            self.item_removed.emit(poi)
+            self.item_removed.emit(element)

@@ -39,6 +39,7 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
         self._text_item.setPen(QPen(Qt.black, 2))
 
         self.setFlag(QGraphicsPathItem.ItemIsSelectable, True)
+        self.setZValue(2)
         self.update_item()
 
     def update_item(self):

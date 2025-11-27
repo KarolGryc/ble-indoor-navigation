@@ -87,6 +87,9 @@ class InteractiveScene(QGraphicsScene):
             is_active = self._active_type is None or item_type == self._active_type
             self._set_active_state(item, is_active)
 
+            for dep in model.dependencies:
+                dep_item = self._presenter.get_item_for_model(dep)
+                self._set_active_state(dep_item, is_active)
 
     def itemAt(self, pos: QPointF, transform):
         items = self.items(pos, Qt.IntersectsItemShape, Qt.DescendingOrder)
@@ -99,17 +102,21 @@ class InteractiveScene(QGraphicsScene):
     def set_active_item_type(self, item_type: type):
         self._active_type = item_type
 
+        checked = set()
+
         for item in self.items():
             model = self._presenter.get_model_for_item(item)
-            if model is None:
+            if model is None or item in checked:
                 continue
 
             is_active = type(model) == self._active_type
             self._set_active_state(item, is_active)
+            checked.add(item)
 
             for dep in model.dependencies:
                 dep_item = self._presenter.get_item_for_model(dep)
                 self._set_active_state(dep_item, is_active)
+                checked.add(dep_item)
 
     def _set_active_state(self, item, is_active: bool):
         if item is None:

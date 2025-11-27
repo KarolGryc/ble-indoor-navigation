@@ -10,7 +10,7 @@ class PointOfInterestAddCommand(QUndoCommand):
         self._point_of_interest = PointOfInterest(position, name, type)
 
     def redo(self):
-        self._model.add_point_of_interest(self._point_of_interest)
+        self._model.add(self._point_of_interest)
 
     def undo(self):
-        self._model.remove_point_of_interest(self._point_of_interest)
+        self._model.remove(self._point_of_interest)

@@ -10,11 +10,7 @@ class ZoneAddCommand(QUndoCommand):
         self._zone = Zone([Node(pt.x(), pt.y()) for pt in corner_points], name, zone_type)
         
     def redo(self):
-        self._model.add_zone(self._zone)
-        for node in self._zone.corner_nodes:
-            self._model.add_node(node)
+        self._model.add(self._zone)
 
     def undo(self):
-        self._model.remove_zone(self._zone)
-        for node in self._zone.corner_nodes:
-            self._model.remove_node(node)
+        self._model.remove(self._zone)
