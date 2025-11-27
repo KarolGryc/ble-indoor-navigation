@@ -87,7 +87,7 @@ class MapCreatorApp(QMainWindow):
         layout.addWidget(layers_panel)
 
         floor_list = AutoSyncFloorList(building_model)
-        floor_list.floor_selected.connect(lambda floor: presenter.set_active_floor(floor))
+        floor_list.floor_selected.connect(lambda floor: setattr(presenter, 'current_floor', floor))
         floor_list.add_floor_request.connect(lambda: self._add_floor(presenter, building_model))
         floor_list.remove_floor_request.connect(lambda floor: self._remove_floor(presenter, building_model, floor))
         floor_list.rename_floor_request.connect(lambda floor: self._rename_floor(floor))

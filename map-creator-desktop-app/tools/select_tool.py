@@ -82,7 +82,7 @@ class SelectTool(Tool):
     def key_press(self, key):
         if key == Qt.Key_Delete:
             elements_to_delete = [model for model in self._selected_models]
-            cmd = DeleteElementsCommand(self.presenter, elements_to_delete)
+            cmd = DeleteElementsCommand(self.presenter.current_floor, elements_to_delete)
             self.presenter.execute(cmd)
 
             self._reset_dragging()

@@ -22,7 +22,7 @@ class WallAddTool(Tool):
         if self._start_point is None:
             self._start_point = pos
         else:
-            command = WallAddCommand(self.presenter.model, self._start_point, pos)
+            command = WallAddCommand(self.presenter.current_floor, self._start_point, pos)
             self.presenter.execute(command)
             self.deactivate()
 

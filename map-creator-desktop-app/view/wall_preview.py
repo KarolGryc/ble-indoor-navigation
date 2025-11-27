@@ -3,6 +3,7 @@ from PySide6.QtGui import QPen, QColor
 from PySide6.QtWidgets import QGraphicsScene
 from view.node_item import NodeGraphicsItem
 from model.node import Node
+import shiboken6
 
 class WallPreview:
     OPACITY = 0.5
@@ -38,14 +39,14 @@ class WallPreview:
             self.scene.addItem(self._end_preview)
 
     def clear(self):
-        if self._start_preview:
+        if self._start_preview and shiboken6.isValid(self._start_preview):
             self.scene.removeItem(self._start_preview)
             self._start_preview = None
 
-        if self._line_preview:
+        if self._line_preview and shiboken6.isValid(self._line_preview):
             self.scene.removeItem(self._line_preview)
             self._line_preview = None
 
-        if self._end_preview:
+        if self._end_preview and shiboken6.isValid(self._end_preview):
             self.scene.removeItem(self._end_preview)
             self._end_preview = None

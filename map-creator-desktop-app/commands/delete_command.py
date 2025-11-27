@@ -1,24 +1,21 @@
 from PySide6.QtGui import QUndoCommand
-from model.node import Node
-from model.wall import Wall
-from model.zone import Zone
 
 class DeleteElementsCommand(QUndoCommand):
-    def __init__(self, presenter, elements: list):
+    def __init__(self, model, elements: list):
         super().__init__("Delete Item")
-        self._presenter = presenter
+        self._model = model
         self._elements = elements
 
     def undo(self):
         for element in self._elements:
             for dep in element.dependencies:
-                self._presenter.model.add(dep)
+                self._model.add(dep)
 
-            self._presenter.model.add(element)
+            self._model.add(element)
 
     def redo(self):
         for element in self._elements:
             for dep in element.dependencies:
-                self._presenter.model.remove(dep)
+                self._model.remove(dep)
                 
-            self._presenter.model.remove(element)
+            self._model.remove(element)

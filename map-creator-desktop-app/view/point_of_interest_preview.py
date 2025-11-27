@@ -1,7 +1,7 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor
 from PySide6.QtWidgets import QGraphicsScene
-
+import shiboken6
 
 class PointOfInterestPreview:
     OPACITY = 0.5
@@ -25,6 +25,6 @@ class PointOfInterestPreview:
             self._poi_preview.setOpacity(self.OPACITY)
 
     def clear(self):
-        if self._poi_preview:
+        if self._poi_preview and shiboken6.isValid(self._poi_preview):
             self.scene.removeItem(self._poi_preview)
             self._poi_preview = None

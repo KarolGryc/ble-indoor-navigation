@@ -1,5 +1,5 @@
 from tools.tool import Tool
-from PySide6.QtWidgets import QGraphicsScene, QInputDialog
+from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtCore import QPointF
 from view.zone_preview import ZonePreview
 from map_presenter import MapPresenter
@@ -33,7 +33,7 @@ class ZoneAddTool(Tool):
             if name is None or zone_type is None:
                 return
 
-            cmd = ZoneAddCommand(self.presenter.model, self._corner_points, name.strip(), zone_type)
+            cmd = ZoneAddCommand(self.presenter.current_floor, self._corner_points, name.strip(), zone_type)
             self.presenter.execute(cmd)
             self.deactivate()
 

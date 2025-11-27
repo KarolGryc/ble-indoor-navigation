@@ -4,6 +4,8 @@ from PySide6.QtGui import QPainterPath, QPen, QColor
 from view.node_item import NodeGraphicsItem
 from model.node import Node
 
+import shiboken6
+
 class ZonePreview:
     DEFAULT_PEN = QPen(QColor("black"), 2)
     ERROR_PEN = QPen(QColor("red"), 2)
@@ -28,11 +30,11 @@ class ZonePreview:
         self.scene.addItem(self._point_item)
 
     def clear(self):
-        if self._polygon_item:
+        if self._polygon_item and shiboken6.isValid(self._polygon_item):
             self.scene.removeItem(self._polygon_item)
             self._polygon_item = None
 
-        if self._point_item:
+        if self._point_item and shiboken6.isValid(self._point_item):
             self.scene.removeItem(self._point_item)
             self._point_item = None
 

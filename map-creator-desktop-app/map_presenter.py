@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import QObject, Signal, QPointF
+from PySide6.QtCore import QObject, QPointF
 from PySide6.QtGui import QUndoStack
 
 from model.floor import Floor
@@ -32,10 +32,9 @@ class MapPresenter(QObject):
         self._current_floor = self.model.get_floor(0)
         if self._current_floor is None:
             raise ValueError("Building must have at least one floor.")
-        
 
-        # self.model.item_added.connect(self._on_item_added)
-        # self.model.item_removed.connect(self._on_item_removed)
+        self._current_floor.item_added.connect(self._on_item_added)
+        self._current_floor.item_removed.connect(self._on_item_removed)
 
         self._model_to_view_map = {}
         self._view_to_model_map = {}
@@ -117,6 +116,29 @@ class MapPresenter(QObject):
     @current_floor.setter
     def current_floor(self, floor: Floor):
         self._current_floor = floor
+        self._current_floor.item_added.connect(self._on_item_added)
+        self._current_floor.item_removed.connect(self._on_item_removed)
+        
+        self._model_to_view_map.clear()
+        self._view_to_model_map.clear()
+        self.scene.clear()
+
+        if self._current_tool:
+            # Change to on_floor_changed method if needed
+            self._current_tool.deactivate()
+
+        for wall in floor.walls:
+            self._on_item_added(wall)
+
+        for zone in floor.zones:
+            self._on_item_added(zone)
+
+        for node in floor.nodes:
+            self._on_item_added(node)
+
+        for poi in floor.points_of_interest:
+            self._on_item_added(poi)
+
 
     def get_model_for_item(self, item) -> MapObject:
         return self._view_to_model_map.get(item, None)

@@ -27,7 +27,7 @@ class PointOfInterestAddTool(Tool):
         if name is None or poi_type is None:
             return
 
-        cmd = PointOfInterestAddCommand(self.presenter.model, snapped_pos, name, poi_type)
+        cmd = PointOfInterestAddCommand(self.presenter.current_floor, snapped_pos, name, poi_type)
         self.presenter.execute(cmd)
         self._preview.clear()
 
