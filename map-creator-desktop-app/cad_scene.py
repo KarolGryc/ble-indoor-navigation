@@ -1,16 +1,15 @@
 import math
-from pyexpat import model
 from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QPen, QColor, QPainter
 
-from map_presenter import MapPresenter
+from main_map_controller import MainMapController
 
 class InteractiveScene(QGraphicsScene):
     ACTIVE_OPACITY = 1.0
     INACTIVE_OPACITY = 0.5
 
-    def __init__(self, presenter:MapPresenter=None, background_color=QColor(255, 255, 255)):
+    def __init__(self, presenter:MainMapController=None, background_color=QColor(255, 255, 255)):
         super().__init__()
         self._presenter = presenter
         self.setBackgroundBrush(background_color)

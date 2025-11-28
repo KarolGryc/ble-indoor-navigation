@@ -15,7 +15,7 @@ from model.point_of_interest import PointOfInterest
 from model.map_object import MapObject
 from model.building import Building
 
-class MapPresenter(QObject):
+class MainMapController(QObject):
     def __init__(self, 
                  model: Building, 
                  scene: QGraphicsScene, 

@@ -2,12 +2,15 @@ from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtGui import QTransform
 from PySide6.QtCore import Qt
 from tools.tool import Tool
-from map_presenter import MapPresenter
+from main_map_controller import MainMapController
 from commands.move_command import MoveElementsCommand
 from commands.delete_command import DeleteElementsCommand
 
 class SelectTool(Tool):
-    def __init__(self, presenter: MapPresenter, scene: QGraphicsScene, name="Select Tool"):
+    def __init__(self, 
+                 presenter: MainMapController, 
+                 scene: QGraphicsScene, 
+                 name="Select Tool"):
         super().__init__(presenter, scene, name)
 
         self._is_dragging = False

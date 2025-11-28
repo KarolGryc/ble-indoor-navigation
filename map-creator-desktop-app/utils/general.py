@@ -1,4 +1,6 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QComboBox, QDialogButtonBox, QMessageBox, QInputDialog
+from PySide6.QtWidgets import QApplication
+from PySide6.QtGui import QPalette
 from model.zone import ZoneType
 from model.point_of_interest import PointOfInterestType
 
@@ -108,3 +110,9 @@ def ask_floor_name(window_name="Floor Name",
     if ok and text.strip():
         return text.strip()
     return None
+
+def _is_dark_theme() -> bool:
+    pallete = QApplication.palette()
+    bg_color = pallete.color(QPalette.Window)
+
+    return bg_color.value() < 128

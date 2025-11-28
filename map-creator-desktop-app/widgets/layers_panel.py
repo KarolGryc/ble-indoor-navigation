@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QButtonGroup, QSizePolicy, QLabel
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 
 from model.wall import Wall
 from model.zone import Zone

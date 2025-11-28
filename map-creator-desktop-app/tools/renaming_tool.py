@@ -1,7 +1,7 @@
 from tools.tool import Tool
 
 from PySide6.QtWidgets import QGraphicsScene
-from map_presenter import MapPresenter
+from main_map_controller import MainMapController
 
 from utils.general import ask_zone_name, ask_poi_name_and_type
 from model.point_of_interest import PointOfInterest
@@ -11,7 +11,7 @@ from PySide6.QtGui import QTransform
 
 class RenamingTool(Tool):
     def __init__(self,
-                 presenter: MapPresenter,
+                 presenter: MainMapController,
                  scene: QGraphicsScene,
                  name="Zone Renaming Tool"):
         super().__init__(presenter, scene, name)

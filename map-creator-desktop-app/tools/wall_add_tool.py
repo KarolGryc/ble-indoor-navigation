@@ -1,11 +1,11 @@
 from tools.tool import Tool
-from map_presenter import MapPresenter
+from main_map_controller import MainMapController
 from commands.wall_add_command import WallAddCommand
 from PySide6.QtWidgets import QGraphicsScene
 from view.wall_preview import WallPreview
 
 class WallAddTool(Tool):
-    def __init__(self, presenter: MapPresenter, scene: QGraphicsScene, name="Wall Add Tool"):
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Wall Add Tool"):
         super().__init__(presenter, scene, name)
 
         self._start_point = None

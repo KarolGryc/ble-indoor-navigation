@@ -1,6 +1,6 @@
 from tools.tool import Tool
 
-from map_presenter import MapPresenter
+from main_map_controller import MainMapController
 from PySide6.QtWidgets import QGraphicsScene
 
 from commands.point_of_interest_add_command import PointOfInterestAddCommand
@@ -9,7 +9,7 @@ from utils.general import ask_poi_name_and_type
 
 class PointOfInterestAddTool(Tool):
     def __init__(self, 
-                 presenter: MapPresenter, 
+                 presenter: MainMapController, 
                  scene: QGraphicsScene, 
                  name="Point of Interest Add Tool"):
         super().__init__(presenter, scene, name)

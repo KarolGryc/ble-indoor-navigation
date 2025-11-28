@@ -1,13 +1,13 @@
 from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter 
 from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
 from PySide6.QtCore import Qt
-from map_presenter import MapPresenter
+from main_map_controller import MainMapController
 from view.zoom import GraphicsViewZoom
 from view.cursor_modes import *
-from view.compass import CompassWidget
+from widgets.compass import CompassWidget
 
 class MapView(QGraphicsView):
-    def __init__(self, presenter: MapPresenter):
+    def __init__(self, presenter: MainMapController):
         super().__init__()
         self.presenter = presenter
         self.scene: QGraphicsScene = presenter.scene
@@ -115,10 +115,8 @@ class MapView(QGraphicsView):
     def reset_rotation(self):
         previous_mode = self._transofmation_mode
         self._set_cursor_mode(RotateMode(self))
-        rotation_to_reset = -self._current_rotation
-        self.rotate(rotation_to_reset)
+        self.rotate(-self._current_rotation)
         self._set_cursor_mode(previous_mode)
-        self._compass.set_angle(0.0)
 
     def _set_cursor_mode(self, mode: CursorMode):
         if type(self._transofmation_mode) != type(mode):
