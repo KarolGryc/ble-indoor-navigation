@@ -52,6 +52,8 @@ class PointOfInterestGraphicsItem(QGraphicsPathItem):
             except TypeError:
                 pass
 
+        return super().itemChange(change, value)
+
 
     def update_item(self):
         self._update_label()

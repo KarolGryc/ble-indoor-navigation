@@ -45,7 +45,7 @@ class ZoneGraphicsItem(QGraphicsPolygonItem):
             except TypeError:
                 pass
 
-
+        return super().itemChange(change, value)
 
     def update_item(self):
         self._update_text()

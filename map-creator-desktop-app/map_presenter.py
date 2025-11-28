@@ -119,32 +119,35 @@ class MapPresenter(QObject):
         self._current_floor.item_added.connect(self._on_item_added)
         self._current_floor.item_removed.connect(self._on_item_removed)
         
-        self._model_to_view_map.clear()
-        self._view_to_model_map.clear()
-        self.scene.clear()
-
         if self._current_tool:
             # Change to on_floor_changed method if needed
             self._current_tool.deactivate()
 
-        for wall in floor.walls:
-            self._on_item_added(wall)
-
-        for zone in floor.zones:
-            self._on_item_added(zone)
-
-        for node in floor.nodes:
-            self._on_item_added(node)
-
-        for poi in floor.points_of_interest:
-            self._on_item_added(poi)
-
+        self._redraw_scene()
 
     def get_model_for_item(self, item) -> MapObject:
         return self._view_to_model_map.get(item, None)
     
     def get_item_for_model(self, model):
         return self._model_to_view_map.get(model, None)
+    
+    def _redraw_scene(self):
+        self.scene.clear()
+        self._model_to_view_map.clear()
+        self._view_to_model_map.clear()
+
+        floor = self._current_floor
+        for node in floor.nodes:
+            self._on_item_added(node)
+        
+        for wall in floor.walls:
+            self._on_item_added(wall)
+
+        for zone in floor.zones:
+            self._on_item_added(zone)
+
+        for poi in floor.points_of_interest:
+            self._on_item_added(poi)
 
     def _on_item_added(self, item):
         view_class = self._model_class_to_view_class.get(type(item), None)
