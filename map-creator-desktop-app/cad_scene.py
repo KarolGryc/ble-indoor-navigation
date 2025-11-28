@@ -1,18 +1,25 @@
 import math
+from pyexpat import model
 from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt, QRectF, QPointF
 from PySide6.QtGui import QPen, QColor, QPainter
 
+from map_presenter import MapPresenter
+
 class InteractiveScene(QGraphicsScene):
-    def __init__(self, presenter=None, background_color=QColor(255, 255, 255)):
+    ACTIVE_OPACITY = 1.0
+    INACTIVE_OPACITY = 0.5
+
+    def __init__(self, presenter:MapPresenter=None, background_color=QColor(255, 255, 255)):
         super().__init__()
         self._presenter = presenter
         self.setBackgroundBrush(background_color)
         
-        # Proste kolory
-        self._grid_color = QColor(220, 220, 220)      # Jasny szary
-        self._axis_color = QColor(80, 80, 80)         # Ciemny szary
-        self._text_color = QColor(50, 50, 50)         # Prawie czarny
+        self._grid_color = QColor(220, 220, 220)
+        self._axis_color = QColor(80, 80, 80)
+        self._text_color = QColor(50, 50, 50)
+
+        self._active_type = None
 
     def set_presenter(self, presenter):
         self._presenter = presenter
@@ -67,3 +74,57 @@ class InteractiveScene(QGraphicsScene):
                 label = str(x / 100) + 'm'
                 painter.drawText(QRectF(x, 2, grid_size, grid_size), 
                                  Qt.AlignLeft | Qt.AlignTop, label)
+
+    def addItem(self, item):
+        super().addItem(item)    
+        
+        model = self._presenter.get_model_for_item(item)
+        if model is None:
+            return
+
+        if model is not None:
+            item_type = type(model)
+            is_active = self._active_type is None or item_type == self._active_type
+            self._set_active_state(item, is_active)
+
+            for dep in model.dependencies:
+                dep_item = self._presenter.get_item_for_model(dep)
+                self._set_active_state(dep_item, is_active)
+
+    def itemAt(self, pos: QPointF, transform):
+        items = self.items(pos, Qt.IntersectsItemShape, Qt.DescendingOrder)
+        for item in items:
+            if item.isEnabled():
+                return item
+            
+        return None
+                
+    def set_active_item_type(self, item_type: type):
+        self._active_type = item_type
+
+        checked = set()
+
+        for item in self.items():
+            model = self._presenter.get_model_for_item(item)
+            if model is None or item in checked:
+                continue
+
+            is_active = type(model) == self._active_type
+            self._set_active_state(item, is_active)
+            checked.add(item)
+
+            for dep in model.dependencies:
+                dep_item = self._presenter.get_item_for_model(dep)
+                self._set_active_state(dep_item, is_active)
+                checked.add(dep_item)
+
+    def _set_active_state(self, item, is_active: bool):
+        if item is None:
+            return
+        
+        opacity = InteractiveScene.ACTIVE_OPACITY if is_active else InteractiveScene.INACTIVE_OPACITY
+        item.setEnabled(is_active)
+        item.setOpacity(opacity)
+
+        if not is_active:
+            item.setSelected(False)

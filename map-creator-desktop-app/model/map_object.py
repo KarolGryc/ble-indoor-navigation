@@ -1,8 +1,15 @@
 from PySide6.QtCore import QObject, Signal
 
 class MapObject(QObject):
-    def get_dependencies(self) -> list:
-        return []
-    
+    updated = Signal()
+
     def should_survive_deletion_of(self, item: 'MapObject') -> bool:
         return True
+
+    @property
+    def movables(self):
+        pass
+
+    @property
+    def dependencies(self) -> list:
+        return []

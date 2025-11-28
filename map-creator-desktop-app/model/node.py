@@ -1,14 +1,16 @@
-from PySide6.QtCore import QPointF, Signal
+from PySide6.QtCore import QPointF
 from math import sqrt
 from model.map_object import MapObject
 
 class Node(MapObject):
-    position_changed = Signal(QPointF)
-
-    def __init__(self, x: float, y: float):
+    def __init__(self, x: float, y: float, owner=None):
         super().__init__()
         self.pos = QPointF(x, y)
-        self.wall = None
+        self.owner = owner
+
+    @property
+    def movables(self) -> list["Node"]:
+        return [self]
 
     @property
     def position(self) -> QPointF:
@@ -18,31 +20,31 @@ class Node(MapObject):
     def position(self, pos: QPointF):
         if self.pos != pos:
             self.pos = pos
-            self.position_changed.emit(self.pos)
+            self.updated.emit()
 
     @property
     def x(self) -> float:
         return self.pos.x()
     
     @x.setter
-    def x(self, value: float):
+    def x(self, value: float) -> None:
         if self.pos.x() != value:
             self.pos.setX(value)
-            self.position_changed.emit(self.pos)
+            self.updated.emit()
 
     @property
     def y(self) -> float:
         return self.pos.y()
     
     @y.setter
-    def y(self, value: float):
+    def y(self, value: float) -> None:
         if self.pos.y() != value:
             self.pos.setY(value)
-            self.position_changed.emit(self.pos)
+            self.updated.emit()
 
-    def moveBy(self, delta: QPointF):
+    def moveBy(self, delta: QPointF) -> None:
         self.position = self.position + delta
-        self.position_changed.emit(self.position)
-
+        self.updated.emit()
+        
     def distance_to(self, other: 'Node') -> float:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)

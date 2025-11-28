@@ -1,29 +1,29 @@
-from PySide6.QtCore import Signal, QPointF
+from PySide6.QtCore import QPointF
 from model.node import Node
 from model.map_object import MapObject
 
 class Wall(MapObject):
-    geometry_changed = Signal()
-
     def __init__(self, start_node: Node, end_node: Node):
         super().__init__()
         self.start_node = start_node
         self.end_node = end_node
-        self.start_node.wall = self
-        self.end_node.wall = self
+        self.start_node.owner = self
+        self.end_node.owner = self
 
-        self.start_node.position_changed.connect(self._on_node_changed)
-        self.end_node.position_changed.connect(self._on_node_changed)
-
-        self._notified_start_node_removal = False
-        self._notified_end_node_removal = False
-
-    def _on_node_changed(self):
-        self.geometry_changed.emit()
+        self.start_node.updated.connect(self.updated)
+        self.end_node.updated.connect(self.updated)
 
     def length(self) -> float:
         return self.start_node.distance_to(self.end_node)
     
+    @property
+    def dependencies(self) -> list[MapObject]:
+        return [self.start_node, self.end_node]
+
+    @property
+    def movables(self) -> list[Node]:
+        return [self.start_node, self.end_node]
+
     @property
     def position(self) -> QPointF:
         return self.middle_point()
@@ -34,16 +34,13 @@ class Wall(MapObject):
         dy = pos.y() - self.middle_point().y()
 
         delta = QPointF(dx, dy)
-        self.start_node.position = self.start_node.position + delta
-        self.end_node.position = self.end_node.position + delta
-
-        self.geometry_changed.emit()
+        self.moveBy(delta)
     
-    def moveBy(self, delta: QPointF):
+    def moveBy(self, delta: QPointF) -> None:
         self.start_node.position = self.start_node.position + delta
         self.end_node.position = self.end_node.position + delta
 
-        self.geometry_changed.emit()
+        self.updated.emit()
     
     def middle_point(self) -> QPointF:
         x = (self.start_node.x + self.end_node.x) / 2

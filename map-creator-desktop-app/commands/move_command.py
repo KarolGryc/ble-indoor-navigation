@@ -1,5 +1,5 @@
 from PySide6.QtGui import QUndoCommand
-from model.map_model import MapModel
+from model.floor import Floor
 
 class MoveElementsCommand(QUndoCommand):
     def __init__(self, elements, delta_pos):

@@ -10,4 +10,21 @@ class NodeGraphicsItem(QGraphicsEllipseItem):
         self.node = node
         self.setPos(node.position)
         self.setFlag(QGraphicsEllipseItem.ItemIsSelectable, True)
-        self.setFlag(QGraphicsEllipseItem.ItemIsMovable, False)
+        self.setZValue(1)
+
+        self.node.updated.connect(self.update_item)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsEllipseItem.ItemSceneHasChanged and value is None:
+            try:
+                self.node.updated.disconnect(self.update_item)
+            except TypeError:
+                pass
+
+        return super().itemChange(change, value)
+
+    def update_item(self):
+        self.update_geometry()
+
+    def update_geometry(self):
+        self.setPos(self.node.position)

@@ -1,18 +1,25 @@
 from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import QObject, Signal, QPointF
+from PySide6.QtCore import QObject, QPointF
 from PySide6.QtGui import QUndoStack
 
-from model.map_model import MapModel
-from view.node_item import NodeGraphicsItem
+from model.floor import Floor
 from tools.tool import Tool
-from view.wall_graphics_item import WallGraphicsItem
+from view.node_item import NodeGraphicsItem
+from view.wall_item import WallGraphicsItem
+from view.zone_item import ZoneGraphicsItem
+from view.point_of_interest_item import PointOfInterestGraphicsItem
 from model.wall import Wall
 from model.node import Node
+from model.zone import Zone
+from model.point_of_interest import PointOfInterest
+from model.map_object import MapObject
+from model.building import Building
 
 class MapPresenter(QObject):
-    current_tool_changed = Signal(Tool)
-
-    def __init__(self, model: MapModel, scene: QGraphicsScene, grid_size: int = 50):
+    def __init__(self, 
+                 model: Building, 
+                 scene: QGraphicsScene, 
+                 grid_size: int = 50):
         super().__init__()
         self.model = model
         self.scene = scene
@@ -21,16 +28,25 @@ class MapPresenter(QObject):
         self._undo_stack = QUndoStack()
 
         self._current_tool = None
-        self.model.node_added.connect(self._on_node_added)
-        self.model.node_removed.connect(self._on_node_removed)
 
-        self.model.wall_added.connect(self._on_wall_added)
-        self.model.wall_removed.connect(self._on_wall_removed)
+        self._current_floor = self.model.get_floor(0)
+        if self._current_floor is None:
+            raise ValueError("Building must have at least one floor.")
+
+        self._current_floor.item_added.connect(self._on_item_added)
+        self._current_floor.item_removed.connect(self._on_item_removed)
 
         self._model_to_view_map = {}
         self._view_to_model_map = {}
 
         self._show_grid = True
+
+        self._model_class_to_view_class = {
+            Node: NodeGraphicsItem,
+            Wall: WallGraphicsItem,
+            Zone: ZoneGraphicsItem,
+            PointOfInterest: PointOfInterestGraphicsItem,
+        }
 
     # ------------------------------------
     # ---------- Grid methods ------------
@@ -73,7 +89,6 @@ class MapPresenter(QObject):
             self._current_tool.deactivate()
 
         self._current_tool = tool
-        self.current_tool_changed.emit(tool)
 
     def reset_current_tool(self):
         if self._current_tool is not None:
@@ -94,34 +109,58 @@ class MapPresenter(QObject):
     # ------------------------------------
     # ------ Model change handlers -------
     # ------------------------------------
-    def get_model_for_item(self, item):
+    @property
+    def current_floor(self) -> Floor:
+        return self._current_floor
+    
+    @current_floor.setter
+    def current_floor(self, floor: Floor):
+        self._current_floor = floor
+        self._current_floor.item_added.connect(self._on_item_added)
+        self._current_floor.item_removed.connect(self._on_item_removed)
+        
+        if self._current_tool:
+            # Change to on_floor_changed method if needed
+            self._current_tool.deactivate()
+
+        self._redraw_scene()
+
+    def get_model_for_item(self, item) -> MapObject:
         return self._view_to_model_map.get(item, None)
     
-    def get_graphics_item_for_model(self, model):
+    def get_item_for_model(self, model):
         return self._model_to_view_map.get(model, None)
+    
+    def _redraw_scene(self):
+        self.scene.clear()
+        self._model_to_view_map.clear()
+        self._view_to_model_map.clear()
 
-    def _on_node_added(self, node: Node):
-        new_node = NodeGraphicsItem(node)
-        self.scene.addItem(new_node)
-        self._model_to_view_map[node] = new_node
-        self._view_to_model_map[new_node] = node
-        node.position_changed.connect(lambda pos: new_node.setPos(pos))
+        floor = self._current_floor
+        for node in floor.nodes:
+            self._on_item_added(node)
+        
+        for wall in floor.walls:
+            self._on_item_added(wall)
 
-    def _on_node_removed(self, node: Node):
-        item = self._model_to_view_map.pop(node, None)
-        if item:
-            self.scene.removeItem(item)
-            del self._view_to_model_map[item]
+        for zone in floor.zones:
+            self._on_item_added(zone)
 
-    def _on_wall_added(self, wall: Wall):
-        new_wall_item = WallGraphicsItem(wall)
-        self.scene.addItem(new_wall_item)
-        self._model_to_view_map[wall] = new_wall_item
-        self._view_to_model_map[new_wall_item] = wall
-        wall.geometry_changed.connect(lambda: new_wall_item.update_geometry())
+        for poi in floor.points_of_interest:
+            self._on_item_added(poi)
 
-    def _on_wall_removed(self, wall: Wall):
-        item = self._model_to_view_map.pop(wall, None)
+    def _on_item_added(self, item):
+        view_class = self._model_class_to_view_class.get(type(item), None)
+        if view_class is None:
+            return
+        
+        new_item = view_class(item)
+        self._model_to_view_map[item] = new_item
+        self._view_to_model_map[new_item] = item
+        self.scene.addItem(new_item)
+
+    def _on_item_removed(self, element):
+        item = self._model_to_view_map.pop(element, None)
         if item:
             self.scene.removeItem(item)
             del self._view_to_model_map[item]
@@ -131,21 +170,16 @@ class MapPresenter(QObject):
     # ------------------------------------
     def on_canvas_click(self, pos, modifier=None):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'mouse_click'):
-                self._current_tool.mouse_click(pos, modifier)
+            self._current_tool.mouse_click(pos, modifier)
 
     def on_canvas_move(self, pos):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'mouse_move'):
-                self._current_tool.mouse_move(pos)
+            self._current_tool.mouse_move(pos)
 
     def on_canvas_release(self, pos):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'mouse_release'):
-                self._current_tool.mouse_release(pos)
+            self._current_tool.mouse_release(pos)
 
     def on_keyboard_press(self, key):
         if self._current_tool is not None:
-            if hasattr(self._current_tool, 'key_press'):
-                self._current_tool.key_press(key)
-        pass
+            self._current_tool.key_press(key)
