@@ -1,10 +1,19 @@
-from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter 
+from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter, QColor
 from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
 from PySide6.QtCore import Qt
 from main_map_controller import MainMapController
 from view.zoom import GraphicsViewZoom
 from view.cursor_modes import *
 from widgets.compass import CompassWidget
+
+from utils.general import _is_dark_theme
+
+from enum import Enum
+
+class MapTheme(Enum):
+    SYSTEM = 0
+    LIGHT = 1
+    DARK = 2
 
 class MapView(QGraphicsView):
     def __init__(self, presenter: MainMapController):
@@ -33,6 +42,23 @@ class MapView(QGraphicsView):
         self._compass = CompassWidget(self, scale = 1.25)
         self._update_compass_position()
         self._compass.clicked.connect(self.reset_rotation)
+
+        self._map_theme = MapTheme.SYSTEM
+
+    @property
+    def map_theme(self):
+        return self._map_theme
+    
+    @map_theme.setter
+    def map_theme(self, value: MapTheme):
+        self._map_theme = value
+        self.viewport().update()
+
+    def drawForeground(self, painter, rect):
+        if self._map_theme == MapTheme.SYSTEM and _is_dark_theme() or self._map_theme == MapTheme.DARK:
+            painter.setCompositionMode(QPainter.CompositionMode_Difference)
+            painter.fillRect(rect, QColor(255, 255, 255))
+            painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

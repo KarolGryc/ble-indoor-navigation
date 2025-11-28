@@ -7,7 +7,7 @@ from main_map_controller import MainMapController
 
 class InteractiveScene(QGraphicsScene):
     ACTIVE_OPACITY = 1.0
-    INACTIVE_OPACITY = 0.5
+    INACTIVE_OPACITY = 0.3
 
     def __init__(self, presenter:MainMapController=None, background_color=QColor(255, 255, 255)):
         super().__init__()

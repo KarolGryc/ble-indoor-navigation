@@ -13,7 +13,7 @@ class RenamingTool(Tool):
     def __init__(self,
                  presenter: MainMapController,
                  scene: QGraphicsScene,
-                 name="Zone Renaming Tool"):
+                 name="Rename"):
         super().__init__(presenter, scene, name)
 
     def mouse_click(self, pos, modifier=None):

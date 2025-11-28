@@ -11,7 +11,7 @@ class PointOfInterestAddTool(Tool):
     def __init__(self, 
                  presenter: MainMapController, 
                  scene: QGraphicsScene, 
-                 name="Point of Interest Add Tool"):
+                 name="Add Place"):
         super().__init__(presenter, scene, name)
         self._preview = PointOfInterestPreview(scene)
 

@@ -10,7 +10,7 @@ import utils.geometry_utils as geo
 
 
 class ZoneAddTool(Tool):
-    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Zone Add Tool"):
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Add Zone"):
         super().__init__(presenter, scene, name)
         self._corner_points = []
 

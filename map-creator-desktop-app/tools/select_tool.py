@@ -10,7 +10,7 @@ class SelectTool(Tool):
     def __init__(self, 
                  presenter: MainMapController, 
                  scene: QGraphicsScene, 
-                 name="Select Tool"):
+                 name="Select and Move"):
         super().__init__(presenter, scene, name)
 
         self._is_dragging = False

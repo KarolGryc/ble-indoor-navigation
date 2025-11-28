@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QGraphicsScene
 from view.wall_preview import WallPreview
 
 class WallAddTool(Tool):
-    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Wall Add Tool"):
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Add Wall"):
         super().__init__(presenter, scene, name)
 
         self._start_point = None

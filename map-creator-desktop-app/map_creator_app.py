@@ -73,8 +73,8 @@ class MapCreatorApp(QMainWindow):
         ###############################
         # MAIN VIEW
         ################################
-        self.view = MapView(presenter)
-        self.setCentralWidget(self.view)
+        view = MapView(presenter)
+        self.setCentralWidget(view)
 
         ###############################
         # RIGHT PANEL
@@ -103,7 +103,7 @@ class MapCreatorApp(QMainWindow):
         ###############################
         # MENU BAR
         ###############################
-        self._create_menu_bar(presenter)
+        self._create_menu_bar(presenter, view)
 
     def _add_floor(self, presenter: MainMapController, building_model: Building):
         name = ask_floor_name("Add Floor", "New Floor")
@@ -141,8 +141,9 @@ class MapCreatorApp(QMainWindow):
         model.add_floor()
         return model
     
-    def _create_menu_bar(self, presenter: MainMapController):
+    def _create_menu_bar(self, presenter: MainMapController, view: MapView):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
         self.menu_bar.undo_triggered.connect(presenter.undo)
         self.menu_bar.redo_triggered.connect(presenter.redo)
+        self.menu_bar.map_theme_triggered.connect(lambda theme: setattr(view, 'map_theme', theme))
