@@ -36,7 +36,7 @@ class InteractiveScene(QGraphicsScene):
         axis_pen = QPen(self._axis_color, 0)
 
         font = painter.font()
-        font.setPixelSize(int(grid_size * 0.25)) 
+        font.setPixelSize(int(grid_size * 0.35)) 
         painter.setFont(font)
 
         left    = int(math.floor(rect.left() / grid_size) * grid_size)
@@ -60,7 +60,9 @@ class InteractiveScene(QGraphicsScene):
             painter.drawLine(0, top, 0, bottom)
             
             for y in range(top, bottom + 1, int(grid_size)):
-                if y == 0: continue
+                if y % 50 != 0 or y == 0: 
+                    continue
+
                 label = str(-y / 100) + 'm'
                 painter.drawText(QRectF(-grid_size, y, grid_size - 2, grid_size), 
                                  Qt.AlignRight | Qt.AlignTop, label)
@@ -69,7 +71,9 @@ class InteractiveScene(QGraphicsScene):
             painter.drawLine(left, 0, right, 0)
             
             for x in range(left, right + 1, int(grid_size)):
-                if x == 0: continue
+                if x % 50 != 0 or x == 0: 
+                    continue
+
                 label = str(x / 100) + 'm'
                 painter.drawText(QRectF(x, 2, grid_size, grid_size), 
                                  Qt.AlignLeft | Qt.AlignTop, label)
@@ -89,6 +93,9 @@ class InteractiveScene(QGraphicsScene):
             for dep in model.dependencies:
                 dep_item = self._presenter.get_item_for_model(dep)
                 self._set_active_state(dep_item, is_active)
+
+            if hasattr(model, 'owner') and type(model.owner) == self._active_type:
+                self._set_active_state(item, True)
 
     def itemAt(self, pos: QPointF, transform):
         items = self.items(pos, Qt.IntersectsItemShape, Qt.DescendingOrder)

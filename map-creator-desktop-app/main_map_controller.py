@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import QObject, QPointF
+from PySide6.QtCore import QObject, QPointF, Signal
 from PySide6.QtGui import QUndoStack
 
 from model.floor import Floor
@@ -16,6 +16,8 @@ from model.map_object import MapObject
 from model.building import Building
 
 class MainMapController(QObject):
+    pointer_canvas_moved = Signal(QPointF)
+
     def __init__(self, 
                  model: Building, 
                  scene: QGraphicsScene, 
@@ -154,6 +156,9 @@ class MainMapController(QObject):
         if view_class is None:
             return
         
+        if item not in self._current_floor.elements:
+            return
+
         new_item = view_class(item)
         self._model_to_view_map[item] = new_item
         self._view_to_model_map[new_item] = item
@@ -173,6 +178,8 @@ class MainMapController(QObject):
             self._current_tool.mouse_click(pos, modifier)
 
     def on_canvas_move(self, pos):
+        self.pointer_canvas_moved.emit(pos)
+
         if self._current_tool is not None:
             self._current_tool.mouse_move(pos)
 

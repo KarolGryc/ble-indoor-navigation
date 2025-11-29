@@ -40,7 +40,7 @@ class MapCreatorApp(QMainWindow):
         scene.setSceneRect(-5000, -5000, 10000, 10000)
 
         building_model = self._create_model()
-        presenter = MainMapController(building_model, scene)
+        presenter = MainMapController(building_model, scene, grid_size=25)
         scene.set_presenter(presenter)
 
         # Tool deactivation shortcut
@@ -58,12 +58,14 @@ class MapCreatorApp(QMainWindow):
             PointOfInterestAddTool(presenter, scene),
         ]
 
+        icons_path = "icons/tools-icons/"
+        icon_format = ".png"
         tool_icon_map = {
-            WallAddTool: "icons/tools-icons/wall_add.svg",
-            SelectTool: "icons/tools-icons/select_move.svg",
-            ZoneAddTool: "icons/tools-icons/zone_add.svg",
-            RenamingTool: "icons/tools-icons/edit_item.svg",
-            PointOfInterestAddTool: "icons/tools-icons/location_add.svg",
+            WallAddTool: f"{icons_path}wall_add{icon_format}",
+            SelectTool: f"{icons_path}select_move{icon_format}",
+            ZoneAddTool: f"{icons_path}zone_add{icon_format}",
+            RenamingTool: f"{icons_path}item_edit{icon_format}",
+            PointOfInterestAddTool: f"{icons_path}location_add{icon_format}",
         }
 
         toolbar = Toolbar(presenter, tools, tool_icon_map)

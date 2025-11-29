@@ -28,6 +28,13 @@ class Floor(QObject):
         }
 
     @property
+    def elements(self) -> list[MapObject]:
+        all_elements = []
+        for lst in self._type_to_list.values():
+            all_elements.extend(lst)
+        return all_elements
+
+    @property
     def name(self) -> str:
         return self._name
     
@@ -37,23 +44,40 @@ class Floor(QObject):
         self.name_changed.emit(new_name)
 
     def add(self, element: MapObject):
+        if element is None:
+            return
+
         el_type = type(element)
-        type_list = self._type_to_list.get(el_type, None)
+        el_list = self._get_list_for_type(el_type)
         
-        if type_list is not None and element not in type_list:
+        if el_list is not None and element not in el_list:
+            el_list.append(element)
+
             for dependency in element.dependencies:
                 self.add(dependency)
-                
-            type_list.append(element)
+
+            if hasattr(element, 'owner'):
+                self.add(element.owner)  
+
             self.item_added.emit(element)
 
     def remove(self, element: MapObject):
+        if element is None:
+            return
+
         el_type = type(element)
-        type_list = self._type_to_list.get(el_type, None)
+        el_list = self._get_list_for_type(el_type)
         
-        if type_list is not None and element in type_list:
-            type_list.remove(element)
+        if el_list is not None and element in el_list:
+            el_list.remove(element)
+
             for dependency in element.dependencies:
                 self.remove(dependency)
 
+            if hasattr(element, 'owner'):
+                self.remove(element.owner)
+
             self.item_removed.emit(element)
+
+    def _get_list_for_type(self, el_type: type) -> list[MapObject] | None:
+        return self._type_to_list.get(el_type, None)
