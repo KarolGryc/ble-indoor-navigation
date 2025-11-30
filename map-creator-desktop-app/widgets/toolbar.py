@@ -5,7 +5,7 @@ from PySide6.QtGui import QIcon, QPixmap, QColor
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import QToolBar, QToolButton, QButtonGroup, QLabel, QWidget, QSizePolicy
 
-from utils.general import _is_dark_theme
+from utils.general import is_dark_theme
 
 from tools import Tool
 
@@ -26,7 +26,7 @@ class Toolbar(QToolBar):
         group = QButtonGroup(self)
         group.setExclusive(True)
 
-        is_dark = _is_dark_theme()
+        is_dark = is_dark_theme()
         icon_color = 'white' if is_dark else 'black'
 
         for tool in tool_set:

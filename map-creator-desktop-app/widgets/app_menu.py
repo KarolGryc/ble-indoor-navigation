@@ -9,6 +9,7 @@ class AppMenu(QMenuBar):
     redo_triggered = Signal()
     map_theme_triggered = Signal(MapTheme)
     save_requested = Signal()
+    load_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,6 +25,11 @@ class AppMenu(QMenuBar):
         save_action.setShortcut(QKeySequence.Save)
         save_action.triggered.connect(self.save_requested)
         file_menu.addAction(save_action)
+
+        load_action = QAction("Open", self)
+        load_action.setShortcut(QKeySequence.Open)
+        load_action.triggered.connect(self.load_requested)
+        file_menu.addAction(load_action)
 
         exit_action = QAction("Exit", self)
         exit_action.setShortcut(QKeySequence.Quit)
@@ -52,9 +58,15 @@ class AppMenu(QMenuBar):
         system_theme_action = QAction("System", self)
         light_theme_action = QAction("Light", self)
         dark_theme_action = QAction("Dark", self)
-        system_theme_action.triggered.connect(lambda: self.map_theme_triggered.emit(MapTheme.SYSTEM))
-        light_theme_action.triggered.connect(lambda: self.map_theme_triggered.emit(MapTheme.LIGHT))
-        dark_theme_action.triggered.connect(lambda: self.map_theme_triggered.emit(MapTheme.DARK))
+        system_theme_action.triggered.connect(
+            lambda: self.map_theme_triggered.emit(MapTheme.SYSTEM)
+        )
+        light_theme_action.triggered.connect(
+            lambda: self.map_theme_triggered.emit(MapTheme.LIGHT)
+        )
+        dark_theme_action.triggered.connect(
+            lambda: self.map_theme_triggered.emit(MapTheme.DARK)
+        )
         theme_menu.addAction(system_theme_action)
         theme_menu.addAction(light_theme_action)
         theme_menu.addAction(dark_theme_action)

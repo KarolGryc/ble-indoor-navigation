@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
 
 from enum import Enum
-from utils.general import _is_dark_theme
+from utils.general import is_dark_theme
 
 from view import GraphicsViewZoom, CursorMode, PanMode, RotateMode, NormalMode
 from .compass import CompassWidget
@@ -59,7 +59,7 @@ class FloorView(QGraphicsView):
         self.viewport().update()
 
     def drawForeground(self, painter, rect):
-        if self._map_theme == MapTheme.SYSTEM and _is_dark_theme() or self._map_theme == MapTheme.DARK:
+        if self._map_theme == MapTheme.SYSTEM and is_dark_theme() or self._map_theme == MapTheme.DARK:
             painter.setCompositionMode(QPainter.CompositionMode_Difference)
             painter.fillRect(rect, QColor(255, 255, 255))
             painter.setCompositionMode(QPainter.CompositionMode_SourceOver)

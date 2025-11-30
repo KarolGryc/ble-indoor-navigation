@@ -5,6 +5,7 @@ from .layers_panel import LayersPanel
 from .map_view import FloorView, MapTheme
 from .toolbar import Toolbar
 from .zone_management import ManageZoneConnectionDialog
+from .right_panel_dock import RightPanelDock
 
 __all__ = [
     "AppMenu",
@@ -14,5 +15,6 @@ __all__ = [
     "FloorView",
     "MapTheme",
     "Toolbar",
-    "ManageZoneConnectionDialog"
+    "ManageZoneConnectionDialog",
+    "RightPanelDock"
 ]

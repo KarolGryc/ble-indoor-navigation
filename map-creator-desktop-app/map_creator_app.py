@@ -21,14 +21,16 @@ from view import (
 )
 
 from widgets import (
-    Toolbar, AppMenu, FloorView, AutoSyncFloorList, LayersPanel
+    Toolbar, AppMenu, FloorView, AutoSyncFloorList, LayersPanel, RightPanelDock
 )
 
 from commands import FloorAddCommand, FloorRemoveCommand
 
 from building_serializer import BuildingSerializer
 
-from utils.general import ask_floor_name
+from utils.general import ask_floor_name, load_building, save_building
+
+from constants import icons, GRID_SIZE_DEFAULT
 
 class MapCreatorApp(QMainWindow):
     def __init__(self,
@@ -36,88 +38,100 @@ class MapCreatorApp(QMainWindow):
                  screen_size=(1280, 720), 
                  window_title="Map Creator App"):
         super().__init__(parent)
+        self._setup_window(screen_size, window_title)
+
+        self._building_model: Building = None
+        self._scene: InteractiveScene = None
+        self._controller: MainMapController = None
+        self._floor_view: FloorView = None
+
+        self._setup_core()
+        self._setup_ui()
+
+    def _setup_window(self, screen_size, window_title):
         self.setWindowTitle(window_title)
-        self.setGeometry(0, 0, *screen_size)
-        
-        scene = InteractiveScene()
-        scene.setSceneRect(-5000, -5000, 10000, 10000)
+        self.resize(*screen_size)
 
-        self._building_model = self._create_model()
-
+    def _setup_core(self):
         type_to_graphics_item = {
             Node: NodeGraphicsItem,
             Wall: WallGraphicsItem,
             Zone: ZoneGraphicsItem,
             PointOfInterest: PointOfInterestGraphicsItem,
         }
-        grid_size = 25
-    
-        presenter = MainMapController(self._building_model, scene, grid_size, type_to_graphics_item)
-        scene.set_presenter(presenter)
 
-        delete_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
-        delete_shortcut.activated.connect(presenter.reset_current_tool)
+        self._building_model = Building()
+        self._building_model.add_floor(Floor("Ground Floor"))
+        self._scene = InteractiveScene()
+        x, y, h, w = -5000, -5000, 10000, 10000
+        self._scene.setSceneRect(x, y, h, w)
+        self._controller = MainMapController(self._building_model, 
+                                             self._scene, 
+                                             GRID_SIZE_DEFAULT,
+                                             type_to_graphics_item)
+        
+        self._scene.set_controller(self._controller)
 
-        ###############################
-        # TOOLS TOOLBAR
-        ###############################
-        tools = [
-            WallAddTool(presenter, scene),
-            SelectTool(presenter, scene),
-            ZoneAddTool(presenter, scene),
-            RenamingTool(presenter, scene),
-            PointOfInterestAddTool(presenter, scene),
-            ZoneConnectTool(presenter, scene)
-        ]
+    def _setup_ui(self):
+        # Add main floor view
+        self._floor_view = FloorView(self._controller)
+        self.setCentralWidget(self._floor_view)
 
-        icons_path = "icons/tools-icons/"
-        icon_format = ".png"
-        tool_icon_map = {
-            WallAddTool: f"{icons_path}wall_add{icon_format}",
-            SelectTool: f"{icons_path}select_move{icon_format}",
-            ZoneAddTool: f"{icons_path}zone_add{icon_format}",
-            RenamingTool: f"{icons_path}item_edit{icon_format}",
-            PointOfInterestAddTool: f"{icons_path}location_add{icon_format}",
-            ZoneConnectTool: f"{icons_path}zone_connection{icon_format}"
-        }
+        # Add toolbar
+        self._setup_toolbar()
 
-        toolbar = Toolbar(presenter, tools, tool_icon_map)
-        self.addToolBar(Qt.LeftToolBarArea, toolbar)
-
-        ###############################
-        # MAIN VIEW
-        ################################
-        view = FloorView(presenter)
-        self.setCentralWidget(view)
-
-        ###############################
-        # RIGHT PANEL
-        ###############################
-        right_panel = QWidget()
-        layout = QVBoxLayout(right_panel)
-
-        layers_panel = LayersPanel(scene)
-        layers_panel.active_class_changed.connect(lambda t: setattr(scene, "active_item_type", t))
-        layout.addWidget(layers_panel)
+        # Add right dock
+        layers_panel = LayersPanel(self._scene)
+        layers_panel.active_class_changed.connect(lambda t: setattr(self._scene, "active_item_type", t))
 
         floor_list = AutoSyncFloorList(self._building_model)
-        floor_list.floor_selected.connect(lambda floor: setattr(presenter, 'current_floor', floor))
-        floor_list.add_floor_request.connect(lambda: self._add_floor(presenter, self._building_model))
-        floor_list.remove_floor_request.connect(lambda floor: self._remove_floor(presenter, self._building_model, floor))
-        floor_list.rename_floor_request.connect(lambda floor: self._rename_floor(floor))
-        layout.addWidget(floor_list)
+        floor_list.floor_selected.connect(
+            lambda floor: setattr(self._controller, 'current_floor', floor)
+        )
+        floor_list.add_floor_request.connect(
+            lambda: self._add_floor(self._controller, self._building_model)
+        )
+        floor_list.remove_floor_request.connect(
+            lambda floor: self._remove_floor(self._controller, self._building_model, floor)
+        )
+        floor_list.rename_floor_request.connect(
+            lambda floor: self._rename_floor(floor)
+        )
 
-        dock = QDockWidget("View settings", self)
-        dock.setFeatures(QDockWidget.DockWidgetMovable)
-        dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        dock.setWidget(right_panel)
+        right_panel = RightPanelDock(self, layers_panel, floor_list)
+        self.addDockWidget(Qt.RightDockWidgetArea, right_panel)
 
-        self.addDockWidget(Qt.RightDockWidgetArea, dock)
+        self._create_menu_bar(self._controller, self._floor_view)
 
-        ###############################
-        # MENU BAR
-        ###############################
-        self._create_menu_bar(presenter, view)
+    def _setup_signals(self):
+        pass
+
+    def _setup_shorcuts(self):
+        delete_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        delete_shortcut.activated.connect(self._controller.reset_current_tool)
+
+    def _setup_toolbar(self):
+        tools = [
+            WallAddTool(self._controller, self._scene),
+            SelectTool(self._controller, self._scene),
+            ZoneAddTool(self._controller, self._scene),
+            RenamingTool(self._controller, self._scene),
+            PointOfInterestAddTool(self._controller, self._scene),
+            ZoneConnectTool(self._controller, self._scene)
+        ]
+
+        tool_icon_map = {
+            WallAddTool: icons["add_wall"],
+            SelectTool: icons["select_move"],
+            ZoneAddTool: icons["add_zone"],
+            RenamingTool: icons["edit_item"],
+            PointOfInterestAddTool: icons["add_poi"],
+            ZoneConnectTool: icons["connect_zones"]
+        }
+
+        toolbar = Toolbar(self._controller, tools, tool_icon_map)
+        self.addToolBar(Qt.LeftToolBarArea, toolbar)
+
 
     def _add_floor(self, presenter: MainMapController, building_model: Building):
         name = ask_floor_name("Add Floor", "New Floor")
@@ -149,25 +163,14 @@ class MapCreatorApp(QMainWindow):
         new_name = ask_floor_name("Rename Floor", floor.name)
         if new_name:
             floor.name = new_name
-
-    def _create_model(self) -> Building:
-        # model = Building()
-        # model.add_floor()
-        serializer = BuildingSerializer()
-        model = serializer.load_from_file("saved_building.json")
-        return model
-    
-    def _save_to_file(self, building: Building, file_path: str):
-        with open(file_path, 'w') as f:
-            print("Saving building to file:", file_path)
-            json.dump(building.to_dict(), f, indent=4)
     
     def _create_menu_bar(self, presenter: MainMapController, view: FloorView):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
 
         # File signals
-        self.menu_bar.save_requested.connect(lambda: self._save_to_file(self._building_model, "saved_building.json"))
+        self.menu_bar.load_requested.connect(lambda: setattr(self._controller, 'building', load_building(self)))
+        self.menu_bar.save_requested.connect(lambda: save_building(self, self._building_model))
         
         # Edit signals
         self.menu_bar.redo_triggered.connect(presenter.redo)
@@ -175,4 +178,3 @@ class MapCreatorApp(QMainWindow):
 
         # View signals
         self.menu_bar.map_theme_triggered.connect(lambda theme: setattr(view, 'map_theme', theme))
-        

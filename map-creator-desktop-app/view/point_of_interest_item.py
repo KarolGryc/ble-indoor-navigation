@@ -2,26 +2,28 @@ from PySide6.QtGui import QPainterPath, QBrush, QColor, QPen, QPixmap, QPainter
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGraphicsPathItem, QGraphicsPixmapItem, QGraphicsSimpleTextItem
 
-from model import PointOfInterestType
+from model import PointOfInterest, PointOfInterestType
+
+from constants import icons, poi_colors
 
 class PointOfInterestGraphicsItem(QGraphicsPathItem):
     type_to_image = {
-            PointOfInterestType.GENERIC: "icons/generic.png",
-            PointOfInterestType.RESTAURANT: "icons/restaurant.png",
-            PointOfInterestType.SHOP: "icons/shop.png",
-            PointOfInterestType.TOILET: "icons/toilet.png",
-            PointOfInterestType.EXIT: "icons/exit.png",
+            PointOfInterestType.GENERIC: icons["generic"],
+            PointOfInterestType.RESTAURANT: icons["restaurant"],
+            PointOfInterestType.SHOP: icons["shop"],
+            PointOfInterestType.TOILET: icons["toilet"],
+            PointOfInterestType.EXIT: icons["exit"],
     }
 
     type_to_color = {
-            PointOfInterestType.GENERIC: "#D32C2C",
-            PointOfInterestType.RESTAURANT: "#F57C00",
-            PointOfInterestType.SHOP: "#FBC02D",
-            PointOfInterestType.TOILET: "#1976D2",
-            PointOfInterestType.EXIT: "#388E3C",
+            PointOfInterestType.GENERIC: poi_colors["generic"],
+            PointOfInterestType.RESTAURANT: poi_colors["restaurant"],
+            PointOfInterestType.SHOP: poi_colors["shop"],
+            PointOfInterestType.TOILET: poi_colors["toilet"],
+            PointOfInterestType.EXIT: poi_colors["exit"],
     }
 
-    def __init__(self, point_of_interest):
+    def __init__(self, point_of_interest: PointOfInterest):
         super().__init__()
         self._point_of_interest = point_of_interest
 

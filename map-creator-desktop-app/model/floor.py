@@ -77,8 +77,9 @@ class Floor(QObject):
                 dependency.floor = self
 
             if hasattr(element, 'owner'):
-                self.add(element.owner)  
-                # element.owner.floor = self
+                if element.owner:    
+                    self.add(element.owner)
+                    element.owner.floor = self
 
             self.item_added.emit(element)
 

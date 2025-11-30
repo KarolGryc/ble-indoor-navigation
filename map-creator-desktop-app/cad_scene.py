@@ -24,7 +24,7 @@ class InteractiveScene(QGraphicsScene):
 
         self._active_type = None
 
-    def set_presenter(self, presenter):
+    def set_controller(self, presenter):
         self._presenter = presenter
 
     def drawBackground(self, painter: QPainter, rect: QRectF):

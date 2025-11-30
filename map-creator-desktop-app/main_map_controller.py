@@ -19,23 +19,21 @@ class MainMapController(QObject):
         self._grid_size = grid_size
         self._current_tool = None
         self._show_grid = True
-
-        self._undo_stack = QUndoStack()
-
-        self._current_floor: Floor = None
-        self.current_floor = self.model.get_floor(0)
-        
-        if self._current_floor is None:
-            raise ValueError("Building must have at least one floor.")
-
-
         self._model_to_view_map = {}
         self._view_to_model_map = {}
+        self._undo_stack = QUndoStack()
 
-        if type_to_graphics_item is None:
+        if not type_to_graphics_item:
             raise ValueError("type_to_graphics_item mapping must be provided.")
 
         self._model_class_to_view_class = type_to_graphics_item
+
+        self._current_floor = self.model.get_floor(0)
+        self._current_floor.item_added.connect(self._on_item_added)
+        self._current_floor.item_removed.connect(self._on_item_removed)
+        
+        if self._current_floor is None:
+            raise ValueError("Building must have at least one floor.")
 
     # ------------------------------------
     # ---------- Grid methods ------------
@@ -98,6 +96,16 @@ class MainMapController(QObject):
     # ------------------------------------
     # ------ Model change handlers -------
     # ------------------------------------
+    @property
+    def building(self) -> Building:
+        return self.model
+    
+    @building.setter
+    def building(self, building: Building):
+        self.model = building
+        self._current_floor = self.model.get_floor(0)
+        self._redraw_scene()
+
     @property
     def current_floor(self) -> Floor:
         return self._current_floor

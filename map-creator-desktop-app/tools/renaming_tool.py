@@ -22,7 +22,7 @@ class RenamingTool(Tool):
 
     def mouse_click(self, pos, modifier=None):
         item = self._scene.itemAt(pos, QTransform())
-        item = self._presenter.get_model_for_item(item)
+        item = self._controller.get_model_for_item(item)
 
         if item is None:
             return
