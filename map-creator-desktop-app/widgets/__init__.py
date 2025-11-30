@@ -4,6 +4,7 @@ from .floor_list import AutoSyncFloorList
 from .layers_panel import LayersPanel
 from .map_view import FloorView, MapTheme
 from .toolbar import Toolbar
+from .zone_management import ManageZoneConnectionDialog
 
 __all__ = [
     "AppMenu",
@@ -13,4 +14,5 @@ __all__ = [
     "FloorView",
     "MapTheme",
     "Toolbar",
+    "ManageZoneConnectionDialog"
 ]

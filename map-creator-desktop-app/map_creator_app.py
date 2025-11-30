@@ -75,6 +75,7 @@ class MapCreatorApp(QMainWindow):
             ZoneAddTool: f"{icons_path}zone_add{icon_format}",
             RenamingTool: f"{icons_path}item_edit{icon_format}",
             PointOfInterestAddTool: f"{icons_path}location_add{icon_format}",
+            ZoneConnectTool: f"{icons_path}zone_connection{icon_format}"
         }
 
         toolbar = Toolbar(presenter, tools, tool_icon_map)

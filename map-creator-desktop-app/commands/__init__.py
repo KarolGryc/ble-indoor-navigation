@@ -8,7 +8,8 @@ from .floor_remove_command import FloorRemoveCommand
 # edit commands
 from .delete_command import DeleteElementsCommand
 from .move_command import MoveElementsCommand
-# Add rename / edit commnads
+from .zone_attributes_changed import ZoneAttributesChangedCommand
+from .point_of_interes_attributes_changed import PointOfInterestAttributesChangedCommand
 
 from .zone_connection_add_command import ZoneConnectionAddCommand
 from .zone_connection_remove_command import ZoneConnectionRemoveCommand
@@ -17,7 +18,9 @@ from .zone_connection_remove_command import ZoneConnectionRemoveCommand
 __all__ = [
     "WallAddCommand",
     "ZoneAddCommand",
+    "ZoneAttributesChangedCommand",
     "PointOfInterestAddCommand",
+    "PointOfInterestAttributesChangedCommand",
     "FloorAddCommand",
     "FloorRemoveCommand",
     "DeleteElementsCommand",
