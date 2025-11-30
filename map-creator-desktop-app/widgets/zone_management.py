@@ -7,16 +7,31 @@ from PySide6.QtCore import Qt
 
 from commands import ZoneConnectionAddCommand, ZoneConnectionRemoveCommand
 
-from model import Zone, Floor
-
-def get_legal_zones_to_connect(zone: Zone):
-    return [z for z in zone.floor.zones if z != zone]
+from model import Zone, ZoneType, Floor
 
 def get_zones_connected_to(zone: Zone):
     building = zone.floor.building
     if building:
         return building.get_zones_connected_to(zone)
     return set()
+
+def get_legal_zones_to_connect(zone: Zone):
+    building = zone.floor.building
+    connected_to = get_zones_connected_to(zone)
+
+    legal_connections = []
+    if zone.type == ZoneType.ELEVATOR or zone.type == ZoneType.STAIRS:
+        for floor in building.floors:
+            if floor == zone.floor:
+                continue
+            
+            for z in floor.zones:
+                if z.type == zone.type and z != zone and z not in connected_to:
+                    legal_connections.append(z)
+
+    legal_connections += [z for z in zone.floor.zones if z != zone and z not in connected_to]
+    return legal_connections
+
 
 class ZoneSelectionDialog(QDialog):
     def __init__(self, zone, parent=None):
