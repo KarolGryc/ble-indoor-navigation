@@ -21,8 +21,21 @@ class Building(QObject):
         self._zone_connections.get(zone2, set()).discard(zone1)
 
     def get_zones_connected_to(self, zone):
-        return self._zone_connections.get(zone, set())
+        connected = self._zone_connections.get(zone, None)
+        if connected is None:
+            return set()
         
+        all_zones = self.get_all_zones()
+        result = filter(lambda z: z in all_zones, connected)
+
+        return set(result)
+        
+    def get_all_zones(self):
+        zones = []
+        for floor in self._floors:
+            zones.extend(floor.zones)
+        return zones
+
     def add_floor(self, floor: Floor = Floor()):
         if floor not in self._floors:
             floor.building = self
