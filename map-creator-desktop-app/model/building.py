@@ -1,5 +1,7 @@
 from PySide6.QtCore import QObject, Signal
 
+import uuid
+
 from .floor import Floor
 
 class Building(QObject):
@@ -66,3 +68,24 @@ class Building(QObject):
     @floors.setter
     def floors(self, new_floors: list[Floor]):
         self._floors = new_floors
+
+    def to_dict(self) -> dict:
+        all_zones = [z for floor in self._floors for z in floor.zones]
+        connections = set()
+
+        for zone in all_zones:
+            connected_zones = self.get_zones_connected_to(zone)
+            for connected_zone in connected_zones:
+                conn = (zone, connected_zone)
+                if (connected_zone, zone) not in connections:
+                    connections.add(conn)
+
+        return {
+            "floors": [floor.to_dict() for floor in self._floors],
+            "zone_connections": [
+                {
+                    "zone1_id": str(zone1.uuid), 
+                    "zone2_id": str(zone2.uuid)
+                } for zone1, zone2 in connections
+            ]
+        }

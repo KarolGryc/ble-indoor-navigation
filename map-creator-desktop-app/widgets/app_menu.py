@@ -8,6 +8,7 @@ class AppMenu(QMenuBar):
     undo_triggered = Signal()
     redo_triggered = Signal()
     map_theme_triggered = Signal(MapTheme)
+    save_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -19,9 +20,14 @@ class AppMenu(QMenuBar):
     def _create_file_menu(self):
         file_menu = self.addMenu("File")
 
+        save_action = QAction("Save", self)
+        save_action.setShortcut(QKeySequence.Save)
+        save_action.triggered.connect(self.save_requested)
+        file_menu.addAction(save_action)
+
         exit_action = QAction("Exit", self)
         exit_action.setShortcut(QKeySequence.Quit)
-        
+
         if self.parent():
             exit_action.triggered.connect(self.parent().close)
         file_menu.addAction(exit_action)

@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from PySide6.QtCore import QObject, Signal
 
 from .node import Node
@@ -7,19 +10,25 @@ from .point_of_interest import PointOfInterest
 from .map_object import MapObject
 
 import weakref
+import uuid
+
+if TYPE_CHECKING:
+    from .building import Building
 
 class Floor(QObject):
     item_added = Signal(MapObject)
     item_removed = Signal(MapObject)
     name_changed = Signal(str)
 
-    def __init__(self, name: str = "Unnamed Floor"):
+    def __init__(self, name: str = "Unnamed Floor", id: uuid.UUID = None):
         super().__init__()
         self._name = name
         self.nodes: list[Node] = []
         self.walls: list[Wall] = []
         self.zones: list[Zone] = []
         self.points_of_interest: list[PointOfInterest] = []
+
+        self._uuid = id if id else uuid.uuid4()
 
         self._type_to_list = {
             Node: self.nodes,
@@ -29,11 +38,11 @@ class Floor(QObject):
         }
 
     @property
-    def building(self) -> "Building":
+    def building(self) -> Building:
         return self._building() if self._building else None
     
     @building.setter
-    def building(self, building: "Building"):
+    def building(self, building: Building):
         self._building = weakref.ref(building) if building else None
 
     @property
@@ -69,7 +78,7 @@ class Floor(QObject):
 
             if hasattr(element, 'owner'):
                 self.add(element.owner)  
-                element.owner.floor = self
+                # element.owner.floor = self
 
             self.item_added.emit(element)
 
@@ -93,3 +102,13 @@ class Floor(QObject):
 
     def _get_list_for_type(self, el_type: type) -> list[MapObject] | None:
         return self._type_to_list.get(el_type, None)
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self._uuid),
+            "name": self._name,
+            "nodes": [node.to_dict() for node in self.nodes],
+            "walls": [wall.to_dict() for wall in self.walls],
+            "zones": [zone.to_dict() for zone in self.zones],
+            "points_of_interest": [poi.to_dict() for poi in self.points_of_interest],
+        }

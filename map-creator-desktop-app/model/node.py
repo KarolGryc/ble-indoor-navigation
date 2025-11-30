@@ -1,3 +1,4 @@
+import uuid
 from PySide6.QtCore import QPointF
 
 from math import sqrt
@@ -5,8 +6,8 @@ from math import sqrt
 from .map_object import MapObject
 
 class Node(MapObject):
-    def __init__(self, x: float, y: float, owner=None):
-        super().__init__()
+    def __init__(self, x: float, y: float, owner=None, id:uuid.UUID=None):
+        super().__init__(id)
         self.pos = QPointF(x, y)
         self.owner = owner
 
@@ -50,3 +51,10 @@ class Node(MapObject):
         
     def distance_to(self, other: 'Node') -> float:
         return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.uuid),
+            "x": self.x,
+            "y": self.y
+        }

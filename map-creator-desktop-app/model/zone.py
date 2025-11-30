@@ -1,3 +1,4 @@
+import uuid
 from PySide6.QtCore import QPointF
 
 from enum import Enum
@@ -14,8 +15,9 @@ class Zone(MapObject):
     def __init__(self, 
                  corner_nodes: list[Node], 
                  name="Zone", 
-                 type=ZoneType.GENERIC):
-        super().__init__()
+                 type=ZoneType.GENERIC,
+                 id:uuid.UUID=None):
+        super().__init__(id)
         self.corner_nodes = corner_nodes
         self._name = name
         self._type = type if type is not None else ZoneType.GENERIC
@@ -70,3 +72,11 @@ class Zone(MapObject):
             node.moveBy(delta)
 
         self.updated.emit()
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.uuid),
+            "name": self._name,
+            "type": self._type.name,
+            "corner_node_ids": [str(node.uuid) for node in self.corner_nodes],
+        }

@@ -22,12 +22,12 @@ class MainMapController(QObject):
 
         self._undo_stack = QUndoStack()
 
-        self._current_floor = self.model.get_floor(0)
+        self._current_floor: Floor = None
+        self.current_floor = self.model.get_floor(0)
+        
         if self._current_floor is None:
             raise ValueError("Building must have at least one floor.")
 
-        self._current_floor.item_added.connect(self._on_item_added)
-        self._current_floor.item_removed.connect(self._on_item_removed)
 
         self._model_to_view_map = {}
         self._view_to_model_map = {}

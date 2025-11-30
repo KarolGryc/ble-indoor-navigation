@@ -1,3 +1,4 @@
+import json
 from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QDockWidget, QMessageBox
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtCore import Qt
@@ -25,6 +26,8 @@ from widgets import (
 
 from commands import FloorAddCommand, FloorRemoveCommand
 
+from building_serializer import BuildingSerializer
+
 from utils.general import ask_floor_name
 
 class MapCreatorApp(QMainWindow):
@@ -39,7 +42,7 @@ class MapCreatorApp(QMainWindow):
         scene = InteractiveScene()
         scene.setSceneRect(-5000, -5000, 10000, 10000)
 
-        building_model = self._create_model()
+        self._building_model = self._create_model()
 
         type_to_graphics_item = {
             Node: NodeGraphicsItem,
@@ -49,7 +52,7 @@ class MapCreatorApp(QMainWindow):
         }
         grid_size = 25
     
-        presenter = MainMapController(building_model, scene, grid_size, type_to_graphics_item)
+        presenter = MainMapController(self._building_model, scene, grid_size, type_to_graphics_item)
         scene.set_presenter(presenter)
 
         delete_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
@@ -97,10 +100,10 @@ class MapCreatorApp(QMainWindow):
         layers_panel.active_class_changed.connect(lambda t: setattr(scene, "active_item_type", t))
         layout.addWidget(layers_panel)
 
-        floor_list = AutoSyncFloorList(building_model)
+        floor_list = AutoSyncFloorList(self._building_model)
         floor_list.floor_selected.connect(lambda floor: setattr(presenter, 'current_floor', floor))
-        floor_list.add_floor_request.connect(lambda: self._add_floor(presenter, building_model))
-        floor_list.remove_floor_request.connect(lambda floor: self._remove_floor(presenter, building_model, floor))
+        floor_list.add_floor_request.connect(lambda: self._add_floor(presenter, self._building_model))
+        floor_list.remove_floor_request.connect(lambda floor: self._remove_floor(presenter, self._building_model, floor))
         floor_list.rename_floor_request.connect(lambda floor: self._rename_floor(floor))
         layout.addWidget(floor_list)
 
@@ -148,13 +151,28 @@ class MapCreatorApp(QMainWindow):
             floor.name = new_name
 
     def _create_model(self) -> Building:
-        model = Building()
-        model.add_floor()
+        # model = Building()
+        # model.add_floor()
+        serializer = BuildingSerializer()
+        model = serializer.load_from_file("saved_building.json")
         return model
+    
+    def _save_to_file(self, building: Building, file_path: str):
+        with open(file_path, 'w') as f:
+            print("Saving building to file:", file_path)
+            json.dump(building.to_dict(), f, indent=4)
     
     def _create_menu_bar(self, presenter: MainMapController, view: FloorView):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
-        self.menu_bar.undo_triggered.connect(presenter.undo)
+
+        # File signals
+        self.menu_bar.save_requested.connect(lambda: self._save_to_file(self._building_model, "saved_building.json"))
+        
+        # Edit signals
         self.menu_bar.redo_triggered.connect(presenter.redo)
+        self.menu_bar.undo_triggered.connect(presenter.undo)
+
+        # View signals
         self.menu_bar.map_theme_triggered.connect(lambda theme: setattr(view, 'map_theme', theme))
+        

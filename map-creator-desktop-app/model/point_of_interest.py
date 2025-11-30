@@ -1,3 +1,4 @@
+import uuid
 from PySide6.QtCore import QPointF
 
 from enum import Enum
@@ -15,8 +16,9 @@ class PointOfInterest(MapObject):
     def __init__(self, 
                  position: QPointF, 
                  name="Point of Interest", 
-                 type=PointOfInterestType.GENERIC):
-        super().__init__()
+                 type=PointOfInterestType.GENERIC,
+                 id:uuid.UUID=None):
+        super().__init__(id)
         self._position: QPointF = position
         self._name: str = name
         self._type: PointOfInterestType = type
@@ -55,3 +57,12 @@ class PointOfInterest(MapObject):
     def type(self, value: PointOfInterestType):
         self._type = value
         self.updated.emit()
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.uuid),
+            "x": self._position.x(), 
+            "y": self._position.y(),
+            "name": self._name,
+            "type": self._type.name,
+        }
