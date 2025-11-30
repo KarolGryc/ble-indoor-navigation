@@ -1,9 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QButtonGroup, QSizePolicy, QLabel
 from PySide6.QtCore import Signal
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QPushButton, QButtonGroup, QSizePolicy, QLabel
+)
 
-from model.wall import Wall
-from model.zone import Zone
-from model.point_of_interest import PointOfInterest
+from model import Wall, Zone, PointOfInterest
 
 class LayersPanel(QWidget):
     active_class_changed = Signal(type)

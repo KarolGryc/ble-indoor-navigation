@@ -1,8 +1,14 @@
-from tools.tool import Tool
-from main_map_controller import MainMapController
-from commands.wall_add_command import WallAddCommand
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from PySide6.QtWidgets import QGraphicsScene
-from view.wall_preview import WallPreview
+
+from .tool import Tool
+from view import WallPreview
+from commands import WallAddCommand
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class WallAddTool(Tool):
     def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Add Wall"):

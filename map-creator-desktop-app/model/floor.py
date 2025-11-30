@@ -1,11 +1,10 @@
-from PySide6.QtCore import QObject
-from model.node import Node
-from model.wall import Wall
-from model.zone import Zone
-from model.point_of_interest import PointOfInterest
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QObject, Signal
 
-from model.map_object import MapObject
+from .node import Node
+from .wall import Wall
+from .zone import Zone
+from .point_of_interest import PointOfInterest
+from .map_object import MapObject
 
 import weakref
 

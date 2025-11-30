@@ -1,10 +1,11 @@
+from PySide6.QtGui import QPainterPath, QPen, QColor
 from PySide6.QtCore import QPointF
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsPathItem
-from PySide6.QtGui import QPainterPath, QPen, QColor
-from view.node_item import NodeGraphicsItem
-from model.node import Node
 
 import shiboken6
+
+from model import Node
+from .node_item import NodeGraphicsItem
 
 class ZonePreview:
     DEFAULT_PEN = QPen(QColor("black"), 2)

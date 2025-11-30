@@ -1,9 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import math
-from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import Qt, QRectF, QPointF
-from PySide6.QtGui import QPen, QColor, QPainter
 
-from main_map_controller import MainMapController
+from PySide6.QtGui import QPen, QColor, QPainter
+from PySide6.QtCore import Qt, QRectF, QPointF
+from PySide6.QtWidgets import QGraphicsScene
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class InteractiveScene(QGraphicsScene):
     ACTIVE_OPACITY = 1.0

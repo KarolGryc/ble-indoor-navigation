@@ -2,29 +2,28 @@ from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QDockWidget, QM
 from PySide6.QtGui import QShortcut, QKeySequence
 from PySide6.QtCore import Qt
 
-from model.floor import Floor
-from view.map_view import MapView
 from main_map_controller import MainMapController
 from cad_scene import InteractiveScene
 
-from tools.wall_add_tool import WallAddTool
-from tools.select_tool import SelectTool
-from tools.zone_add_tool import ZoneAddTool
-from tools.renaming_tool import RenamingTool
-from tools.point_of_interest_add_tool import PointOfInterestAddTool
-from tools.zone_connect_tool import ZoneConnectTool
+from tools import (
+    WallAddTool, SelectTool, ZoneAddTool, 
+    RenamingTool, PointOfInterestAddTool, ZoneConnectTool
+)
 
-from widgets.toolbar import Toolbar
+from model import (
+    Building, Floor, Node, Wall, Zone, PointOfInterest
+)
 
-from widgets.app_menu import AppMenu
+from view import (
+    NodeGraphicsItem, WallGraphicsItem, 
+    ZoneGraphicsItem, PointOfInterestGraphicsItem
+)
 
-from model.building import Building
+from widgets import (
+    Toolbar, AppMenu, FloorView, AutoSyncFloorList, LayersPanel
+)
 
-from widgets.floor_list import AutoSyncFloorList
-from widgets.layers_panel import LayersPanel
-
-from commands.floor_add_command import FloorAddCommand
-from commands.floor_remove_command import FloorRemoveCommand
+from commands import FloorAddCommand, FloorRemoveCommand
 
 from utils.general import ask_floor_name
 
@@ -41,10 +40,18 @@ class MapCreatorApp(QMainWindow):
         scene.setSceneRect(-5000, -5000, 10000, 10000)
 
         building_model = self._create_model()
-        presenter = MainMapController(building_model, scene, grid_size=25)
+
+        type_to_graphics_item = {
+            Node: NodeGraphicsItem,
+            Wall: WallGraphicsItem,
+            Zone: ZoneGraphicsItem,
+            PointOfInterest: PointOfInterestGraphicsItem,
+        }
+        grid_size = 25
+    
+        presenter = MainMapController(building_model, scene, grid_size, type_to_graphics_item)
         scene.set_presenter(presenter)
 
-        # Tool deactivation shortcut
         delete_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         delete_shortcut.activated.connect(presenter.reset_current_tool)
 
@@ -71,13 +78,12 @@ class MapCreatorApp(QMainWindow):
         }
 
         toolbar = Toolbar(presenter, tools, tool_icon_map)
-
         self.addToolBar(Qt.LeftToolBarArea, toolbar)
 
         ###############################
         # MAIN VIEW
         ################################
-        view = MapView(presenter)
+        view = FloorView(presenter)
         self.setCentralWidget(view)
 
         ###############################
@@ -145,7 +151,7 @@ class MapCreatorApp(QMainWindow):
         model.add_floor()
         return model
     
-    def _create_menu_bar(self, presenter: MainMapController, view: MapView):
+    def _create_menu_bar(self, presenter: MainMapController, view: FloorView):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
         self.menu_bar.undo_triggered.connect(presenter.undo)

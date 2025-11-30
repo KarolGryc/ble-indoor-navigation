@@ -1,10 +1,15 @@
-from PySide6.QtWidgets import QGraphicsScene
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from PySide6.QtGui import QTransform
 from PySide6.QtCore import Qt
-from tools.tool import Tool
-from main_map_controller import MainMapController
-from commands.move_command import MoveElementsCommand
-from commands.delete_command import DeleteElementsCommand
+from PySide6.QtWidgets import QGraphicsScene
+
+from .tool import Tool
+from commands import MoveElementsCommand, DeleteElementsCommand
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class SelectTool(Tool):
     def __init__(self, 

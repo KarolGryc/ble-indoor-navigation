@@ -1,8 +1,8 @@
-from PySide6.QtWidgets import QMenuBar, QMenu
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QMenuBar, QMenu
 
-from view.map_view import MapTheme
+from .map_view import MapTheme
 
 class AppMenu(QMenuBar):
     undo_triggered = Signal()

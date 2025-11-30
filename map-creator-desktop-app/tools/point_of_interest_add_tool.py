@@ -1,11 +1,16 @@
-from tools.tool import Tool
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from main_map_controller import MainMapController
 from PySide6.QtWidgets import QGraphicsScene
 
-from commands.point_of_interest_add_command import PointOfInterestAddCommand
-from view.point_of_interest_preview import PointOfInterestPreview
 from utils.general import ask_poi_name_and_type
+
+from .tool import Tool
+from view  import PointOfInterestPreview
+from commands import PointOfInterestAddCommand
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class PointOfInterestAddTool(Tool):
     def __init__(self, 

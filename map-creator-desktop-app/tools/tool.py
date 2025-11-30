@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
-
 from PySide6.QtWidgets import QGraphicsScene
+
+from abc import ABC, abstractmethod
 
 class Tool(ABC):
     def __init__(self, presenter, scene: QGraphicsScene, name="Generic Tool"):

@@ -1,6 +1,7 @@
 from PySide6.QtCore import QPointF
-from model.node import Node
-from model.map_object import MapObject
+
+from .map_object import MapObject
+from .node import Node
 
 class Wall(MapObject):
     def __init__(self, start_node: Node, end_node: Node):

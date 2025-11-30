@@ -1,10 +1,8 @@
-from model.zone import Zone
-from PySide6.QtWidgets import QGraphicsPolygonItem
 from PySide6.QtGui import QBrush, QPen, QColor, QPolygonF
 from PySide6.QtCore import QPointF
-from PySide6.QtWidgets import QGraphicsSimpleTextItem
+from PySide6.QtWidgets import QGraphicsPolygonItem, QGraphicsSimpleTextItem
 
-from model.zone import ZoneType
+from model import Zone, ZoneType
 
 class ZoneGraphicsItem(QGraphicsPolygonItem):
     EMOTE_TYPE_MAP = {

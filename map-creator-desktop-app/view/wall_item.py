@@ -1,6 +1,7 @@
-from model.wall import Wall
 from PySide6.QtWidgets import QGraphicsLineItem
 from PySide6.QtGui import QPen, QColor
+
+from model import Wall
 
 class WallGraphicsItem(QGraphicsLineItem):
     def __init__(self, wall: Wall):

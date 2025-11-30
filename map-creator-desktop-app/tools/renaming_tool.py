@@ -1,13 +1,17 @@
-from tools.tool import Tool
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
+from PySide6.QtGui import QTransform
 from PySide6.QtWidgets import QGraphicsScene
-from main_map_controller import MainMapController
 
 from utils.general import ask_zone_name, ask_poi_name_and_type
-from model.point_of_interest import PointOfInterest
 
-from model.zone import Zone
-from PySide6.QtGui import QTransform
+from .tool import Tool
+from model import PointOfInterest, Zone
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
+
 
 class RenamingTool(Tool):
     def __init__(self,

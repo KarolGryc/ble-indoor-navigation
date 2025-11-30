@@ -1,8 +1,8 @@
-from model.map_object import MapObject
-
 from PySide6.QtCore import QPointF
 
 from enum import Enum
+
+from .map_object import MapObject
 
 class PointOfInterestType(Enum):
     GENERIC = 1

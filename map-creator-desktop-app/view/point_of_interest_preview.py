@@ -1,6 +1,7 @@
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QPen, QColor
+from PySide6.QtCore import QPointF
 from PySide6.QtWidgets import QGraphicsScene
+
 import shiboken6
 
 class PointOfInterestPreview:
@@ -11,7 +12,7 @@ class PointOfInterestPreview:
         self.scene = scene
         self._poi_preview = None
 
-    def update_preview(self, pos):
+    def update_preview(self, pos: QPointF):
         self.clear()
 
         if pos is not None:

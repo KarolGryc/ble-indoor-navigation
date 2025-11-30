@@ -2,18 +2,8 @@ from PySide6.QtWidgets import QGraphicsScene
 from PySide6.QtCore import QObject, QPointF, Signal
 from PySide6.QtGui import QUndoStack
 
-from model.floor import Floor
-from tools.tool import Tool
-from view.node_item import NodeGraphicsItem
-from view.wall_item import WallGraphicsItem
-from view.zone_item import ZoneGraphicsItem
-from view.point_of_interest_item import PointOfInterestGraphicsItem
-from model.wall import Wall
-from model.node import Node
-from model.zone import Zone
-from model.point_of_interest import PointOfInterest
-from model.map_object import MapObject
-from model.building import Building
+from tools import Tool
+from model import Floor, MapObject, Building
 
 class MainMapController(QObject):
     pointer_canvas_moved = Signal(QPointF)
@@ -21,15 +11,16 @@ class MainMapController(QObject):
     def __init__(self, 
                  model: Building, 
                  scene: QGraphicsScene, 
-                 grid_size: int = 50):
+                 grid_size: int = 50,
+                 type_to_graphics_item: dict[type, type] = None):
         super().__init__()
         self.model = model
         self.scene = scene
         self._grid_size = grid_size
+        self._current_tool = None
+        self._show_grid = True
 
         self._undo_stack = QUndoStack()
-
-        self._current_tool = None
 
         self._current_floor = self.model.get_floor(0)
         if self._current_floor is None:
@@ -41,14 +32,10 @@ class MainMapController(QObject):
         self._model_to_view_map = {}
         self._view_to_model_map = {}
 
-        self._show_grid = True
+        if type_to_graphics_item is None:
+            raise ValueError("type_to_graphics_item mapping must be provided.")
 
-        self._model_class_to_view_class = {
-            Node: NodeGraphicsItem,
-            Wall: WallGraphicsItem,
-            Zone: ZoneGraphicsItem,
-            PointOfInterest: PointOfInterestGraphicsItem,
-        }
+        self._model_class_to_view_class = type_to_graphics_item
 
     # ------------------------------------
     # ---------- Grid methods ------------
@@ -117,6 +104,10 @@ class MainMapController(QObject):
     
     @current_floor.setter
     def current_floor(self, floor: Floor):
+        if self._current_floor:
+            self._current_floor.item_added.disconnect(self._on_item_added)
+            self._current_floor.item_removed.disconnect(self._on_item_removed)
+
         self._current_floor = floor
         self._current_floor.item_added.connect(self._on_item_added)
         self._current_floor.item_removed.connect(self._on_item_removed)
@@ -138,24 +129,12 @@ class MainMapController(QObject):
         self._view_to_model_map.clear()
 
         floor = self._current_floor
-        for node in floor.nodes:
-            self._on_item_added(node)
-        
-        for wall in floor.walls:
-            self._on_item_added(wall)
-
-        for zone in floor.zones:
-            self._on_item_added(zone)
-
-        for poi in floor.points_of_interest:
-            self._on_item_added(poi)
+        for element in floor.elements:
+            self._on_item_added(element)
 
     def _on_item_added(self, item):
         view_class = self._model_class_to_view_class.get(type(item), None)
         if view_class is None:
-            return
-        
-        if item not in self._current_floor.elements:
             return
 
         new_item = view_class(item)

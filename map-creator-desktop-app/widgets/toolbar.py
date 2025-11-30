@@ -1,11 +1,11 @@
-from PySide6.QtWidgets import QToolBar, QToolButton, QButtonGroup, QLabel, QWidget, QSizePolicy
 from PySide6.QtGui import QIcon, QPixmap, QColor
 from PySide6.QtCore import QSize
-from main_map_controller import MainMapController
-
-from tools.tool import Tool
+from PySide6.QtWidgets import QToolBar, QToolButton, QButtonGroup, QLabel, QWidget, QSizePolicy
 
 from utils.general import _is_dark_theme
+
+from main_map_controller import MainMapController
+from tools import Tool
 
 class Toolbar(QToolBar):
     def __init__(self, 

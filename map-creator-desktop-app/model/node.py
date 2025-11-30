@@ -1,6 +1,8 @@
 from PySide6.QtCore import QPointF
+
 from math import sqrt
-from model.map_object import MapObject
+
+from .map_object import MapObject
 
 class Node(MapObject):
     def __init__(self, x: float, y: float, owner=None):

@@ -1,9 +1,11 @@
-from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QPen, QColor
+from PySide6.QtCore import QPointF, Qt
 from PySide6.QtWidgets import QGraphicsScene
-from view.node_item import NodeGraphicsItem
-from model.node import Node
+
 import shiboken6
+
+from model import Node
+from .node_item import NodeGraphicsItem
 
 class WallPreview:
     OPACITY = 0.5

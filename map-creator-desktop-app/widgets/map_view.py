@@ -1,21 +1,25 @@
-from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter, QColor
-from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
-from PySide6.QtCore import Qt
-from main_map_controller import MainMapController
-from view.zoom import GraphicsViewZoom
-from view.cursor_modes import *
-from widgets.compass import CompassWidget
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-from utils.general import _is_dark_theme
+from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter, QColor
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
 
 from enum import Enum
+from utils.general import _is_dark_theme
+
+from view import GraphicsViewZoom, CursorMode, PanMode, RotateMode, NormalMode
+from .compass import CompassWidget
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class MapTheme(Enum):
     SYSTEM = 0
     LIGHT = 1
     DARK = 2
 
-class MapView(QGraphicsView):
+class FloorView(QGraphicsView):
     def __init__(self, presenter: MainMapController):
         super().__init__()
         self.presenter = presenter

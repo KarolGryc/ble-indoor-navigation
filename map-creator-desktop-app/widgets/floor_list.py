@@ -1,11 +1,10 @@
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QListWidget, QAbstractItemView, QListWidgetItem, QPushButton
 )
-from PySide6.QtCore import Qt, Signal
 
-from model.building import Building
-from model.floor import Floor
+from model import Building, Floor
 
 class AutoSyncFloorList(QWidget):
     floor_selected = Signal(Floor)

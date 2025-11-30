@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QPainter, QPen, QBrush, QColor, QPolygonF
 from PySide6.QtCore import Qt, QPointF, Signal, QRectF
+from PySide6.QtWidgets import QWidget
 
 class CompassWidget(QWidget):
     clicked = Signal()

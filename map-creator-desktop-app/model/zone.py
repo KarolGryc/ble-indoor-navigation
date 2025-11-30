@@ -1,8 +1,9 @@
 from PySide6.QtCore import QPointF
-from model.node import Node
-from model.map_object import MapObject
 
 from enum import Enum
+
+from .node import Node
+from .map_object import MapObject
 
 class ZoneType(Enum):
     GENERIC = 1
@@ -24,7 +25,7 @@ class Zone(MapObject):
             node.updated.connect(self.updated)
 
     @property
-    def dependencies(self) -> list[MapObject]:
+    def dependencies(self) -> list[Node]:
         return self.corner_nodes
 
     @property

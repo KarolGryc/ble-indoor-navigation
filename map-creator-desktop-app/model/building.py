@@ -1,5 +1,6 @@
-from model.floor import Floor
 from PySide6.QtCore import QObject, Signal
+
+from .floor import Floor
 
 class Building(QObject):
     floor_added = Signal(Floor)
@@ -19,6 +20,9 @@ class Building(QObject):
         self._zone_connections.get(zone1, set()).discard(zone2)
         self._zone_connections.get(zone2, set()).discard(zone1)
 
+    def get_zones_connected_to(self, zone):
+        return self._zone_connections.get(zone, set())
+        
     def add_floor(self, floor: Floor = Floor()):
         if floor not in self._floors:
             floor.building = self
