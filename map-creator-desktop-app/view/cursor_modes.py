@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtWidgets import QGraphicsView
+
+from abc import ABC, abstractmethod
 
 class CursorMode(ABC):
     def __init__(self, view: QGraphicsView):

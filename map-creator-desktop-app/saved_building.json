@@ -1,0 +1,90 @@
+{
+    "floors": [
+        {
+            "id": "394f1b61-7f6d-49a5-9a73-1ba3e80399ad",
+            "name": "Ground Floor",
+            "nodes": [
+                {
+                    "id": "cf5ca82b-4c8b-4f7f-bcae-b73603317f39",
+                    "x": -250.0,
+                    "y": -100.0
+                },
+                {
+                    "id": "860a135c-2e21-47c4-86cb-d662e95aa7ca",
+                    "x": -50.0,
+                    "y": -250.0
+                },
+                {
+                    "id": "be19fbe3-9535-4a5b-b9e8-fab29e44c617",
+                    "x": -50.0,
+                    "y": -250.0
+                },
+                {
+                    "id": "5853169b-e39b-4024-a6fb-dfc116dcdd8f",
+                    "x": 75.0,
+                    "y": -175.0
+                },
+                {
+                    "id": "9131cdbb-7f9c-4d08-be42-00234fc43b2e",
+                    "x": 75.0,
+                    "y": -175.0
+                },
+                {
+                    "id": "34fd45d3-f8aa-44bc-97dc-49b84f9bfdbc",
+                    "x": -25.0,
+                    "y": 25.0
+                },
+                {
+                    "id": "560febd7-172d-4c09-b60a-327304fef1fc",
+                    "x": -25.0,
+                    "y": 25.0
+                },
+                {
+                    "id": "768749f2-3299-4208-a2b3-46312ad440c8",
+                    "x": -25.0,
+                    "y": 225.0
+                },
+                {
+                    "id": "dbacf064-e087-4d17-a75c-c17328cfc9b5",
+                    "x": -25.0,
+                    "y": 275.0
+                },
+                {
+                    "id": "96ac62fb-8e03-49ce-b5eb-afa4e502b1ad",
+                    "x": -25.0,
+                    "y": 275.0
+                }
+            ],
+            "walls": [
+                {
+                    "id": "8e4f76e8-c8b0-4fdd-8405-4c2913542e16",
+                    "start_node_id": "cf5ca82b-4c8b-4f7f-bcae-b73603317f39",
+                    "end_node_id": "860a135c-2e21-47c4-86cb-d662e95aa7ca"
+                },
+                {
+                    "id": "dc473d83-a39d-4031-8d6c-d6bc2fa76354",
+                    "start_node_id": "be19fbe3-9535-4a5b-b9e8-fab29e44c617",
+                    "end_node_id": "5853169b-e39b-4024-a6fb-dfc116dcdd8f"
+                },
+                {
+                    "id": "053bffc9-1255-470f-a4fa-7cf60389bc60",
+                    "start_node_id": "9131cdbb-7f9c-4d08-be42-00234fc43b2e",
+                    "end_node_id": "34fd45d3-f8aa-44bc-97dc-49b84f9bfdbc"
+                },
+                {
+                    "id": "a75b2d0a-f96c-4695-9afb-369bd03a4b17",
+                    "start_node_id": "560febd7-172d-4c09-b60a-327304fef1fc",
+                    "end_node_id": "768749f2-3299-4208-a2b3-46312ad440c8"
+                },
+                {
+                    "id": "b99e1c2e-ba5b-4b8a-88be-3a0e86f6237c",
+                    "start_node_id": "dbacf064-e087-4d17-a75c-c17328cfc9b5",
+                    "end_node_id": "96ac62fb-8e03-49ce-b5eb-afa4e502b1ad"
+                }
+            ],
+            "zones": [],
+            "points_of_interest": []
+        }
+    ],
+    "zone_connections": []
+}

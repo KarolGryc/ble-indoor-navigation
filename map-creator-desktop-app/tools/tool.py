@@ -1,11 +1,20 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QGraphicsScene
 
+from abc import ABC, abstractmethod
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
+
 class Tool(ABC):
-    def __init__(self, presenter, scene: QGraphicsScene, name="Generic Tool"):
-        self.presenter = presenter
-        self.scene = scene
+    def __init__(self, 
+                 controller: MainMapController, 
+                 scene: QGraphicsScene, 
+                 name="Generic Tool"):
+        self._controller = controller
+        self._scene = scene
         self.name = name
 
     def mouse_click(self, pos, modifier=None):

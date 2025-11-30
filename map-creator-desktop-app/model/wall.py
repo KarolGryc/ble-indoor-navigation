@@ -1,10 +1,12 @@
+import uuid
 from PySide6.QtCore import QPointF
-from model.node import Node
-from model.map_object import MapObject
+
+from .map_object import MapObject
+from .node import Node
 
 class Wall(MapObject):
-    def __init__(self, start_node: Node, end_node: Node):
-        super().__init__()
+    def __init__(self, start_node: Node, end_node: Node, id:uuid.UUID=None):
+        super().__init__(id)
         self.start_node = start_node
         self.end_node = end_node
         self.start_node.owner = self
@@ -46,3 +48,10 @@ class Wall(MapObject):
         x = (self.start_node.x + self.end_node.x) / 2
         y = (self.start_node.y + self.end_node.y) / 2
         return QPointF(x, y)
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.uuid),
+            "start_node_id": str(self.start_node.uuid),
+            "end_node_id": str(self.end_node.uuid),
+        }

@@ -1,6 +1,12 @@
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QComboBox, QDialogButtonBox, QMessageBox, QInputDialog
-from model.zone import ZoneType
-from model.point_of_interest import PointOfInterestType
+from PySide6.QtGui import QPalette
+from PySide6.QtWidgets import (
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, 
+    QComboBox, QDialogButtonBox, QMessageBox, QInputDialog, 
+    QFileDialog, QApplication
+)
+
+from model import ZoneType, PointOfInterestType, Building
+from building_serializer import BuildingSerializer
 
 def ask_zone_name(window_name="Zone settings",
                   default_name="Example Zone",
@@ -108,3 +114,78 @@ def ask_floor_name(window_name="Floor Name",
     if ok and text.strip():
         return text.strip()
     return None
+
+def is_dark_theme() -> bool:
+    pallete = QApplication.palette()
+    bg_color = pallete.color(QPalette.Window)
+
+    return bg_color.value() < 128
+
+def load_file_dialog(parent, 
+                          title="Open File", 
+                          filter="JSON Files (*.json);;All Files (*)") -> str | None:
+    file_dialog = QFileDialog(parent, title)
+    file_dialog.setFileMode(QFileDialog.ExistingFile)
+    file_dialog.setNameFilter(filter)
+
+    if file_dialog.exec() == QFileDialog.Accepted:
+        selected_files = file_dialog.selectedFiles()
+        if selected_files:
+            return selected_files[0]
+    
+    return None
+
+def load_building(parent,
+                  title="Open Building File", 
+                  filter="JSON Files (*.json);;All Files (*)"):
+    path = load_file_dialog(parent, title, filter)
+    if path is None:
+        return None
+
+    serializer = BuildingSerializer()
+    building = serializer.load_from_file(path)
+    if building is None:
+        QMessageBox.critical(
+            parent,
+            "Error",
+            f"Failed to load building from file: {path}"
+        )
+    return building
+
+def save_file_dialog(parent,
+                     title="Save File", 
+                     filter="JSON Files (*.json);;All Files (*)") -> str | None:
+        file_dialog = QFileDialog(parent, title)
+        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setNameFilter(filter)
+
+        if file_dialog.exec() == QFileDialog.Accepted:
+            selected_files = file_dialog.selectedFiles()
+            if selected_files:
+                file_path = selected_files[0]
+                if not file_path.lower().endswith('.json'):
+                    file_path += '.json'
+                
+                return file_path
+        
+        return None
+
+def save_building(parent,
+                  building: Building,
+                  title="Save Building File", 
+                  filter="JSON Files (*.json);;All Files (*)"):
+        path = save_file_dialog(parent, title, filter)
+        if path is None:
+            return None
+    
+        serializer = BuildingSerializer()
+        success = serializer.save_to_file(building, path)
+        if not success:
+            QMessageBox.critical(
+                parent,
+                "Error",
+                f"Failed to save building to file: {path}"
+            )
+            return None
+        
+        return path

@@ -1,6 +1,6 @@
-from model.zone import Zone
-from model.node import Node
 from PySide6.QtGui import QUndoCommand
+
+from model import Zone, Node
 
 class ZoneAddCommand(QUndoCommand):
     def __init__(self, model, corner_points, name = "", zone_type=None):

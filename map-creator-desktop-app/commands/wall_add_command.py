@@ -1,6 +1,5 @@
-from model.wall import Wall
-from model.node import Node
 from PySide6.QtGui import QUndoCommand
+from model import Node, Wall
 
 class WallAddCommand(QUndoCommand):
     def __init__(self, model, start_pos, end_pos):

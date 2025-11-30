@@ -1,5 +1,6 @@
-from model.point_of_interest import PointOfInterest, PointOfInterestType
 from PySide6.QtGui import QUndoCommand
+
+from model import PointOfInterest, PointOfInterestType
 
 class PointOfInterestAddCommand(QUndoCommand):
     def __init__(self, model, position, name="Place", type=PointOfInterestType.GENERIC):

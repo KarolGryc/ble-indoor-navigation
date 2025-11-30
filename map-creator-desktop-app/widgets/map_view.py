@@ -1,13 +1,26 @@
-from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter 
-from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
-from PySide6.QtCore import Qt
-from map_presenter import MapPresenter
-from view.zoom import GraphicsViewZoom
-from view.cursor_modes import *
-from view.compass import CompassWidget
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-class MapView(QGraphicsView):
-    def __init__(self, presenter: MapPresenter):
+from PySide6.QtGui import QMouseEvent, QWheelEvent, QPainter, QColor
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QGraphicsView, QGraphicsScene 
+
+from enum import Enum
+from utils.general import is_dark_theme
+
+from view import GraphicsViewZoom, CursorMode, PanMode, RotateMode, NormalMode
+from .compass import CompassWidget
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
+
+class MapTheme(Enum):
+    SYSTEM = 0
+    LIGHT = 1
+    DARK = 2
+
+class FloorView(QGraphicsView):
+    def __init__(self, presenter: MainMapController):
         super().__init__()
         self.presenter = presenter
         self.scene: QGraphicsScene = presenter.scene
@@ -33,6 +46,23 @@ class MapView(QGraphicsView):
         self._compass = CompassWidget(self, scale = 1.25)
         self._update_compass_position()
         self._compass.clicked.connect(self.reset_rotation)
+
+        self._map_theme = MapTheme.SYSTEM
+
+    @property
+    def map_theme(self):
+        return self._map_theme
+    
+    @map_theme.setter
+    def map_theme(self, value: MapTheme):
+        self._map_theme = value
+        self.viewport().update()
+
+    def drawForeground(self, painter, rect):
+        if self._map_theme == MapTheme.SYSTEM and is_dark_theme() or self._map_theme == MapTheme.DARK:
+            painter.setCompositionMode(QPainter.CompositionMode_Difference)
+            painter.fillRect(rect, QColor(255, 255, 255))
+            painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -115,10 +145,8 @@ class MapView(QGraphicsView):
     def reset_rotation(self):
         previous_mode = self._transofmation_mode
         self._set_cursor_mode(RotateMode(self))
-        rotation_to_reset = -self._current_rotation
-        self.rotate(rotation_to_reset)
+        self.rotate(-self._current_rotation)
         self._set_cursor_mode(previous_mode)
-        self._compass.set_angle(0.0)
 
     def _set_cursor_mode(self, mode: CursorMode):
         if type(self._transofmation_mode) != type(mode):

@@ -1,7 +1,6 @@
-from model.building import Building
-from model.floor import Floor
-
 from PySide6.QtGui import QUndoCommand
+
+from model import Building, Floor
 
 class FloorAddCommand(QUndoCommand):
     def __init__(self, building: Building, floor: Floor):

@@ -1,8 +1,10 @@
 from PySide6.QtGui import QUndoCommand
-from model.floor import Floor
+from PySide6.QtCore import QPointF
+
+from model import MapObject
 
 class MoveElementsCommand(QUndoCommand):
-    def __init__(self, elements, delta_pos):
+    def __init__(self, elements: list[MapObject], delta_pos: QPointF):
         super().__init__("Move Element")
         self._elements = elements
         self._delta_pos = delta_pos

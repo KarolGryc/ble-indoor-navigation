@@ -1,16 +1,21 @@
-from tools.tool import Tool
-from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import QPointF
-from view.zone_preview import ZonePreview
-from map_presenter import MapPresenter
-from commands.zone_add_command import ZoneAddCommand
-from utils.general import ask_zone_name
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
+from PySide6.QtCore import QPointF
+from PySide6.QtWidgets import QGraphicsScene
+
+from utils.general import ask_zone_name
 import utils.geometry_utils as geo
 
+from .tool import Tool
+from view import ZonePreview
+from commands import ZoneAddCommand
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class ZoneAddTool(Tool):
-    def __init__(self, presenter: MapPresenter, scene: QGraphicsScene, name="Zone Add Tool"):
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Add Zone"):
         super().__init__(presenter, scene, name)
         self._corner_points = []
 
@@ -21,7 +26,7 @@ class ZoneAddTool(Tool):
         self._preview.clear()
 
     def mouse_click(self, pos, modifier=None):
-        pos = self.presenter.snap_to_grid(pos)
+        pos = self._controller.snap_to_grid(pos)
         
         if not self._is_polygon_valid(pos):
             return
@@ -33,12 +38,12 @@ class ZoneAddTool(Tool):
             if name is None or zone_type is None:
                 return
 
-            cmd = ZoneAddCommand(self.presenter.current_floor, self._corner_points, name.strip(), zone_type)
-            self.presenter.execute(cmd)
+            cmd = ZoneAddCommand(self._controller.current_floor, self._corner_points, name.strip(), zone_type)
+            self._controller.execute(cmd)
             self.deactivate()
 
     def mouse_move(self, pos):
-        pos = self.presenter.snap_to_grid(pos)
+        pos = self._controller.snap_to_grid(pos)
         self._preview.update_preview(self._corner_points, pos, self._is_polygon_valid(pos))
 
     def _is_polygon_valid(self, new_point: QPointF) -> bool:

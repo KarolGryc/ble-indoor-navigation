@@ -1,16 +1,19 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import math
-from pyexpat import model
-from PySide6.QtWidgets import QGraphicsScene
-from PySide6.QtCore import Qt, QRectF, QPointF
-from PySide6.QtGui import QPen, QColor, QPainter
 
-from map_presenter import MapPresenter
+from PySide6.QtGui import QPen, QColor, QPainter
+from PySide6.QtCore import Qt, QRectF, QPointF
+from PySide6.QtWidgets import QGraphicsScene
+
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
 
 class InteractiveScene(QGraphicsScene):
     ACTIVE_OPACITY = 1.0
-    INACTIVE_OPACITY = 0.5
+    INACTIVE_OPACITY = 0.3
 
-    def __init__(self, presenter:MapPresenter=None, background_color=QColor(255, 255, 255)):
+    def __init__(self, presenter:MainMapController=None, background_color=QColor(255, 255, 255)):
         super().__init__()
         self._presenter = presenter
         self.setBackgroundBrush(background_color)
@@ -21,7 +24,7 @@ class InteractiveScene(QGraphicsScene):
 
         self._active_type = None
 
-    def set_presenter(self, presenter):
+    def set_controller(self, presenter):
         self._presenter = presenter
 
     def drawBackground(self, painter: QPainter, rect: QRectF):
@@ -37,7 +40,7 @@ class InteractiveScene(QGraphicsScene):
         axis_pen = QPen(self._axis_color, 0)
 
         font = painter.font()
-        font.setPixelSize(int(grid_size * 0.25)) 
+        font.setPixelSize(int(grid_size * 0.35)) 
         painter.setFont(font)
 
         left    = int(math.floor(rect.left() / grid_size) * grid_size)
@@ -61,7 +64,9 @@ class InteractiveScene(QGraphicsScene):
             painter.drawLine(0, top, 0, bottom)
             
             for y in range(top, bottom + 1, int(grid_size)):
-                if y == 0: continue
+                if y % 50 != 0 or y == 0: 
+                    continue
+
                 label = str(-y / 100) + 'm'
                 painter.drawText(QRectF(-grid_size, y, grid_size - 2, grid_size), 
                                  Qt.AlignRight | Qt.AlignTop, label)
@@ -70,7 +75,9 @@ class InteractiveScene(QGraphicsScene):
             painter.drawLine(left, 0, right, 0)
             
             for x in range(left, right + 1, int(grid_size)):
-                if x == 0: continue
+                if x % 50 != 0 or x == 0: 
+                    continue
+
                 label = str(x / 100) + 'm'
                 painter.drawText(QRectF(x, 2, grid_size, grid_size), 
                                  Qt.AlignLeft | Qt.AlignTop, label)
@@ -91,6 +98,9 @@ class InteractiveScene(QGraphicsScene):
                 dep_item = self._presenter.get_item_for_model(dep)
                 self._set_active_state(dep_item, is_active)
 
+            if hasattr(model, 'owner') and type(model.owner) == self._active_type:
+                self._set_active_state(item, True)
+
     def itemAt(self, pos: QPointF, transform):
         items = self.items(pos, Qt.IntersectsItemShape, Qt.DescendingOrder)
         for item in items:
@@ -98,8 +108,13 @@ class InteractiveScene(QGraphicsScene):
                 return item
             
         return None
-                
-    def set_active_item_type(self, item_type: type):
+
+    @property
+    def active_item_type(self):
+        return self._active_type
+         
+    @active_item_type.setter
+    def active_item_type(self, item_type: type):
         self._active_type = item_type
 
         checked = set()

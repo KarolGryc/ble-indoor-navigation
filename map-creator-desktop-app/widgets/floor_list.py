@@ -1,11 +1,10 @@
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QListWidget, QAbstractItemView, QListWidgetItem, QPushButton
 )
-from PySide6.QtCore import Qt, Signal
 
-from model.building import Building
-from model.floor import Floor
+from model import Building, Floor
 
 class AutoSyncFloorList(QWidget):
     floor_selected = Signal(Floor)
@@ -52,25 +51,30 @@ class AutoSyncFloorList(QWidget):
         self.refresh_view()
 
     def refresh_view(self):
+        self._list_widget.blockSignals(True)
         self._list_widget.clear()
-        for floor in self._building.floors:
+        
+        for floor in reversed(self._building.floors):
             item = QListWidgetItem(str(floor.name))
             item.setData(Qt.UserRole, floor)
             self._list_widget.addItem(item)
+            
+        self._list_widget.blockSignals(False)
 
     def _on_user_reordered(self):
-        new_order = []
+        new_order_visual = []
+        
         for i in range(self._list_widget.count()):
             item = self._list_widget.item(i)
-            new_order.append(item.data(Qt.UserRole))
+            new_order_visual.append(item.data(Qt.UserRole))
         
-        self._building.floors = new_order
+        self._building.floors = list(reversed(new_order_visual))
+        
         self.refresh_view()
 
     def _on_selection_changed(self, current: QListWidgetItem, previous: QListWidgetItem):
         if current is not None:
             clicked_floor = current.data(Qt.UserRole)
-
             self.floor_selected.emit(clicked_floor)
 
     @property
