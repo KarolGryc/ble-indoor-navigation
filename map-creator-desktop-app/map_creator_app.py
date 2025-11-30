@@ -12,6 +12,7 @@ from tools.select_tool import SelectTool
 from tools.zone_add_tool import ZoneAddTool
 from tools.renaming_tool import RenamingTool
 from tools.point_of_interest_add_tool import PointOfInterestAddTool
+from tools.zone_connect_tool import ZoneConnectTool
 
 from widgets.toolbar import Toolbar
 
@@ -56,6 +57,7 @@ class MapCreatorApp(QMainWindow):
             ZoneAddTool(presenter, scene),
             RenamingTool(presenter, scene),
             PointOfInterestAddTool(presenter, scene),
+            ZoneConnectTool(presenter, scene)
         ]
 
         icons_path = "icons/tools-icons/"
@@ -85,7 +87,7 @@ class MapCreatorApp(QMainWindow):
         layout = QVBoxLayout(right_panel)
 
         layers_panel = LayersPanel(scene)
-        layers_panel.active_class_changed.connect(scene.set_active_item_type)
+        layers_panel.active_class_changed.connect(lambda t: setattr(scene, "active_item_type", t))
         layout.addWidget(layers_panel)
 
         floor_list = AutoSyncFloorList(building_model)

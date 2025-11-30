@@ -16,16 +16,16 @@ class WallAddTool(Tool):
         self._preview.clear()
 
     def mouse_click(self, pos, modifier=None):
-        pos = self.presenter.snap_to_grid(pos)
+        pos = self._presenter.snap_to_grid(pos)
         self._preview.update_preview(self._start_point, pos)
 
         if self._start_point is None:
             self._start_point = pos
         else:
-            command = WallAddCommand(self.presenter.current_floor, self._start_point, pos)
-            self.presenter.execute(command)
+            command = WallAddCommand(self._presenter.current_floor, self._start_point, pos)
+            self._presenter.execute(command)
             self.deactivate()
 
     def mouse_move(self, pos):
-        pos = self.presenter.snap_to_grid(pos)
+        pos = self._presenter.snap_to_grid(pos)
         self._preview.update_preview(self._start_point, pos)

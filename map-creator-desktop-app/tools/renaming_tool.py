@@ -17,8 +17,8 @@ class RenamingTool(Tool):
         super().__init__(presenter, scene, name)
 
     def mouse_click(self, pos, modifier=None):
-        item = self.scene.itemAt(pos, QTransform())
-        item = self.presenter.get_model_for_item(item)
+        item = self._scene.itemAt(pos, QTransform())
+        item = self._presenter.get_model_for_item(item)
 
         if item is None:
             return

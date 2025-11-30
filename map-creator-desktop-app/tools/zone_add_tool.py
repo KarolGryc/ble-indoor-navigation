@@ -21,7 +21,7 @@ class ZoneAddTool(Tool):
         self._preview.clear()
 
     def mouse_click(self, pos, modifier=None):
-        pos = self.presenter.snap_to_grid(pos)
+        pos = self._presenter.snap_to_grid(pos)
         
         if not self._is_polygon_valid(pos):
             return
@@ -33,12 +33,12 @@ class ZoneAddTool(Tool):
             if name is None or zone_type is None:
                 return
 
-            cmd = ZoneAddCommand(self.presenter.current_floor, self._corner_points, name.strip(), zone_type)
-            self.presenter.execute(cmd)
+            cmd = ZoneAddCommand(self._presenter.current_floor, self._corner_points, name.strip(), zone_type)
+            self._presenter.execute(cmd)
             self.deactivate()
 
     def mouse_move(self, pos):
-        pos = self.presenter.snap_to_grid(pos)
+        pos = self._presenter.snap_to_grid(pos)
         self._preview.update_preview(self._corner_points, pos, self._is_polygon_valid(pos))
 
     def _is_polygon_valid(self, new_point: QPointF) -> bool:

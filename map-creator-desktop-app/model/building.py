@@ -9,9 +9,19 @@ class Building(QObject):
     def __init__(self):
         super().__init__()
         self._floors: list[Floor] = []
+        self._zone_connections = {}
+
+    def add_connection(self, zone1, zone2):
+        self._zone_connections.setdefault(zone1, set()).add(zone2)
+        self._zone_connections.setdefault(zone2, set()).add(zone1)
+
+    def remove_connection(self, zone1, zone2):
+        self._zone_connections.get(zone1, set()).discard(zone2)
+        self._zone_connections.get(zone2, set()).discard(zone1)
 
     def add_floor(self, floor: Floor = Floor()):
         if floor not in self._floors:
+            floor.building = self
             self._floors.append(floor)
             self.floor_added.emit(floor)
             floor.name_changed.connect(self.floor_name_changed)

@@ -25,15 +25,16 @@ class ZoneGraphicsItem(QGraphicsPolygonItem):
         self.setFlag(QGraphicsPolygonItem.ItemIsSelectable, True)
         self.setToolTip(self._zone.name)
 
-        self._text_item = QGraphicsSimpleTextItem(self._zone.name, self)
+        self._label = QGraphicsSimpleTextItem(self._zone.name, self)
+        self._label.setEnabled(False)
 
-        font = self._text_item.font()
+        font = self._label.font()
         font.setPointSize(25)
         font.setBold(True)
 
-        self._text_item.setBrush(QBrush(QColor("white")))
-        self._text_item.setPen(QPen(QColor("black"), 2))
-        self._text_item.setFont(font)
+        self._label.setBrush(QBrush(QColor("white")))
+        self._label.setPen(QPen(QColor("black"), 2))
+        self._label.setFont(font)
 
         self._zone.updated.connect(self.update_item)
         self.update_item()
@@ -51,17 +52,26 @@ class ZoneGraphicsItem(QGraphicsPolygonItem):
         self._update_text()
         self._update_geometry()
 
+    def set_highlight(self, highlight=True):
+        if highlight:
+            self.setBrush(QBrush(QColor(200, 200, 250, 100)))
+        else:
+            self.setBrush(QBrush(QColor(100, 200, 250, 100)))
+
     def _update_text(self):
         emote = self.EMOTE_TYPE_MAP.get(self._zone.type, "")
         name = f"{emote} {self._zone.name}" if emote else self._zone.name
-        self._text_item.setText(name)
+        self._label.setText(name)
         self.setToolTip(name)
+
+        text_rect = self._label.boundingRect()
+        offset_x = text_rect.width() / 2
+        offset_y = text_rect.height() / 2
+
+        pos_x = self._zone.position.x() - offset_x
+        pos_y = self._zone.position.y() - offset_y
+        self._label.setPos(pos_x, pos_y)
 
     def _update_geometry(self):
         polygon = QPolygonF([QPointF(node.x, node.y) for node in self._zone.corner_nodes])
         self.setPolygon(polygon)
-
-        text_rect = self._text_item.boundingRect()
-        offset_x = text_rect.width() / 2
-        offset_y = text_rect.height() / 2
-        self._text_item.setPos(self._zone.position.x() - offset_x, self._zone.position.y() - offset_y)

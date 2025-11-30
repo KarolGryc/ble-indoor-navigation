@@ -122,7 +122,6 @@ class MainMapController(QObject):
         self._current_floor.item_removed.connect(self._on_item_removed)
         
         if self._current_tool:
-            # Change to on_floor_changed method if needed
             self._current_tool.deactivate()
 
         self._redraw_scene()

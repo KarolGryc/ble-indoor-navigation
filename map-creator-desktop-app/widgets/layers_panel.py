@@ -10,7 +10,7 @@ class LayersPanel(QWidget):
 
     def __init__(self, scene, parent=None):
         super().__init__(parent)
-        self.scene = scene
+        self._scene = scene
         
         layout = QVBoxLayout(self)
         layout.setSpacing(5)
@@ -31,7 +31,8 @@ class LayersPanel(QWidget):
         first_btn = self.btn_group.button(0)
         if first_btn:
             first_btn.setChecked(True)
-            self.scene.set_active_item_type(Wall)
+            self._scene.active_item_type = Wall
+            self.active_class_changed.emit(Wall)
 
     def _add_layer_btn(self, text, item_type, layout):
         btn = QPushButton(text)

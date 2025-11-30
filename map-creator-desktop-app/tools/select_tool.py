@@ -30,14 +30,14 @@ class SelectTool(Tool):
 
     def mouse_click(self, pos, modifier=None):
         ctrl_active = modifier == Qt.ControlModifier
-        item = self.scene.itemAt(pos, QTransform())
+        item = self._scene.itemAt(pos, QTransform())
 
         if item is None:
             if not ctrl_active:
                 self.clear_selection()
             return
         else:
-            model = self.presenter.get_model_for_item(item)
+            model = self._presenter.get_model_for_item(item)
             if model is None:
                 return
             
@@ -58,7 +58,7 @@ class SelectTool(Tool):
     def mouse_move(self, pos):
         if self._is_dragging:
             delta = pos - self._start_pos
-            delta = self.presenter.snap_to_grid(delta)
+            delta = self._presenter.snap_to_grid(delta)
 
             for model in self._movables_start_pos.keys():
                 model.position = self._movables_start_pos[model]
@@ -67,7 +67,7 @@ class SelectTool(Tool):
     def mouse_release(self, pos):
         if self._is_dragging and self._movables_start_pos:
             delta = pos - self._start_pos
-            delta = self.presenter.snap_to_grid(delta)
+            delta = self._presenter.snap_to_grid(delta)
 
             if delta.manhattanLength() > 0.1:
                 for model, pos in self._movables_start_pos.items():
@@ -75,7 +75,7 @@ class SelectTool(Tool):
                     pos = pos + delta
 
                 cmd = MoveElementsCommand([x for x in self._movables_start_pos.keys()], delta)
-                self.presenter.execute(cmd)
+                self._presenter.execute(cmd)
                 
         else:
             self.clear_selection()
@@ -85,8 +85,8 @@ class SelectTool(Tool):
     def key_press(self, key):
         if key == Qt.Key_Delete:
             elements_to_delete = [model for model in self._selected_models]
-            cmd = DeleteElementsCommand(self.presenter.current_floor, elements_to_delete)
-            self.presenter.execute(cmd)
+            cmd = DeleteElementsCommand(self._presenter.current_floor, elements_to_delete)
+            self._presenter.execute(cmd)
 
             self._reset_dragging()
 
@@ -99,7 +99,7 @@ class SelectTool(Tool):
 
     def clear_selection(self):
         for model in self._selected_models:
-            item = self.presenter.get_item_for_model(model)
+            item = self._presenter.get_item_for_model(model)
             if item is not None:
                 item.setSelected(False)
 

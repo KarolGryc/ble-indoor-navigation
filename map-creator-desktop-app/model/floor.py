@@ -7,6 +7,8 @@ from PySide6.QtCore import Signal
 
 from model.map_object import MapObject
 
+import weakref
+
 class Floor(QObject):
     item_added = Signal(MapObject)
     item_removed = Signal(MapObject)
@@ -26,6 +28,14 @@ class Floor(QObject):
             Zone: self.zones,
             PointOfInterest: self.points_of_interest,
         }
+
+    @property
+    def building(self) -> "Building":
+        return self._building() if self._building else None
+    
+    @building.setter
+    def building(self, building: "Building"):
+        self._building = weakref.ref(building) if building else None
 
     @property
     def elements(self) -> list[MapObject]:
@@ -52,12 +62,15 @@ class Floor(QObject):
         
         if el_list is not None and element not in el_list:
             el_list.append(element)
+            element.floor = self
 
             for dependency in element.dependencies:
                 self.add(dependency)
+                dependency.floor = self
 
             if hasattr(element, 'owner'):
                 self.add(element.owner)  
+                element.owner.floor = self
 
             self.item_added.emit(element)
 

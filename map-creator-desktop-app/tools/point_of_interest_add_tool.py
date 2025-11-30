@@ -20,17 +20,17 @@ class PointOfInterestAddTool(Tool):
         return super().deactivate()
 
     def mouse_click(self, pos, modifier=None):
-        snapped_pos = self.presenter.snap_to_grid(pos)
+        snapped_pos = self._presenter.snap_to_grid(pos)
 
         name, poi_type = ask_poi_name_and_type(window_name="Enter Point Details")
 
         if name is None or poi_type is None:
             return
 
-        cmd = PointOfInterestAddCommand(self.presenter.current_floor, snapped_pos, name, poi_type)
-        self.presenter.execute(cmd)
+        cmd = PointOfInterestAddCommand(self._presenter.current_floor, snapped_pos, name, poi_type)
+        self._presenter.execute(cmd)
         self._preview.clear()
 
     def mouse_move(self, pos, modifier=None):
-        snapped_pos = self.presenter.snap_to_grid(pos)
+        snapped_pos = self._presenter.snap_to_grid(pos)
         self._preview.update_preview(snapped_pos)

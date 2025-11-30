@@ -104,8 +104,13 @@ class InteractiveScene(QGraphicsScene):
                 return item
             
         return None
-                
-    def set_active_item_type(self, item_type: type):
+
+    @property
+    def active_item_type(self):
+        return self._active_type
+         
+    @active_item_type.setter
+    def active_item_type(self, item_type: type):
         self._active_type = item_type
 
         checked = set()
