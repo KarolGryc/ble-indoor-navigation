@@ -1,88 +1,161 @@
 {
+    "id": "c9af5e56-e44a-4aba-a3a9-7d33331b3c95",
     "floors": [
         {
-            "id": "394f1b61-7f6d-49a5-9a73-1ba3e80399ad",
-            "name": "Ground Floor",
+            "id": "bc961118-707a-4e38-8b03-82b7110203b3",
+            "name": "Floor 1",
             "nodes": [
                 {
-                    "id": "cf5ca82b-4c8b-4f7f-bcae-b73603317f39",
-                    "x": -250.0,
-                    "y": -100.0
-                },
-                {
-                    "id": "860a135c-2e21-47c4-86cb-d662e95aa7ca",
-                    "x": -50.0,
-                    "y": -250.0
-                },
-                {
-                    "id": "be19fbe3-9535-4a5b-b9e8-fab29e44c617",
-                    "x": -50.0,
-                    "y": -250.0
-                },
-                {
-                    "id": "5853169b-e39b-4024-a6fb-dfc116dcdd8f",
-                    "x": 75.0,
+                    "id": "0f0f6367-5242-4024-8a25-f72475f0ec9d",
+                    "x": -175.0,
                     "y": -175.0
                 },
                 {
-                    "id": "9131cdbb-7f9c-4d08-be42-00234fc43b2e",
-                    "x": 75.0,
+                    "id": "39552289-98a4-449d-8588-46abe376a77b",
+                    "x": -175.0,
+                    "y": 75.0
+                },
+                {
+                    "id": "79feb4eb-05f6-467d-bff4-cba32d49caf8",
+                    "x": 125.0,
                     "y": -175.0
                 },
                 {
-                    "id": "34fd45d3-f8aa-44bc-97dc-49b84f9bfdbc",
-                    "x": -25.0,
-                    "y": 25.0
+                    "id": "f502e0cb-95a7-4716-a778-d2c1f99074b2",
+                    "x": 125.0,
+                    "y": 75.0
                 },
                 {
-                    "id": "560febd7-172d-4c09-b60a-327304fef1fc",
-                    "x": -25.0,
-                    "y": 25.0
+                    "id": "4e4965bd-be86-4072-951f-82f7db8c0ee9",
+                    "x": -125.0,
+                    "y": 175.0
                 },
                 {
-                    "id": "768749f2-3299-4208-a2b3-46312ad440c8",
-                    "x": -25.0,
-                    "y": 225.0
+                    "id": "e3453b8d-d1d6-4b30-a330-0b0c48b1f0ee",
+                    "x": 100.0,
+                    "y": 175.0
                 },
                 {
-                    "id": "dbacf064-e087-4d17-a75c-c17328cfc9b5",
-                    "x": -25.0,
-                    "y": 275.0
+                    "id": "52eb7c9f-740f-4c88-a3cf-14c37b4da474",
+                    "x": -125.0,
+                    "y": -225.0
                 },
                 {
-                    "id": "96ac62fb-8e03-49ce-b5eb-afa4e502b1ad",
-                    "x": -25.0,
-                    "y": 275.0
+                    "id": "a8e5c422-bec9-4da4-87ff-5e6568c42f9c",
+                    "x": 75.0,
+                    "y": -225.0
+                },
+                {
+                    "id": "c14c075e-97b5-4f16-b04c-6980ddfe8e06",
+                    "x": -175.0,
+                    "y": -225.0
+                },
+                {
+                    "id": "598d014d-59f6-4e9d-87cf-a706f15730b6",
+                    "x": 125.0,
+                    "y": -225.0
+                },
+                {
+                    "id": "51e52b4e-d59b-4c2b-b7b2-4e23429222d4",
+                    "x": 125.0,
+                    "y": 150.0
+                },
+                {
+                    "id": "a738bfb5-2dae-40f7-b594-2106131e9bbb",
+                    "x": 125.0,
+                    "y": 175.0
+                },
+                {
+                    "id": "73554f5d-37b9-43e8-96e9-3e8ba59349c3",
+                    "x": -175.0,
+                    "y": 175.0
                 }
             ],
             "walls": [
                 {
-                    "id": "8e4f76e8-c8b0-4fdd-8405-4c2913542e16",
-                    "start_node_id": "cf5ca82b-4c8b-4f7f-bcae-b73603317f39",
-                    "end_node_id": "860a135c-2e21-47c4-86cb-d662e95aa7ca"
+                    "id": "aa30d132-0332-4525-a95f-1c433798463c",
+                    "start_node_id": "0f0f6367-5242-4024-8a25-f72475f0ec9d",
+                    "end_node_id": "39552289-98a4-449d-8588-46abe376a77b"
                 },
                 {
-                    "id": "dc473d83-a39d-4031-8d6c-d6bc2fa76354",
-                    "start_node_id": "be19fbe3-9535-4a5b-b9e8-fab29e44c617",
-                    "end_node_id": "5853169b-e39b-4024-a6fb-dfc116dcdd8f"
+                    "id": "b7b5445e-4aba-4385-ac94-3ac32705a471",
+                    "start_node_id": "79feb4eb-05f6-467d-bff4-cba32d49caf8",
+                    "end_node_id": "f502e0cb-95a7-4716-a778-d2c1f99074b2"
                 },
                 {
-                    "id": "053bffc9-1255-470f-a4fa-7cf60389bc60",
-                    "start_node_id": "9131cdbb-7f9c-4d08-be42-00234fc43b2e",
-                    "end_node_id": "34fd45d3-f8aa-44bc-97dc-49b84f9bfdbc"
+                    "id": "e3c6c218-b29e-4a84-a102-946445e97f18",
+                    "start_node_id": "4e4965bd-be86-4072-951f-82f7db8c0ee9",
+                    "end_node_id": "e3453b8d-d1d6-4b30-a330-0b0c48b1f0ee"
                 },
                 {
-                    "id": "a75b2d0a-f96c-4695-9afb-369bd03a4b17",
-                    "start_node_id": "560febd7-172d-4c09-b60a-327304fef1fc",
-                    "end_node_id": "768749f2-3299-4208-a2b3-46312ad440c8"
-                },
-                {
-                    "id": "b99e1c2e-ba5b-4b8a-88be-3a0e86f6237c",
-                    "start_node_id": "dbacf064-e087-4d17-a75c-c17328cfc9b5",
-                    "end_node_id": "96ac62fb-8e03-49ce-b5eb-afa4e502b1ad"
+                    "id": "a5213edc-8573-4672-b5a6-6a2174980f43",
+                    "start_node_id": "52eb7c9f-740f-4c88-a3cf-14c37b4da474",
+                    "end_node_id": "a8e5c422-bec9-4da4-87ff-5e6568c42f9c"
                 }
             ],
-            "zones": [],
+            "zones": [
+                {
+                    "id": "249d37ea-052c-4129-a028-561580817947",
+                    "name": "Example Zone",
+                    "type": "GENERIC",
+                    "corner_node_ids": [
+                        "c14c075e-97b5-4f16-b04c-6980ddfe8e06",
+                        "598d014d-59f6-4e9d-87cf-a706f15730b6",
+                        "51e52b4e-d59b-4c2b-b7b2-4e23429222d4",
+                        "a738bfb5-2dae-40f7-b594-2106131e9bbb",
+                        "73554f5d-37b9-43e8-96e9-3e8ba59349c3"
+                    ]
+                }
+            ],
+            "points_of_interest": [
+                {
+                    "id": "1c692a2f-9d7b-4e23-a485-88305dcca0b9",
+                    "x": 0.0,
+                    "y": -50.0,
+                    "name": "Bufet",
+                    "type": "SHOP"
+                }
+            ]
+        },
+        {
+            "id": "e5068b32-f9fd-4147-9b70-b520a4702d79",
+            "name": "Floor 2",
+            "nodes": [
+                {
+                    "id": "16d923cd-2969-41e5-85f1-d5a2ee3dfd45",
+                    "x": -125.0,
+                    "y": -200.0
+                },
+                {
+                    "id": "7d320015-9c5a-460b-b6dd-863051d456a2",
+                    "x": -125.0,
+                    "y": 150.0
+                },
+                {
+                    "id": "5e3ba39c-d52b-41c2-a3d6-ae864005bd8e",
+                    "x": 175.0,
+                    "y": 150.0
+                },
+                {
+                    "id": "f9d74e0b-2522-4e7e-a98a-ea5b75303da2",
+                    "x": 175.0,
+                    "y": -200.0
+                }
+            ],
+            "walls": [],
+            "zones": [
+                {
+                    "id": "b0df132f-0824-4fd2-9d2e-3cdfe4870b53",
+                    "name": "Example Zone",
+                    "type": "GENERIC",
+                    "corner_node_ids": [
+                        "16d923cd-2969-41e5-85f1-d5a2ee3dfd45",
+                        "7d320015-9c5a-460b-b6dd-863051d456a2",
+                        "5e3ba39c-d52b-41c2-a3d6-ae864005bd8e",
+                        "f9d74e0b-2522-4e7e-a98a-ea5b75303da2"
+                    ]
+                }
+            ],
             "points_of_interest": []
         }
     ],
