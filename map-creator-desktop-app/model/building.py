@@ -9,8 +9,9 @@ class Building(QObject):
     floor_removed = Signal(Floor)
     floor_name_changed = Signal(str)
 
-    def __init__(self):
+    def __init__(self, id: uuid.UUID = None):
         super().__init__()
+        self.id = id if id else uuid.uuid4()
         self._floors: list[Floor] = []
         self._zone_connections = {}
 
@@ -81,6 +82,7 @@ class Building(QObject):
                     connections.add(conn)
 
         return {
+            "id": str(self.id),
             "floors": [floor.to_dict() for floor in self._floors],
             "zone_connections": [
                 {
