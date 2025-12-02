@@ -51,6 +51,9 @@ kotlin {
             implementation(libs.moko.permissions.location)
 
             api(libs.kotlinx.datetime)
+
+            implementation(libs.kotlinx.io)
+//            implementation(libs.kotlinx.io.couroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
