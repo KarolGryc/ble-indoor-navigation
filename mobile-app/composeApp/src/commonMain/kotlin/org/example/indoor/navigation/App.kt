@@ -53,7 +53,7 @@ fun App() {
             ) {
                 var name by remember { mutableStateOf("No name selected") }
                 val picker = rememberFilePicker { file ->
-                    name = file?.name ?: "Name is null, you've failed!"
+                    name = file?.content.toString()
                 }
 
                 Column {
