@@ -1,6 +1,6 @@
 package domain.repository
 
-import domain.model.BuildingMapModel
+import domain.model.BuildingMap
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -8,7 +8,7 @@ import kotlin.uuid.Uuid
 interface BuildingMapRepository {
     suspend fun getAvailableMapsInfo(): List<MapInfo>
 
-    suspend fun getMap(buildingUuid: Uuid): BuildingMapModel
+    suspend fun getMap(buildingUuid: Uuid): BuildingMap
 
-    suspend fun saveMap(buildingMap: BuildingMapModel)
+    suspend fun addMap(name: String, buildingMap: BuildingMap)
 }

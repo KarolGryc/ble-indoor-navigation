@@ -1,7 +1,7 @@
 package data.repository
 
 import data.filesystemProviders.IoFileService
-import domain.model.BuildingMapModel
+import domain.model.BuildingMap
 import domain.repository.BuildingMapRepository
 import domain.repository.MapInfo
 import kotlin.uuid.ExperimentalUuidApi
@@ -22,11 +22,11 @@ class LocalMapRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMap(buildingUuid: Uuid): BuildingMapModel {
+    override suspend fun getMap(buildingUuid: Uuid): BuildingMap {
         TODO("Not yet implemented")
     }
 
-    override suspend fun saveMap(buildingMap: BuildingMapModel) {
+    override suspend fun addMap(name: String, buildingMap: BuildingMap) {
         TODO("Not yet implemented")
     }
 }

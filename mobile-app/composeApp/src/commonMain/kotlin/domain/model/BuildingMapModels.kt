@@ -4,24 +4,30 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-data class BuildingMapModel (
+data class BuildingMap (
     val id: Uuid,
-    val floors: List<FloorModel>,
+    val floors: List<Floor>,
+    val zoneConnections: List<ZoneConnection>
 )
 
 @OptIn(ExperimentalUuidApi::class)
-data class FloorModel (
+data class Floor (
     val id: Uuid,
     val name: String,
-    val walls: List<WallModel>,
-    val zones: List<ZoneModel>,
-    val pointsOfInterest: List<PointOfInterestModel>
+    val walls: List<Wall>,
+    val zones: List<Zone>,
+    val pointsOfInterest: List<PointOfInterest>
 )
 
-data class Node(val x: Float, val y: Float)
+@OptIn(ExperimentalUuidApi::class)
+data class Node(
+    val id: Uuid,
+    val x: Float,
+    val y: Float
+)
 
 @OptIn(ExperimentalUuidApi::class)
-data class WallModel(
+data class Wall(
     val id: Uuid,
     val start: Node,
     val end: Node
@@ -34,7 +40,7 @@ enum class ZoneType {
 }
 
 @OptIn(ExperimentalUuidApi::class)
-data class ZoneModel(
+data class Zone(
     val id: Uuid,
     val name: String,
     val boundary: List<Node>,
@@ -50,9 +56,15 @@ enum class PointOfInterestType {
 }
 
 @OptIn(ExperimentalUuidApi::class)
-data class PointOfInterestModel(
+data class PointOfInterest(
     val id: Uuid,
     val name: String,
-    val location: Node,
+    val x: Float,
+    val y: Float,
     val type: PointOfInterestType
+)
+
+data class ZoneConnection(
+    val zoneA: Zone,
+    val zoneB: Zone
 )
