@@ -22,7 +22,8 @@ lifecycleViewModel = "2.10.0"
 lifecycleViewModelCompose = "2.9.6"
 
 kotlinx-io = "0.8.2"
-kotlinx-io-coroutines = "0.8.2"
+
+kotlinx-serialization = "1.6.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -54,6 +55,9 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 # Kotlinx IO library
 kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
+
+# Kotlinx serialization
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
