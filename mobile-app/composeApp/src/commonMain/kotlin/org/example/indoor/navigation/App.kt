@@ -1,6 +1,7 @@
 package org.example.indoor.navigation
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -15,10 +16,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import data.dto.BuildingMapDto
 import data.filesystemProviders.rememberFilePicker
-import data.mapper.BuildingMapper
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
@@ -28,7 +28,6 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import koin.createKoinConfiguration
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinMultiplatformApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -53,54 +52,29 @@ fun App() {
             snackbarHost = { SnackbarHost(snackbarHostState) },
             containerColor = Color.White,
             contentColor = Color.Black
-        ) {
+        ) { innerPadding ->
             KoinMultiplatformApplication(
                 config = createKoinConfiguration(),
             ) {
-//                var name by remember { mutableStateOf("No name selected") }
-//                val picker = rememberFilePicker { file ->
-//                    name = file?.content?.size?.toString() ?: "Failed to get file"
-//                }
-//
-//                Column {
-//                    Button(onClick = { picker.pickFile() }) {
-//                        Text("Get file")
-//                    }
-//                    Button(onClick = {}) {
-//                        Text(name)
-//                    }
-//                }
                 val viewModel = koinViewModel<MapListViewModel>()
                 val picker = rememberFilePicker { file ->
-                    if (file != null) {
-                        scope.launch {
-                            try {
-                                val jsonString = file.content.decodeToString()
-                                val jsonParser = Json { ignoreUnknownKeys = true }
-                                val dto = jsonParser.decodeFromString<BuildingMapDto>(jsonString)
-                                val map = BuildingMapper.mapToDomain(dto)
-                                viewModel.addMap(file.name.replace(".json", ""), map)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+                    file?.let {
+                        try {
+                            val fileName = it.name.replace(".json", "")
+                            viewModel.addMap(fileName, it.content)
+                        } catch (_: Exception) {
+                            scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Failed to parse file: ${e.message}"
+                                    message = "Failed to add file"
                                 )
                             }
-
-                        }
-                    }
-                    else {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "Failed to get file"
-                            )
                         }
                     }
                 }
 
 
                 val state by viewModel.uiState.collectAsState()
-                Column {
+                Column(modifier = Modifier.padding(innerPadding)) {
                     Button(onClick = {
                         picker.pickFile()
                     }) {

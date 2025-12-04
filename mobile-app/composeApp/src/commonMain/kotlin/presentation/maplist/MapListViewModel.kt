@@ -2,12 +2,15 @@ package presentation.maplist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import data.dto.BuildingMapDto
+import data.mapper.BuildingMapper
 import domain.model.BuildingMap
 import domain.repository.BuildingMapRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 data class MapListUiState(
     val isLoading: Boolean = false,
@@ -50,5 +53,14 @@ class MapListViewModel(
             mapRepository.addMap(name, buildingMap)
             loadMapList()
         }
+    }
+
+    fun addMap(name: String, buildingMap: ByteArray) {
+        val jsonString = buildingMap.decodeToString()
+        val jsonParser = Json { ignoreUnknownKeys = true }
+        val dto = jsonParser.decodeFromString<BuildingMapDto>(jsonString)
+        val domainMap = BuildingMapper.mapToDomain(dto)
+
+        addMap(name, domainMap)
     }
 }
