@@ -10,8 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoveDown
+import androidx.compose.material.icons.filled.MoveUp
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,10 +52,17 @@ import presentation.theme.NaviTheme
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-data class MapAction(
-    val label: String,
+data class GeneralAction(
+    val label: String = "",
     val icon: ImageVector? = null,
     val onClick: () -> Unit
+)
+
+@OptIn(ExperimentalUuidApi::class)
+data class MapAction(
+    val label: String = "",
+    val icon: ImageVector? = null,
+    val onClick: (Uuid) -> Unit
 )
 
 @OptIn(ExperimentalUuidApi::class, ExperimentalMaterial3Api::class)
@@ -78,13 +89,16 @@ fun MapListScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Available Maps") })
+            CenterAlignedTopAppBar(title = { Text("Maps Menu") })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { picker.pickFile() }) {
-                Icon(Icons.Default.Add, contentDescription = "Add map")
-            }
-        },
+            FloatingActions(
+                actions = listOf(
+                    GeneralAction("Add from file", Icons.Default.Add) { picker.pickFile() },
+                    GeneralAction("Add from camera", Icons.Default.QrCode) {}
+                )
+            )
+       },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
@@ -102,9 +116,60 @@ fun MapListScreen(
     }
 }
 
+
+@Composable
+fun FloatingActions(
+    actions: List<GeneralAction> = emptyList(),
+    isExpandedDefault: Boolean = false
+) {
+    var isExpanded by remember { mutableStateOf(isExpandedDefault) }
+
+    Column {
+        if (isExpanded) {
+            LazyColumn {
+                items(actions) { action ->
+                    FloatingActionButton(
+                        onClick = {
+                            isExpanded = false
+                            action.onClick()
+                        },
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        action.icon?.let {
+                            Icon(it, contentDescription = action.label)
+                        }
+                    }
+                }
+            }
+        }
+        FloatingActionButton(
+            onClick = { isExpanded = !isExpanded }
+        ) {
+            val icon = if (isExpanded) Icons.Default.MoveDown else Icons.Default.MoveUp
+            Icon(icon, contentDescription = "Add map")
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun FloatingButtonsPreview() {
+    NaviTheme {
+        FloatingActions(
+            actions = listOf(
+                GeneralAction("Add from file", Icons.Default.Add) {},
+                GeneralAction("Add from camera", Icons.Default.QrCode) {}
+            ),
+            isExpandedDefault = true
+        )
+    }
+}
+
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun MapListItem(
     name: String,
+    uuid: Uuid,
     onClick: () -> Unit,
     actions: List<MapAction> = emptyList(),
     modifier: Modifier = Modifier
@@ -122,7 +187,7 @@ fun MapListItem(
         Row(
             modifier = Modifier
                 .padding(16.dp)
-                .defaultMinSize(minHeight = 56.dp),
+                .defaultMinSize(minHeight = 48.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -157,7 +222,7 @@ fun MapListItem(
                                 },
                                 onClick = {
                                     isMenuExpended = false
-                                    action.onClick()
+                                    action.onClick(uuid)
                                 }
                             )
                         }
@@ -168,11 +233,19 @@ fun MapListItem(
     }
 }
 
+
+
+@OptIn(ExperimentalUuidApi::class)
 @Preview
 @Composable
 private fun MapListItemPreview() {
     NaviTheme {
-        MapListItem(name = "Map", onClick = {}, actions = listOf(MapAction("Delete"){}))
+        MapListItem(
+            name = "Map",
+            uuid = Uuid.random(),
+            onClick = {},
+            actions = listOf(MapAction("Delete"){})
+        )
     }
 }
 
@@ -188,6 +261,7 @@ fun MapList(
         items(maps.size) { index ->
             MapListItem(
                 name = maps[index].name,
+                uuid = Uuid.random(),
                 onClick = { onMapSelected(maps[index].id) },
                 actions = actions,
                 modifier = modifier
