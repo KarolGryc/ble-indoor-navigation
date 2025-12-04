@@ -6,5 +6,5 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 data class MapInfo(
     val name: String,
-    val buildingUuid: Uuid
+    val id: Uuid
 )

@@ -20,7 +20,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-object BuildingMapMapper {
+object BuildingMapper {
     fun mapToDomain(dto: BuildingMapDto): BuildingMap {
         val mappedFloors = dto.floors.map { mapFloorToDomain(it) }
 

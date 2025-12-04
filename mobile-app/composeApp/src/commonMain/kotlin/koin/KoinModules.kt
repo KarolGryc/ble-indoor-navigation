@@ -12,7 +12,9 @@ expect val filesystemModule: Module
 
 val mapListModule: Module = module {
     single<BuildingMapRepository> {
-        LocalMapRepositoryImpl(fileIO = get())
+        LocalMapRepositoryImpl(
+            fileIO = get()
+        )
     }
 
     viewModel {

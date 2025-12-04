@@ -2,6 +2,7 @@ package presentation.maplist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import domain.model.BuildingMap
 import domain.repository.BuildingMapRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +42,13 @@ class MapListViewModel(
                     )
                 }
             }
+        }
+    }
+
+    fun addMap(name: String, buildingMap: BuildingMap) {
+        viewModelScope.launch {
+            mapRepository.addMap(name, buildingMap)
+            loadMapList()
         }
     }
 }
