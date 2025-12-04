@@ -6,6 +6,7 @@ import data.dto.BuildingMapDto
 import data.mapper.BuildingMapper
 import domain.model.BuildingMap
 import domain.repository.BuildingMapRepository
+import domain.repository.MapInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +15,7 @@ import kotlinx.serialization.json.Json
 
 data class MapListUiState(
     val isLoading: Boolean = false,
-    val mapNames: List<String> = emptyList(),
+    val mapData: List<MapInfo> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -29,11 +30,10 @@ class MapListViewModel(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val maps = mapRepository.getAvailableMapsInfo()
-                val mapNames = maps.map { it.name }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        mapNames = mapNames,
+                        mapData = maps,
                         errorMessage = null
                     )
                 }
