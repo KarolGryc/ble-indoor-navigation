@@ -18,10 +18,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import presentation.maplist.GeneralAction
 import presentation.theme.NaviTheme
+
+data class GeneralAction(
+    val label: String = "",
+    val icon: ImageVector? = null,
+    val onClick: () -> Unit
+)
 
 @Composable
 fun FloatingActions(

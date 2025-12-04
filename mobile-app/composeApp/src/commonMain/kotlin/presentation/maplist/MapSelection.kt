@@ -46,16 +46,11 @@ import domain.repository.MapInfo
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.composables.FloatingActions
+import presentation.composables.GeneralAction
 import presentation.composables.TextInputDialog
 import presentation.theme.NaviTheme
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-
-data class GeneralAction(
-    val label: String = "",
-    val icon: ImageVector? = null,
-    val onClick: () -> Unit
-)
 
 @OptIn(ExperimentalUuidApi::class)
 data class MapAction(
@@ -64,6 +59,12 @@ data class MapAction(
     val onClick: (Uuid) -> Unit
 )
 
+/**
+ * Screen displaying a list of maps. Provides options to add new maps and manage existing ones.
+ *
+ * @param viewModel The ViewModel managing the map list state.
+ * @param onNavigateToMap Callback invoked when a map is selected, providing the map's UUID.
+ */
 @OptIn(ExperimentalUuidApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapListScreen(
@@ -125,6 +126,15 @@ fun MapListScreen(
     }
 }
 
+/**
+ * Single map item in a list.
+ *
+ * @param name The name of the map.
+ * @param uuid The UUID of the map, send to .
+ * @param onClick Callback invoked when the map item is clicked.
+ * @param actions List of actions available for the map item.
+ * @param modifier The modifier to be applied to the [MapListItem]
+ */
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun MapListItem(
@@ -207,6 +217,15 @@ private fun MapListItemPreview() {
     }
 }
 
+
+/**
+ * Displays a list of maps as [MapListItem].
+ *
+ * @param maps The list of maps to display.
+ * @param onMapSelected A callback invoked when a map is selected, providing the map's UUID.
+ * @param actions A list of actions available for each map item.
+ * @param modifier The modifier to be applied to the [MapListItem]
+ */
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun MapList(
