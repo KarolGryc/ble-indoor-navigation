@@ -1,15 +1,18 @@
 package org.example.indoor.navigation
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
@@ -23,8 +26,9 @@ import org.koin.compose.KoinMultiplatformApplication
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.maplist.MapListScreen
+import kotlin.uuid.ExperimentalUuidApi
 
-@OptIn(KoinExperimentalAPI::class)
+@OptIn(KoinExperimentalAPI::class, ExperimentalUuidApi::class)
 @Composable
 @Preview
 fun App() {
@@ -36,17 +40,34 @@ fun App() {
             factory.createPermissionsController()
         }
 
+        val navController = rememberNavController()
+
         BindEffect(controller)
 
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            containerColor = Color.White,
-            contentColor = Color.Black
-        ) { innerPadding ->
-            KoinMultiplatformApplication(
-                config = createKoinConfiguration(),
+        KoinMultiplatformApplication(
+            config = createKoinConfiguration(),
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = "mapList"
             ) {
-                MapListScreen(koinViewModel())
+                composable("mapList") {
+                    MapListScreen(
+                        koinViewModel(),
+                        onNavigateToMap = { uuid ->
+                            navController.navigate("details/$uuid")
+                        }
+                    )
+                }
+
+                composable(
+                    route = "details/{mapId}",
+                    arguments = listOf(navArgument("mapId") { type = NavType.StringType } )
+                ) { backStackEntry ->
+                    val mapIdString = backStackEntry.savedStateHandle.get<String>("mapId") ?: ""
+
+                    Text("Odebrano ID: $mapIdString")
+                }
             }
         }
     }
