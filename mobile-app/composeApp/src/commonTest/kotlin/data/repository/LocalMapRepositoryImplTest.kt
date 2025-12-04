@@ -30,6 +30,10 @@ class LocalMapRepositoryImplTest {
             files["$directory/$fileName"] = content
         }
 
+        override suspend fun deleteFile(directory: String, fileName: String) {
+            files.remove("$directory/$fileName")
+        }
+
         fun getFileContent(directory: String, fileName: String): String? = files["$directory/$fileName"]
     }
 
@@ -120,6 +124,31 @@ class LocalMapRepositoryImplTest {
         assertEquals(2, availableMaps.size)
         assertTrue(availableMaps.any { it.id == map1.id })
         assertTrue(availableMaps.any { it.id == map2.id })
+    }
+
+    @Test
+    fun `removeMap deletes map file and updates index`() = runTest {
+        // Given
+        val mapId = Uuid.random()
+        val map = createDummyMap(mapId)
+
+        repository.addMap("Map to Remove", map)
+
+        // When
+        repository.removeMap(mapId)
+
+        // Then
+        val availableMaps = repository.getAvailableMapsInfo()
+        assertTrue(
+            availableMaps.any { it.id == mapId},
+            "Index should be empty after removal"
+        )
+
+        val expectedFileName = "Map_to_Remove_$mapId.json"
+        assertTrue(
+            !fakeFileIo.exists("maps", expectedFileName),
+            "Map file should be deleted"
+        )
     }
 
     private fun createDummyMap(id: Uuid): BuildingMap {

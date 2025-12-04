@@ -41,6 +41,13 @@ class IoFileServiceImpl(
         }
     }
 
+    override suspend fun deleteFile(directory: String, fileName: String) {
+        withContext(Dispatchers.IO) {
+            val path = getFullPath(directory, fileName)
+            fileSystem.delete(path)
+        }
+    }
+
     override fun exists(directory: String, fileName: String): Boolean {
         val path = getFullPath(directory, fileName)
         return fileSystem.exists(path)

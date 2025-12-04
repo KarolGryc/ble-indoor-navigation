@@ -62,6 +62,17 @@ class LocalMapRepositoryImpl(
         updateIndex(entry = newEntry)
     }
 
+    override suspend fun removeMap(buildingUuid: Uuid) {
+        val indexEntries = loadIndex()
+        val mapEntry = indexEntries.find { it.id == buildingUuid }
+            ?: throw IllegalArgumentException("Map with ID $buildingUuid not found")
+
+        fileIO.deleteFile(MAPS_DIRECTORY, mapEntry.name)
+
+        val updatedEntries = indexEntries.filter { it.id != buildingUuid }
+        updateIndex(entries = updatedEntries)
+    }
+
     private suspend fun updateIndex(entry: MapIndexEntry) {
         updateIndex(listOf(entry))
     }
