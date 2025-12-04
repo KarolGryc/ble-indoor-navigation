@@ -5,7 +5,7 @@ data class File (
     val content: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
-        if (this == other)
+        if (this === other)
             return true
 
         if (other == null || this::class != other::class)

@@ -13,8 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoveDown
-import androidx.compose.material.icons.filled.MoveUp
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
@@ -23,7 +22,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,22 +30,23 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import data.filesystemProviders.File
 import data.filesystemProviders.rememberFilePicker
 import domain.repository.MapInfo
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import presentation.composables.FloatingActions
+import presentation.composables.TextInputDialog
 import presentation.theme.NaviTheme
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -71,21 +70,11 @@ fun MapListScreen(
     viewModel: MapListViewModel = koinViewModel(),
     onNavigateToMap: (Uuid) -> Unit = { _ -> }
 ) {
-    val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(scope) {
-        viewModel.loadMapList()
-    }
-    val picker = rememberFilePicker { file ->
-        file?.let {
-            try {
-                val fileName = it.name.replace(".json", "")
-                viewModel.addMap(fileName, it.content)
-            } catch (_: Exception) {}
-        }
-    }
+    var pendingFile by remember {  mutableStateOf<File?>(null) }
+    val picker = rememberFilePicker { pendingFile = it }
 
     Scaffold(
         topBar = {
@@ -109,59 +98,30 @@ fun MapListScreen(
             MapList(
                 maps = uiState.mapData,
                 onMapSelected = onNavigateToMap,
-                actions = listOf(),
+                actions = listOf(
+                    MapAction(
+                        label = "Delete",
+                        icon = Icons.Default.Delete,
+                        onClick = viewModel::removeMap
+                    )
+                ),
                 modifier = Modifier.weight(1f)
             )
         }
-    }
-}
 
-
-@Composable
-fun FloatingActions(
-    actions: List<GeneralAction> = emptyList(),
-    isExpandedDefault: Boolean = false
-) {
-    var isExpanded by remember { mutableStateOf(isExpandedDefault) }
-
-    Column {
-        if (isExpanded) {
-            LazyColumn {
-                items(actions) { action ->
-                    FloatingActionButton(
-                        onClick = {
-                            isExpanded = false
-                            action.onClick()
-                        },
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    ) {
-                        action.icon?.let {
-                            Icon(it, contentDescription = action.label)
-                        }
+        if (pendingFile != null) {
+            TextInputDialog(
+                title = "Name the added map",
+                onDismiss = { pendingFile = null },
+                onConfirm = { name ->
+                    pendingFile?.let {
+                        viewModel.addMap(name, it.content)
+                        pendingFile = null
                     }
-                }
-            }
+                },
+                initialValue = pendingFile?.name ?: ""
+            )
         }
-        FloatingActionButton(
-            onClick = { isExpanded = !isExpanded }
-        ) {
-            val icon = if (isExpanded) Icons.Default.MoveDown else Icons.Default.MoveUp
-            Icon(icon, contentDescription = "Add map")
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun FloatingButtonsPreview() {
-    NaviTheme {
-        FloatingActions(
-            actions = listOf(
-                GeneralAction("Add from file", Icons.Default.Add) {},
-                GeneralAction("Add from camera", Icons.Default.QrCode) {}
-            ),
-            isExpandedDefault = true
-        )
     }
 }
 
@@ -233,8 +193,6 @@ fun MapListItem(
     }
 }
 
-
-
 @OptIn(ExperimentalUuidApi::class)
 @Preview
 @Composable
@@ -258,11 +216,11 @@ fun MapList(
     modifier: Modifier = Modifier
 ) {
     LazyColumn {
-        items(maps.size) { index ->
+        items(maps) { map ->
             MapListItem(
-                name = maps[index].name,
-                uuid = Uuid.random(),
-                onClick = { onMapSelected(maps[index].id) },
+                name = map.name,
+                uuid = map.id,
+                onClick = { onMapSelected(map.id) },
                 actions = actions,
                 modifier = modifier
             )

@@ -69,20 +69,23 @@ class LocalMapRepositoryImpl(
 
         fileIO.deleteFile(MAPS_DIRECTORY, mapEntry.name)
 
+        deleteEntryFromIndex(buildingUuid)
+    }
+
+    private suspend fun deleteEntryFromIndex(buildingUuid: Uuid) {
+        val indexEntries = loadIndex()
         val updatedEntries = indexEntries.filter { it.id != buildingUuid }
-        updateIndex(entries = updatedEntries)
+        updateIndex(updatedEntries = updatedEntries)
     }
 
     private suspend fun updateIndex(entry: MapIndexEntry) {
         updateIndex(listOf(entry))
     }
 
-    private suspend fun updateIndex(entries: List<MapIndexEntry>) {
+    private suspend fun updateIndex(updatedEntries: List<MapIndexEntry>) {
         val filesIndex = loadIndex().toMutableList()
-        filesIndex.removeAll {
-            it.id in entries.map { entry -> entry.id }
-        }
-        filesIndex.addAll(entries)
+        filesIndex.clear()
+        filesIndex.addAll(updatedEntries)
 
         fileIO.writeFile(
             directory = MAPS_DIRECTORY,

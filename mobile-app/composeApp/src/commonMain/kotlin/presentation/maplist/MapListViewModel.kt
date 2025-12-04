@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 data class MapListUiState(
     val isLoading: Boolean = false,
@@ -19,11 +21,16 @@ data class MapListUiState(
     val errorMessage: String? = null
 )
 
+@OptIn(ExperimentalUuidApi::class)
 class MapListViewModel(
     private val mapRepository: BuildingMapRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MapListUiState())
     val  uiState = _uiState.asStateFlow()
+
+    init {
+        loadMapList()
+    }
 
     fun loadMapList() {
         viewModelScope.launch {
@@ -62,5 +69,12 @@ class MapListViewModel(
         val domainMap = BuildingMapper.mapToDomain(dto)
 
         addMap(name, domainMap)
+    }
+
+    fun removeMap(buildingUuid: Uuid) {
+        viewModelScope.launch {
+            mapRepository.removeMap(buildingUuid)
+            loadMapList()
+        }
     }
 }
