@@ -2,22 +2,29 @@ package presentation.navigationScreen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import domain.model.Floor
@@ -35,16 +42,43 @@ object MapStyles {
     val backgroundColor = Color.LightGray
 }
 
+data class MapCameraState(
+    val offset: Offset = Offset.Zero,
+    val scale: Float = 1.0f,
+    val rotation: Float = 0.0f,
+    val tilt: Float = 0.2f
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuildingMapScreen(
     viewModel: MapNavigationViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold() { innerPadding ->
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    var rotation by remember { mutableFloatStateOf(0f) }
+
+    val tilt = 0.6f
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("Maps Menu") })
+        },
+    ) { innerPadding ->
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
+            .clipToBounds()
+            .pointerInput(Unit) {
+                detectTransformGestures { _, pan, zoom, twist ->
+                    scale *= zoom
+                    scale = scale.coerceIn(0.5f, 5f)
+                    rotation += twist
+                    offset += pan
+                }
+            }
         ) {
             if (uiState.isLoadingMap) {
                 CircularProgressIndicator()
@@ -53,7 +87,13 @@ fun BuildingMapScreen(
             uiState.map?.let { map ->
                 var selectedFloor by remember { mutableStateOf(map.floors.firstOrNull()) }
                 selectedFloor?.let { floor ->
-                    FloorMap(floor = floor)
+                    FloorMap(floor = floor, MapCameraState(
+                        offset = offset,
+                        scale = scale,
+                        rotation = rotation,
+                        tilt = tilt
+                        )
+                    )
                 }
             }
         }
@@ -166,15 +206,18 @@ fun BuildingMapPreview() {
 
     FloorMap(
         floor = floor,
+        cameraState = MapCameraState(),
         zones[0],
         zones[1],
         listOf(zones[2])
     )
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 fun FloorMap(
     floor: Floor,
+    cameraState: MapCameraState,
     currentZone: Zone? = null,
     selectedZone: Zone? = null,
     pathZones: List<Zone> = emptyList()
@@ -182,33 +225,52 @@ fun FloorMap(
     val textMeasurer = rememberTextMeasurer()
     val poiPainters = rememberPoiPainters()
 
+    val (offset, scale, rotation, tilt) = cameraState
+
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MapStyles.backgroundColor)
         ) {
-            val screenCenter = Offset(size.width / 2.0f, size.height / 2.0f)
+            val center = Offset(size.width / 2.0f, size.height / 2.0f)
 
             withTransform(
                 transformBlock = {
-                    translate(left = screenCenter.x, top = screenCenter.y)
+                    translate(left = center.x + offset.x, top = center.y + offset.y)
+                    scale(scaleX = scale, scaleY = scale * tilt, pivot = Offset.Zero)
+                    rotate(degrees = rotation, pivot = Offset.Zero)
                 }
             ) {
-                drawFloor(floor, textMeasurer, currentZone, selectedZone, pathZones)
+                drawFloorPlan(floor, textMeasurer, currentZone, selectedZone, pathZones)
+            }
 
-                floor.pointsOfInterest.forEach { poi ->
-                    val color = PoiTheme.get(poi.type).color
-                    val iconPainter = poiPainters.getPainter(poi.type)
+            val rad = rotation * (kotlin.math.PI / 180.0)
+            val cos = kotlin.math.cos(rad).toFloat()
+            val sin = kotlin.math.sin(rad).toFloat()
 
-                    drawPoiPin(poi, textMeasurer, iconPainter, color)
+            floor.pointsOfInterest.forEach { poi ->
+                val color = PoiTheme.get(poi.type).color
+                val iconPainter = poiPainters.getPainter(poi.type)
+
+                val rotatedX = poi.x * cos - poi.y * sin
+                val rotatedY = poi.x * sin + poi.y * cos
+
+                val finalX = center.x + offset.x + (rotatedX * scale)
+                val finalY = center.y + offset.y + (rotatedY * scale * tilt)
+
+                withTransform({
+                    translate(left = finalX, top = finalY)
+                }) {
+                    val localPoi = poi.copy(x = 0f, y = 0f)
+                    drawPoiPin(localPoi, textMeasurer, iconPainter, color)
                 }
             }
         }
     }
 }
 
-fun DrawScope.drawFloor(
+fun DrawScope.drawFloorPlan(
     floor: Floor,
     textMeasurer: TextMeasurer,
     currentZone: Zone? = null,

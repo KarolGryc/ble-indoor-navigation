@@ -7,7 +7,7 @@ import domain.model.Wall
 
 object WallStyles {
     val wallColor = Color.Black
-    val wallThickness = 10f
+    val wallThickness = 2f
 }
 
 fun DrawScope.drawWall(
