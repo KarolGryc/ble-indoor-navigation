@@ -21,25 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import domain.model.Floor
 import domain.model.Node
 import domain.model.PointOfInterest
@@ -53,22 +40,6 @@ import kotlin.uuid.Uuid
 
 object MapStyles {
     val backgroundColor = Color.LightGray
-
-    val wallColor = Color.Black
-    val wallThickness = 5f
-
-    val zoneOpacity = 0.5f
-    val zoneNameSize = 16.sp
-    val zoneNameColor = Color.White
-    val zoneNameStrokeColor = Color.Black
-    val zoneStrokeWidth = 6f
-}
-
-enum class ZoneState(val color: Color) {
-    NONE(Color(0xADFFFFFF)),
-    SELECTED(Color(0xffff0000)),
-    CURRENT(Color(0xff2e75ff)),
-    PATH(Color(0xffffa46b))
 }
 
 @Composable
@@ -251,7 +222,8 @@ fun FloorMap(
                     drawPoiPin(
                         poi = poi,
                         iconPainter = icon,
-                        color = color
+                        color = color,
+                        textMeasurer = textMeasurer
                     )
                 }
             }
@@ -278,159 +250,6 @@ fun DrawScope.drawFloor(
     
     floor.walls.forEach {
         drawWall(it)
-    }
-}
-
-fun DrawScope.drawWall(wall: Wall) {
-    drawLine(
-        color = MapStyles.wallColor,
-        start = Offset(wall.start.x, wall.start.y),
-        end = Offset(wall.end.x, wall.end.y),
-        strokeWidth = MapStyles.wallThickness
-    )
-}
-
-fun DrawScope.drawZone(
-    zone: Zone,
-    textMeasurer: TextMeasurer,
-    state: ZoneState = ZoneState.NONE
-) {
-    val cornerPoints = zone.boundary
-    if (cornerPoints.isEmpty()) {
-        return
-    }
-
-    val path = Path().apply {
-        val startPoint = cornerPoints.first()
-        moveTo(startPoint.x, startPoint.y)
-
-        for (i in 1..< cornerPoints.size) {
-            val pos = cornerPoints[i]
-            lineTo(pos.x, pos.y)
-        }
-        close()
-    }
-
-    val zoneColor = state.color
-    drawPath(path = path, color = zoneColor, alpha = MapStyles.zoneOpacity)
-
-    val minX = cornerPoints.minBy { it.x }.x
-    val maxX = cornerPoints.maxBy { it.x }.x
-    val minY = cornerPoints.minBy { it.y }.y
-    val maxY = cornerPoints.maxBy { it.y }.y
-
-    val centerX = (minX + maxX) / 2
-    val centerY = (minY + maxY) / 2
-
-    val baseStyle = TextStyle(
-        fontSize = MapStyles.zoneNameSize,
-        fontWeight = FontWeight.Medium,
-        color = Color.Unspecified
-    )
-
-    val nameEmote = when(zone.type) {
-        ZoneType.STAIRS -> "\uD80C\uDE8D"
-        ZoneType.ELEVATOR -> "\uD83D\uDED7"
-        else -> ""
-    }
-    val textLayoutResult = textMeasurer.measure(text = "${zone.name} $nameEmote", style = baseStyle)
-    val textOffset = Offset(
-        x = centerX - textLayoutResult.size.width / 2,
-        y = centerY - textLayoutResult.size.height / 2
-    )
-
-    drawText(
-        textLayoutResult = textLayoutResult,
-        color = MapStyles.zoneNameStrokeColor,
-        topLeft = textOffset,
-        drawStyle = Stroke(width = MapStyles.zoneStrokeWidth)
-    )
-
-    drawText(
-        textLayoutResult = textLayoutResult,
-        color = MapStyles.zoneNameColor,
-        topLeft = textOffset,
-        drawStyle = Fill
-    )
-}
-
-fun DrawScope.drawPoiPin(
-    poi: PointOfInterest,
-    iconPainter: VectorPainter,
-    color: Color = Color.Red,
-    borderColor: Color = Color.White,
-    iconColor: Color = Color.White
-) {
-    val pinRadius = 24.dp.toPx()
-    val pinHeight = 60.dp.toPx()
-    val iconSize = 24.dp.toPx()
-    
-    val tip = Offset(poi.x, poi.y)
-    val pinPath = createPinPath(tip, pinRadius, pinHeight)
-    translate(left = 2f, top = 2f) {
-        drawPath(
-            path = pinPath,
-            color = Color.Black.copy(alpha = 0.3f)
-        )
-    }
-
-    drawPath(
-        path = pinPath,
-        color = color
-    )
-
-    drawPath(
-        path = pinPath,
-        color = borderColor,
-        style = Stroke(width = 3.dp.toPx())
-    )
-
-    val headCenterY = poi.y - pinHeight + pinRadius
-
-    translate(
-        left = poi.x - iconSize / 2,
-        top = headCenterY - iconSize / 2
-    ) {
-        with(iconPainter) {
-            draw(
-                size = Size(iconSize, iconSize),
-                colorFilter = ColorFilter.tint(iconColor)
-            )
-        }
-    }
-}
-
-private fun createPinPath(tipPosition: Offset, radius: Float, height: Float): Path {
-    return Path().apply {
-        moveTo(tipPosition.x, tipPosition.y)
-        
-        val centerX = tipPosition.x
-        val centerY = tipPosition.y - height + radius
-
-        val stemHeight = height - radius
-        val controlPointY = tipPosition.y - (stemHeight * 0.6f)
-        quadraticTo(
-            x1 = centerX - radius, y1 = controlPointY,
-            x2 = centerX - radius, y2 = centerY
-        )
-
-        arcTo(
-            rect = Rect(
-                left = centerX - radius,
-                top = centerY - radius,
-                right = centerX + radius,
-                bottom = centerY + radius
-            ),
-            startAngleDegrees = 180f,
-            sweepAngleDegrees = 180f,
-            forceMoveTo = false
-        )
-
-        quadraticTo(
-            x1 = centerX + radius, y1 = controlPointY,
-            x2 = tipPosition.x, y2 = tipPosition.y
-        )
-        close()
     }
 }
 
