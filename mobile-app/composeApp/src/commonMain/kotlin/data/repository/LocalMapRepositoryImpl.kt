@@ -23,7 +23,7 @@ class LocalMapRepositoryImpl(
         const val INDEX_FILE_NAME = "maps_index.json"
     }
 
-    override suspend fun getAvailableMapsInfo(): List<MapInfo> {
+    override suspend fun getMapsInfo(): List<MapInfo> {
         if (!fileIO.exists(MAPS_DIRECTORY, INDEX_FILE_NAME)) {
             return emptyList()
         }
@@ -47,15 +47,19 @@ class LocalMapRepositoryImpl(
         return BuildingMapper.mapToDomain(mapDto)
     }
 
-    override suspend fun addMap(name: String, buildingMap: BuildingMap) {
-        val buildingDto = BuildingMapper.mapToDto(buildingMap)
+    override suspend fun addMap(name: String, building: BuildingMap) {
+        val buildingDto = BuildingMapper.mapToDto(building)
         val buildingJson = json.encodeToString(buildingDto)
 
-        val safeFileName = getSafeFileName(name, buildingMap.id)
+        if (indexContains(building.id)) {
+            removeMap(building.id)
+        }
+
+        val safeFileName = getSafeFileName(name, building.id)
         fileIO.writeFile(MAPS_DIRECTORY, safeFileName, buildingJson)
 
         val newEntry = MapIndexEntry(
-            id = buildingMap.id,
+            id = building.id,
             name = safeFileName,
             displayName = name
         )
@@ -72,10 +76,27 @@ class LocalMapRepositoryImpl(
         deleteEntryFromIndex(buildingUuid)
     }
 
+    override suspend fun renameMap(buildingUuid: Uuid, newDisplayName: String) {
+        val indexEntries = loadIndex()
+        val mapEntry = indexEntries.find { it.id == buildingUuid }
+            ?: throw IllegalArgumentException("Map with ID $buildingUuid not found")
+
+        val updatedEntry = mapEntry.copy(displayName = newDisplayName)
+        val updatedEntries = indexEntries.map {
+            if (it.id == buildingUuid) updatedEntry else it
+        }
+        updateIndex(updatedEntries = updatedEntries)
+    }
+
     private suspend fun deleteEntryFromIndex(buildingUuid: Uuid) {
         val indexEntries = loadIndex()
         val updatedEntries = indexEntries.filter { it.id != buildingUuid }
         updateIndex(updatedEntries = updatedEntries)
+    }
+
+    private suspend fun indexContains(buildingUuid: Uuid): Boolean {
+        val indexEntries = loadIndex()
+        return indexEntries.any { it.id == buildingUuid }
     }
 
     private suspend fun updateIndex(entry: MapIndexEntry) {

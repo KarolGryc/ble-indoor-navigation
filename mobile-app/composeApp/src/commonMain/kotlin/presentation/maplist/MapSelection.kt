@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
@@ -56,7 +57,7 @@ import kotlin.uuid.Uuid
 data class MapAction(
     val label: String = "",
     val icon: ImageVector? = null,
-    val onClick: (Uuid) -> Unit
+    val onClick: (MapInfo) -> Unit
 )
 
 /**
@@ -69,13 +70,15 @@ data class MapAction(
 @Composable
 fun MapListScreen(
     viewModel: MapListViewModel = koinViewModel(),
-    onNavigateToMap: (Uuid) -> Unit = { _ -> }
+    onNavigateToMap: (Uuid) -> Unit = { }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingFile by remember {  mutableStateOf<File?>(null) }
     val picker = rememberFilePicker { pendingFile = it }
+
+    var renamedMapInfo by remember { mutableStateOf<MapInfo?>(null) }
 
     Scaffold(
         topBar = {
@@ -97,14 +100,11 @@ fun MapListScreen(
                 .fillMaxSize()
         ) {
             MapList(
-                maps = uiState.mapData,
+                mapInfos = uiState.mapData,
                 onMapSelected = onNavigateToMap,
                 actions = listOf(
-                    MapAction(
-                        label = "Delete",
-                        icon = Icons.Default.Delete,
-                        onClick = viewModel::removeMap
-                    )
+                    MapAction(label = "Delete", icon = Icons.Default.Delete, onClick = { viewModel.removeMap(it.id) }),
+                    MapAction(label = "Rename", icon = Icons.Default.Edit, onClick = { renamedMapInfo = it })
                 ),
                 modifier = Modifier.weight(1f)
             )
@@ -120,7 +120,20 @@ fun MapListScreen(
                         pendingFile = null
                     }
                 },
-                initialValue = pendingFile?.name ?: ""
+                initialValue = pendingFile?.name
+            )
+        }
+        if (renamedMapInfo != null) {
+            TextInputDialog(
+                title = "Rename the map",
+                onDismiss = { renamedMapInfo = null },
+                onConfirm = { name ->
+                    renamedMapInfo?.let {
+                        viewModel.renameMap(it.id, name)
+                        renamedMapInfo = null
+                    }
+                },
+                initialValue = renamedMapInfo?.name
             )
         }
     }
@@ -129,8 +142,7 @@ fun MapListScreen(
 /**
  * Single map item in a list.
  *
- * @param name The name of the map.
- * @param uuid The UUID of the map, send to .
+ * @param info Details about map .
  * @param onClick Callback invoked when the map item is clicked.
  * @param actions List of actions available for the map item.
  * @param modifier The modifier to be applied to the [MapListItem]
@@ -138,8 +150,7 @@ fun MapListScreen(
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun MapListItem(
-    name: String,
-    uuid: Uuid,
+    info: MapInfo,
     onClick: () -> Unit,
     actions: List<MapAction> = emptyList(),
     modifier: Modifier = Modifier
@@ -162,7 +173,7 @@ fun MapListItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = name,
+                text = info.name,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
@@ -192,7 +203,7 @@ fun MapListItem(
                                 },
                                 onClick = {
                                     isMenuExpended = false
-                                    action.onClick(uuid)
+                                    action.onClick(info)
                                 }
                             )
                         }
@@ -209,8 +220,7 @@ fun MapListItem(
 private fun MapListItemPreview() {
     NaviTheme {
         MapListItem(
-            name = "Map",
-            uuid = Uuid.random(),
+            info = MapInfo("Sample Map", Uuid.random()),
             onClick = {},
             actions = listOf(MapAction("Delete"){})
         )
@@ -221,7 +231,7 @@ private fun MapListItemPreview() {
 /**
  * Displays a list of maps as [MapListItem].
  *
- * @param maps The list of maps to display.
+ * @param mapInfos The list of maps to display.
  * @param onMapSelected A callback invoked when a map is selected, providing the map's UUID.
  * @param actions A list of actions available for each map item.
  * @param modifier The modifier to be applied to the [MapListItem]
@@ -229,17 +239,16 @@ private fun MapListItemPreview() {
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun MapList(
-    maps: List<MapInfo>,
+    mapInfos: List<MapInfo>,
     onMapSelected: (Uuid) -> Unit,
     actions: List<MapAction> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     LazyColumn {
-        items(maps) { map ->
+        items(mapInfos) { mapInfo ->
             MapListItem(
-                name = map.name,
-                uuid = map.id,
-                onClick = { onMapSelected(map.id) },
+                info = mapInfo,
+                onClick = { onMapSelected(mapInfo.id) },
                 actions = actions,
                 modifier = modifier
             )
@@ -253,7 +262,7 @@ fun MapList(
 private fun MapListPreview() {
     NaviTheme {
         MapList(
-            maps = listOf(
+            mapInfos = listOf(
                 MapInfo("Map 1", Uuid.random()),
                 MapInfo("Map 2", Uuid.random()),
                 MapInfo("Map 3", Uuid.random())

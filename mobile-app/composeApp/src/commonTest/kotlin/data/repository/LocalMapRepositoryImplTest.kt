@@ -46,7 +46,7 @@ class LocalMapRepositoryImplTest {
     fun `getAvailableMapsInfo returns empty list when index does not exist`() = runTest {
         // Given: Empty file system (no index file)
         // When
-        val result = repository.getAvailableMapsInfo()
+        val result = repository.getMapsInfo()
 
         // Then
         assertTrue(result.isEmpty())
@@ -74,7 +74,7 @@ class LocalMapRepositoryImplTest {
             "Index file should exist"
         )
 
-        val mapsList = repository.getAvailableMapsInfo()
+        val mapsList = repository.getMapsInfo()
         assertEquals(1, mapsList.size)
         assertEquals(mapName, mapsList[0].name)
         assertEquals(mapId, mapsList[0].id)
@@ -120,7 +120,7 @@ class LocalMapRepositoryImplTest {
         repository.addMap("Map 2", map2)
 
         // Then
-        val availableMaps = repository.getAvailableMapsInfo()
+        val availableMaps = repository.getMapsInfo()
         assertEquals(2, availableMaps.size)
         assertTrue(availableMaps.any { it.id == map1.id })
         assertTrue(availableMaps.any { it.id == map2.id })
@@ -138,7 +138,7 @@ class LocalMapRepositoryImplTest {
         repository.removeMap(mapId)
 
         // Then
-        val availableMaps = repository.getAvailableMapsInfo()
+        val availableMaps = repository.getMapsInfo()
         assertTrue(
             availableMaps.any { it.id == mapId},
             "Index should be empty after removal"

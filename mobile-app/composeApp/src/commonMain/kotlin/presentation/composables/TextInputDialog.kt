@@ -17,12 +17,12 @@ import androidx.compose.ui.focus.focusRequester
 @Composable
 fun TextInputDialog(
     title: String,
-    initialValue: String = "",
+    initialValue: String? = "",
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
     placeholder: String = ""
 ) {
-    var text by remember { mutableStateOf(initialValue) }
+    var text by remember { mutableStateOf(initialValue ?: "") }
     val focusRequester = remember { FocusRequester() }
 
     AlertDialog(

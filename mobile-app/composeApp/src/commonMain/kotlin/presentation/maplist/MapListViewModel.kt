@@ -36,7 +36,7 @@ class MapListViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val maps = mapRepository.getAvailableMapsInfo()
+                val maps = mapRepository.getMapsInfo()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -74,6 +74,13 @@ class MapListViewModel(
     fun removeMap(buildingUuid: Uuid) {
         viewModelScope.launch {
             mapRepository.removeMap(buildingUuid)
+            loadMapList()
+        }
+    }
+
+    fun renameMap(buildingUuid: Uuid, newName: String) {
+        viewModelScope.launch {
+            mapRepository.renameMap(buildingUuid, newName)
             loadMapList()
         }
     }
