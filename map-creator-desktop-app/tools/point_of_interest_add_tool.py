@@ -13,11 +13,10 @@ if TYPE_CHECKING:
     from main_map_controller import MainMapController
 
 class PointOfInterestAddTool(Tool):
-    def __init__(self, 
-                 presenter: MainMapController, 
-                 scene: QGraphicsScene, 
-                 name="Add Place"):
-        super().__init__(presenter, scene, name)
+    name = "Add Place"
+
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene):
+        super().__init__(presenter, scene)
         self._preview = PointOfInterestPreview(scene)
 
     def deactivate(self):

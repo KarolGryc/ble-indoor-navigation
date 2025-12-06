@@ -68,14 +68,14 @@ class MainMapController(QObject):
         return self._current_tool
 
     @current_tool.setter
-    def current_tool(self, tool: Tool):
-        if type(tool) == type(self._current_tool):
+    def current_tool(self, tool_type: type[Tool]):
+        if tool_type == type(self._current_tool):
             return
         
         if self._current_tool is not None:
             self._current_tool.deactivate()
 
-        self._current_tool = tool
+        self._current_tool = tool_type(self, self.scene)
 
     def reset_current_tool(self):
         if self._current_tool is not None:
@@ -102,6 +102,8 @@ class MainMapController(QObject):
     
     @building.setter
     def building(self, building: Building):
+        self._undo_stack.clear()
+        self._current_tool = type(self._current_tool)(self, self.scene) if self._current_tool else None
         self.model = building
         self._current_floor = self.model.get_floor(0)
         self._redraw_scene()

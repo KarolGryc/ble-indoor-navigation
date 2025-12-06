@@ -12,11 +12,10 @@ if TYPE_CHECKING:
     from main_map_controller import MainMapController
 
 class SelectTool(Tool):
-    def __init__(self, 
-                 presenter: MainMapController, 
-                 scene: QGraphicsScene, 
-                 name="Select and Move"):
-        super().__init__(presenter, scene, name)
+    name = "Select and Move"
+
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene):
+        super().__init__(presenter, scene)
 
         self._is_dragging = False
         self._start_pos = None

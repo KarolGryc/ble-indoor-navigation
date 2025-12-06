@@ -10,6 +10,7 @@ class AppMenu(QMenuBar):
     map_theme_triggered = Signal(MapTheme)
     save_requested = Signal()
     load_requested = Signal()
+    new_file_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -20,6 +21,11 @@ class AppMenu(QMenuBar):
 
     def _create_file_menu(self):
         file_menu = self.addMenu("File")
+
+        new_action = QAction("New", self)
+        new_action.setShortcut(QKeySequence.New)
+        new_action.triggered.connect(self.new_file_requested)
+        file_menu.addAction(new_action)
 
         save_action = QAction("Save", self)
         save_action.setShortcut(QKeySequence.Save)

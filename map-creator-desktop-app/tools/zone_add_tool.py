@@ -15,8 +15,10 @@ if TYPE_CHECKING:
     from main_map_controller import MainMapController
 
 class ZoneAddTool(Tool):
-    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Add Zone"):
-        super().__init__(presenter, scene, name)
+    name = "Add Zone"
+
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene):
+        super().__init__(presenter, scene)
         self._corner_points = []
 
         self._preview = ZonePreview(scene)

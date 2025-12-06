@@ -14,11 +14,10 @@ if TYPE_CHECKING:
 
 
 class RenamingTool(Tool):
-    def __init__(self,
-                 presenter: MainMapController,
-                 scene: QGraphicsScene,
-                 name="Rename"):
-        super().__init__(presenter, scene, name)
+    name = "Rename"
+
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene):
+        super().__init__(presenter, scene)
 
     def mouse_click(self, pos, modifier=None):
         item = self._scene.itemAt(pos, QTransform())

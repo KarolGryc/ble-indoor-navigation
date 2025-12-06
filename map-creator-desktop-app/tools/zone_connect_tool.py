@@ -15,11 +15,11 @@ if TYPE_CHECKING:
     from main_map_controller import MainMapController
 
 class ZoneConnectTool(Tool):
+    name = "Zone connection management"
     def __init__(self, 
                  controller: MainMapController, 
-                 scene: InteractiveScene, 
-                 name="Zone connection management"):
-        super().__init__(controller, scene, name)
+                 scene: InteractiveScene):
+        super().__init__(controller, scene)
         self._highlight_preview = HighlightPreview()
 
     def mouse_click(self, pos, modifier=None):

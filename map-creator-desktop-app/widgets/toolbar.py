@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class Toolbar(QToolBar):
     def __init__(self, 
                  presenter: MainMapController, 
-                 tool_set: list[Tool], 
+                 tool_set: list[type[Tool]], 
                  tool_icon_map: dict[type, str] = {}):
         super().__init__("Main Toolbar")
         self._presenter = presenter
@@ -35,7 +35,7 @@ class Toolbar(QToolBar):
             self.addWidget(button)
             button.setText(tool.name)
 
-            path = tool_icon_map.get(type(tool), None)
+            path = tool_icon_map.get(tool, None)
             if path:
                 pixmap = QPixmap(path)
                 mask = pixmap.mask()
@@ -48,7 +48,7 @@ class Toolbar(QToolBar):
             button.setIcon(icon)
             
             button.setToolTip(tool.name)
-            button.clicked.connect(lambda checked, t=tool: self._set_current_tool(t))
+            button.clicked.connect(lambda ch, t=tool: self._set_current_tool(t))
             group.addButton(button)
 
         self.addSeparator()

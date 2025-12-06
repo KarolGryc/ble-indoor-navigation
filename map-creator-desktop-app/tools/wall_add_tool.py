@@ -11,8 +11,10 @@ if TYPE_CHECKING:
     from main_map_controller import MainMapController
 
 class WallAddTool(Tool):
-    def __init__(self, presenter: MainMapController, scene: QGraphicsScene, name="Add Wall"):
-        super().__init__(presenter, scene, name)
+    name = "Add Wall"
+
+    def __init__(self, presenter: MainMapController, scene: QGraphicsScene):
+        super().__init__(presenter, scene)
 
         self._start_point = None
         self._preview = WallPreview(scene)

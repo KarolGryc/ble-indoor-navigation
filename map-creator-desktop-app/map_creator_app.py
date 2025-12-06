@@ -26,8 +26,6 @@ from widgets import (
 
 from commands import FloorAddCommand, FloorRemoveCommand
 
-from building_serializer import BuildingSerializer
-
 from utils.general import ask_floor_name, load_building, save_building
 
 from constants import icons, GRID_SIZE_DEFAULT
@@ -47,6 +45,7 @@ class MapCreatorApp(QMainWindow):
 
         self._setup_core()
         self._setup_ui()
+        self._setup_shortcuts()
 
     def _setup_window(self, screen_size, window_title):
         self.setWindowTitle(window_title)
@@ -103,21 +102,18 @@ class MapCreatorApp(QMainWindow):
 
         self._create_menu_bar(self._controller, self._floor_view)
 
-    def _setup_signals(self):
-        pass
-
-    def _setup_shorcuts(self):
+    def _setup_shortcuts(self):
         delete_shortcut = QShortcut(QKeySequence(Qt.Key_Escape), self)
         delete_shortcut.activated.connect(self._controller.reset_current_tool)
 
     def _setup_toolbar(self):
         tools = [
-            WallAddTool(self._controller, self._scene),
-            SelectTool(self._controller, self._scene),
-            ZoneAddTool(self._controller, self._scene),
-            RenamingTool(self._controller, self._scene),
-            PointOfInterestAddTool(self._controller, self._scene),
-            ZoneConnectTool(self._controller, self._scene)
+            WallAddTool,
+            SelectTool,
+            ZoneAddTool,
+            RenamingTool,
+            PointOfInterestAddTool,
+            ZoneConnectTool
         ]
 
         tool_icon_map = {
@@ -164,11 +160,17 @@ class MapCreatorApp(QMainWindow):
         if new_name:
             floor.name = new_name
     
+    def _reset_state(self):
+        building = Building()
+        building.add_floor(Floor("Ground Floor"))
+        self._controller.building = building
+
     def _create_menu_bar(self, presenter: MainMapController, view: FloorView):
         self.menu_bar = AppMenu(self)
         self.setMenuBar(self.menu_bar)
 
         # File signals
+        # self.menu_bar.new_file_requested.connect(self._reset_state)
         self.menu_bar.load_requested.connect(lambda: setattr(self._controller, 'building', load_building(self)))
         self.menu_bar.save_requested.connect(lambda: save_building(self, self._building_model))
         

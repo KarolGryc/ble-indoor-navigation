@@ -9,13 +9,12 @@ if TYPE_CHECKING:
     from main_map_controller import MainMapController
 
 class Tool(ABC):
+    name = "Generic Tool"
     def __init__(self, 
                  controller: MainMapController, 
-                 scene: QGraphicsScene, 
-                 name="Generic Tool"):
+                 scene: QGraphicsScene):
         self._controller = controller
         self._scene = scene
-        self.name = name
 
     def mouse_click(self, pos, modifier=None):
         pass
