@@ -5,6 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DoorFront
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.ShoppingBasket
+import androidx.compose.material.icons.filled.Wc
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,20 +21,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import domain.model.Floor
 import domain.model.Node
+import domain.model.PointOfInterest
+import domain.model.PointOfInterestType
 import domain.model.Wall
 import domain.model.Zone
 import domain.model.ZoneType
@@ -49,11 +64,11 @@ object MapStyles {
     val zoneStrokeWidth = 6f
 }
 
-enum class ZoneState(val color: Long) {
-    NONE(0xFFd6e4ff),
-    SELECTED(0xffff0000),
-    CURRENT(0xff2e75ff),
-    PATH(0xffffa46b)
+enum class ZoneState(val color: Color) {
+    NONE(Color(0xADFFFFFF)),
+    SELECTED(Color(0xffff0000)),
+    CURRENT(Color(0xff2e75ff)),
+    PATH(Color(0xffffa46b))
 }
 
 @Composable
@@ -139,12 +154,50 @@ fun BuildingMapPreview() {
         )
     )
 
+    val pois = listOf(
+        PointOfInterest(
+            Uuid.random(),
+            name = "Shop",
+            x = 0f,
+            y = 0f,
+            type = PointOfInterestType.SHOP
+        ),
+        PointOfInterest(
+            Uuid.random(),
+            name = "Generic",
+            x = 200f,
+            y = 200f,
+            type = PointOfInterestType.GENERIC
+        ),
+        PointOfInterest(
+            Uuid.random(),
+            name = "Toilet",
+            x = -200f,
+            y = -200f,
+            type = PointOfInterestType.TOILET
+        ),
+        PointOfInterest(
+            id = Uuid.random(),
+            name = "Exit",
+            x = 200f,
+            y = -200f,
+            type = PointOfInterestType.EXIT
+        ),
+        PointOfInterest(
+            id = Uuid.random(),
+            name = "Restaurant",
+            x = -200f,
+            y = 200f,
+            type = PointOfInterestType.RESTAURANT
+        )
+    )
+
     val floor = Floor(
         id = Uuid.random(),
         name = "Piętro 1",
         walls = walls,
         zones = zones,
-        pointsOfInterest = emptyList()
+        pointsOfInterest = pois
     )
 
     FloorMap(
@@ -164,6 +217,12 @@ fun FloorMap(
 ) {
     val textMeasurer = rememberTextMeasurer()
 
+    val defaultIcon = rememberVectorPainter(Icons.Default.Explore)
+    val exitIcon = rememberVectorPainter(Icons.Default.DoorFront)
+    val wcIcon = rememberVectorPainter(Icons.Default.Wc)
+    val shopIcon = rememberVectorPainter(Icons.Default.ShoppingBasket)
+    val restaurantIcon = rememberVectorPainter(Icons.Default.Restaurant)
+
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(
             modifier = Modifier
@@ -178,6 +237,23 @@ fun FloorMap(
                 }
             ) {
                 drawFloor(floor, textMeasurer, currentZone, selectedZone, pathZones)
+
+                floor.pointsOfInterest.forEach { poi ->
+
+                    val (icon, color) = when (poi.type) {
+                        PointOfInterestType.GENERIC -> defaultIcon to Color(0xFFD41F1F)
+                        PointOfInterestType.TOILET -> wcIcon to Color(0xFF2166E5)
+                        PointOfInterestType.SHOP -> shopIcon to Color(0xFFEE6A52)
+                        PointOfInterestType.RESTAURANT -> restaurantIcon to Color(0xFFF5B400)
+                        PointOfInterestType.EXIT -> exitIcon to Color(0xFF2A7F00)
+                    }
+
+                    drawPoiPin(
+                        poi = poi,
+                        iconPainter = icon,
+                        color = color
+                    )
+                }
             }
         }
     }
@@ -235,7 +311,7 @@ fun DrawScope.drawZone(
         close()
     }
 
-    val zoneColor = Color(state.color)
+    val zoneColor = state.color
     drawPath(path = path, color = zoneColor, alpha = MapStyles.zoneOpacity)
 
     val minX = cornerPoints.minBy { it.x }.x
@@ -276,6 +352,86 @@ fun DrawScope.drawZone(
         topLeft = textOffset,
         drawStyle = Fill
     )
+}
+
+fun DrawScope.drawPoiPin(
+    poi: PointOfInterest,
+    iconPainter: VectorPainter,
+    color: Color = Color.Red,
+    borderColor: Color = Color.White,
+    iconColor: Color = Color.White
+) {
+    val pinRadius = 24.dp.toPx()
+    val pinHeight = 60.dp.toPx()
+    val iconSize = 24.dp.toPx()
+    
+    val tip = Offset(poi.x, poi.y)
+    val pinPath = createPinPath(tip, pinRadius, pinHeight)
+    translate(left = 2f, top = 2f) {
+        drawPath(
+            path = pinPath,
+            color = Color.Black.copy(alpha = 0.3f)
+        )
+    }
+
+    drawPath(
+        path = pinPath,
+        color = color
+    )
+
+    drawPath(
+        path = pinPath,
+        color = borderColor,
+        style = Stroke(width = 3.dp.toPx())
+    )
+
+    val headCenterY = poi.y - pinHeight + pinRadius
+
+    translate(
+        left = poi.x - iconSize / 2,
+        top = headCenterY - iconSize / 2
+    ) {
+        with(iconPainter) {
+            draw(
+                size = Size(iconSize, iconSize),
+                colorFilter = ColorFilter.tint(iconColor)
+            )
+        }
+    }
+}
+
+private fun createPinPath(tipPosition: Offset, radius: Float, height: Float): Path {
+    return Path().apply {
+        moveTo(tipPosition.x, tipPosition.y)
+        
+        val centerX = tipPosition.x
+        val centerY = tipPosition.y - height + radius
+
+        val stemHeight = height - radius
+        val controlPointY = tipPosition.y - (stemHeight * 0.6f)
+        quadraticTo(
+            x1 = centerX - radius, y1 = controlPointY,
+            x2 = centerX - radius, y2 = centerY
+        )
+
+        arcTo(
+            rect = Rect(
+                left = centerX - radius,
+                top = centerY - radius,
+                right = centerX + radius,
+                bottom = centerY + radius
+            ),
+            startAngleDegrees = 180f,
+            sweepAngleDegrees = 180f,
+            forceMoveTo = false
+        )
+
+        quadraticTo(
+            x1 = centerX + radius, y1 = controlPointY,
+            x2 = tipPosition.x, y2 = tipPosition.y
+        )
+        close()
+    }
 }
 
 //@Composable
