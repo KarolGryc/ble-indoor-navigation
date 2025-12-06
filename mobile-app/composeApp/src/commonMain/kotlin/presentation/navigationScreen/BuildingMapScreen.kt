@@ -5,12 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DoorFront
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingBasket
-import androidx.compose.material.icons.filled.Wc
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -24,7 +18,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
 import domain.model.Floor
@@ -187,12 +180,7 @@ fun FloorMap(
     pathZones: List<Zone> = emptyList()
 ) {
     val textMeasurer = rememberTextMeasurer()
-
-    val defaultIcon = rememberVectorPainter(Icons.Default.Explore)
-    val exitIcon = rememberVectorPainter(Icons.Default.DoorFront)
-    val wcIcon = rememberVectorPainter(Icons.Default.Wc)
-    val shopIcon = rememberVectorPainter(Icons.Default.ShoppingBasket)
-    val restaurantIcon = rememberVectorPainter(Icons.Default.Restaurant)
+    val poiPainters = rememberPoiPainters()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Canvas(
@@ -210,21 +198,10 @@ fun FloorMap(
                 drawFloor(floor, textMeasurer, currentZone, selectedZone, pathZones)
 
                 floor.pointsOfInterest.forEach { poi ->
+                    val color = PoiTheme.get(poi.type).color
+                    val iconPainter = poiPainters.getPainter(poi.type)
 
-                    val (icon, color) = when (poi.type) {
-                        PointOfInterestType.GENERIC -> defaultIcon to Color(0xFFD41F1F)
-                        PointOfInterestType.TOILET -> wcIcon to Color(0xFF2166E5)
-                        PointOfInterestType.SHOP -> shopIcon to Color(0xFFEE6A52)
-                        PointOfInterestType.RESTAURANT -> restaurantIcon to Color(0xFFF5B400)
-                        PointOfInterestType.EXIT -> exitIcon to Color(0xFF2A7F00)
-                    }
-
-                    drawPoiPin(
-                        poi = poi,
-                        iconPainter = icon,
-                        color = color,
-                        textMeasurer = textMeasurer
-                    )
+                    drawPoiPin(poi, textMeasurer, iconPainter, color)
                 }
             }
         }
@@ -238,6 +215,10 @@ fun DrawScope.drawFloor(
     selectedZone: Zone? = null,
     pathZones: List<Zone> = emptyList()
 ) {
+    floor.walls.forEach {
+        drawWall(it)
+    }
+
     floor.zones.forEach {
         val zoneState = when {
             it === selectedZone -> ZoneState.SELECTED
@@ -246,10 +227,6 @@ fun DrawScope.drawFloor(
             else -> ZoneState.NONE
         }
         drawZone(it, textMeasurer, zoneState)
-    }
-    
-    floor.walls.forEach {
-        drawWall(it)
     }
 }
 
@@ -296,85 +273,4 @@ fun DrawScope.drawFloor(
 //            }
 //        }
 //    }
-//}
-//
-//fun DrawScope.drawFloorBase(floor: Floor, textMeasurer: TextMeasurer) {
-//    floor.zones.forEach { zone ->
-//        drawZone(zone, textMeasurer)
-//    }
-//    floor.walls.forEach { wall ->
-//        drawWall(wall)
-//    }
-//}
-//
-//fun DrawScope.drawWall(wall: Wall) {
-//    drawLine(
-//        color = MapStyles.WallColor,
-//        start = Offset(wall.start.x, wall.start.y),
-//        end = Offset(wall.end.x, wall.end.y),
-//        strokeWidth = MapStyles.WALL_THICKNESS
-//    )
-//}
-//
-//fun DrawScope.drawZone(zone: Zone, textMeasurer: TextMeasurer) {
-//    if (zone.boundary.isEmpty()) return
-//
-//    val path = Path().apply {
-//        moveTo(zone.boundary.first().x, zone.boundary.first().y)
-//        for (i in 1 until zone.boundary.size) {
-//            lineTo(zone.boundary[i].x, zone.boundary[i].y)
-//        }
-//        close()
-//    }
-//
-//    drawPath(
-//        path = path,
-//        color = when (zone.type) {
-//            ZoneType.STAIRS -> Color.Yellow.copy(alpha = 0.3f)
-//            ZoneType.ELEVATOR -> Color.Red.copy(alpha = 0.3f)
-//            else -> MapStyles.ZoneColor
-//        }
-//    )
-//
-//    drawPath(
-//        path = path,
-//        color = MapStyles.ZoneBorderColor,
-//        style = Stroke(width = 2f)
-//    )
-//
-//    val centerX = zone.boundary.map { it.x }.average().toFloat()
-//    val centerY = zone.boundary.map { it.y }.average().toFloat()
-//
-//    val textStyle = TextStyle(
-//        color = Color.Black,
-//        fontSize = 14.sp,
-//        fontWeight = FontWeight.Medium
-//    )
-//
-//    val textLayoutResult = textMeasurer.measure(
-//        text = zone.name,
-//        style = textStyle
-//    )
-//
-//    drawText(
-//        textLayoutResult = textLayoutResult,
-//        topLeft = Offset(
-//            x = centerX - textLayoutResult.size.width / 2,
-//            y = centerY - textLayoutResult.size.height / 2
-//        )
-//    )
-//}
-//
-//fun DrawScope.drawPoi(poi: PointOfInterest) {
-//    val color = when (poi.type) {
-//        PointOfInterestType.TOILET -> Color.Cyan
-//        PointOfInterestType.EXIT -> Color.Green
-//        else -> MapStyles.POIColor
-//    }
-//
-//    drawCircle(
-//        color = color,
-//        radius = MapStyles.POI_RADIUS,
-//        center = Offset(poi.x, poi.y)
-//    )
 //}
