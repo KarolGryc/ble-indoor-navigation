@@ -58,12 +58,7 @@ class LocalMapRepositoryImpl(
         val safeFileName = getSafeFileName(name, building.id)
         fileIO.writeFile(MAPS_DIRECTORY, safeFileName, buildingJson)
 
-        val newEntry = MapIndexEntry(
-            id = building.id,
-            name = safeFileName,
-            displayName = name
-        )
-        updateIndex(entry = newEntry)
+        addToIndex(MapIndexEntry(id = building.id, name = safeFileName, displayName = name))
     }
 
     override suspend fun removeMap(buildingUuid: Uuid) {
@@ -73,7 +68,7 @@ class LocalMapRepositoryImpl(
 
         fileIO.deleteFile(MAPS_DIRECTORY, mapEntry.name)
 
-        deleteEntryFromIndex(buildingUuid)
+        deleteFromIndex(buildingUuid)
     }
 
     override suspend fun renameMap(buildingUuid: Uuid, newDisplayName: String) {
@@ -88,7 +83,14 @@ class LocalMapRepositoryImpl(
         updateIndex(updatedEntries = updatedEntries)
     }
 
-    private suspend fun deleteEntryFromIndex(buildingUuid: Uuid) {
+
+    private suspend fun addToIndex(entry: MapIndexEntry) {
+        val indexEntries = loadIndex().toMutableList()
+        indexEntries.add(entry)
+        updateIndex(updatedEntries = indexEntries)
+    }
+
+    private suspend fun deleteFromIndex(buildingUuid: Uuid) {
         val indexEntries = loadIndex()
         val updatedEntries = indexEntries.filter { it.id != buildingUuid }
         updateIndex(updatedEntries = updatedEntries)
@@ -97,10 +99,6 @@ class LocalMapRepositoryImpl(
     private suspend fun indexContains(buildingUuid: Uuid): Boolean {
         val indexEntries = loadIndex()
         return indexEntries.any { it.id == buildingUuid }
-    }
-
-    private suspend fun updateIndex(entry: MapIndexEntry) {
-        updateIndex(listOf(entry))
     }
 
     private suspend fun updateIndex(updatedEntries: List<MapIndexEntry>) {

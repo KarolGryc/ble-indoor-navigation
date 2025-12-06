@@ -23,6 +23,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.sp
 import domain.model.Floor
 import domain.model.PointOfInterest
 import domain.model.PointOfInterestType
@@ -43,7 +49,6 @@ object MapStyles {
 fun BuildingMapScreen(
     viewModel: MapNavigationViewModel
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
     Scaffold() { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -52,7 +57,7 @@ fun BuildingMapScreen(
             }
 
             uiState.map?.let { map ->
-                BuildingMapScreen(
+                BuildingMap(
                     map.floors
                 )
             }
@@ -61,7 +66,7 @@ fun BuildingMapScreen(
 }
 
 @Composable
-fun BuildingMapScreen(
+fun BuildingMap(
     floors: List<Floor>
 ) {
     var selectedFloor by remember { mutableStateOf(floors.firstOrNull()) }
@@ -71,38 +76,54 @@ fun BuildingMapScreen(
     }
 }
 
+
+
 @Composable
 fun ZoomableMap(floor: Floor) {
+    var rotation by remember { mutableFloatStateOf(0f) }
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    val textMeasurer = rememberTextMeasurer()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, _ ->
+                detectTransformGestures { _, pan, zoom, twist ->
                     scale *= zoom
                     scale = scale.coerceIn(0.5f, 5f)
-
                     offset += pan
+                    rotation += twist
                 }
             }
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+//                .graphicsLayer {
+//                    rotationX = 45f
+//                    cameraDistance = 12f * density
+//                }
+        ) {
+            val centerX = size.width / 2
+            val centerY = size.height / 2
+
             withTransform({
-                translate(left = offset.x, top = offset.y)
+                translate(left = centerX, top = centerY) // Move to composable center
+                translate(left = offset.x, top = offset.y) // Move to panned position
+                rotate(rotation, pivot = Offset.Zero)
                 scale(scale, pivot = Offset.Zero)
             }) {
-                drawFloor(floor)
+                drawFloor(floor, textMeasurer)
             }
         }
     }
 }
 
 
-fun DrawScope.drawFloor(floor: Floor) {
+fun DrawScope.drawFloor(floor: Floor, textMeasurer: TextMeasurer) {
     floor.zones.forEach { zone ->
-        drawZone(zone)
+        drawZone(zone, textMeasurer)
     }
 
     floor.walls.forEach { wall ->
@@ -123,7 +144,7 @@ fun DrawScope.drawWall(wall: Wall) {
     )
 }
 
-fun DrawScope.drawZone(zone: Zone) {
+fun DrawScope.drawZone(zone: Zone, textMeasurer: TextMeasurer) {
     if (zone.boundary.isEmpty()) return
 
     val path = Path().apply {
@@ -147,6 +168,28 @@ fun DrawScope.drawZone(zone: Zone) {
         path = path,
         color = MapStyles.ZoneBorderColor,
         style = Stroke(width = 2f)
+    )
+
+    val centerX = zone.boundary.map { it.x }.average().toFloat()
+    val centerY = zone.boundary.map { it.y }.average().toFloat()
+
+    val textStyle = TextStyle(
+        color = Color.Black,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium
+    )
+
+    val textLayoutResult = textMeasurer.measure(
+        text = zone.name,
+        style = textStyle
+    )
+
+    drawText(
+        textLayoutResult = textLayoutResult,
+        topLeft = Offset(
+            x = centerX - textLayoutResult.size.width / 2,
+            y = centerY - textLayoutResult.size.height / 2
+        )
     )
 }
 
