@@ -4,7 +4,7 @@ import data.dto.BuildingMapDto
 import data.dto.UuidSerializer
 import data.filesystemProviders.IoFileService
 import data.mapper.BuildingMapper
-import domain.model.BuildingMap
+import domain.model.Building
 import domain.repository.BuildingMapRepository
 import domain.repository.MapInfo
 import kotlinx.serialization.Serializable
@@ -36,7 +36,7 @@ class LocalMapRepositoryImpl(
         }
     }
 
-    override suspend fun getMap(buildingUuid: Uuid): BuildingMap {
+    override suspend fun getBuildingMap(buildingUuid: Uuid): Building {
         val indexEntries = loadIndex()
         val mapEntry = indexEntries.find { it.id == buildingUuid }
             ?: throw IllegalArgumentException("Map with ID $buildingUuid not found")
@@ -47,7 +47,7 @@ class LocalMapRepositoryImpl(
         return BuildingMapper.mapToDomain(mapDto)
     }
 
-    override suspend fun addMap(name: String, building: BuildingMap) {
+    override suspend fun addMap(name: String, building: Building) {
         val buildingDto = BuildingMapper.mapToDto(building)
         val buildingJson = json.encodeToString(buildingDto)
 

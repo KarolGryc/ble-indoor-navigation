@@ -7,7 +7,7 @@ import data.dto.PointOfInterestDto
 import data.dto.WallDto
 import data.dto.ZoneConnectionDto
 import data.dto.ZoneDto
-import domain.model.BuildingMap
+import domain.model.Building
 import domain.model.Floor
 import domain.model.Node
 import domain.model.PointOfInterest
@@ -21,7 +21,7 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 object BuildingMapper {
-    fun mapToDomain(dto: BuildingMapDto): BuildingMap {
+    fun mapToDomain(dto: BuildingMapDto): Building {
         val mappedFloors = dto.floors.map { mapFloorToDomain(it) }
 
         val allZonesMap: Map<Uuid, Zone> = mappedFloors
@@ -39,14 +39,14 @@ object BuildingMapper {
             }
         }
 
-        return BuildingMap(
+        return Building(
             id = dto.id,
             floors = mappedFloors,
             zoneConnections = mappedConnections
         )
     }
 
-    fun mapToDto(domain: BuildingMap): BuildingMapDto {
+    fun mapToDto(domain: Building): BuildingMapDto {
         val floorsDto = domain.floors.map { mapFloorToDto(it) }
 
         val connectionsDto = domain.zoneConnections.map { conn ->

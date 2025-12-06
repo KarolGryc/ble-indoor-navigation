@@ -4,7 +4,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -25,8 +24,11 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinMultiplatformApplication
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.core.parameter.parametersOf
 import presentation.maplist.MapListScreen
+import presentation.navigationScreen.BuildingMapScreen
 import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @OptIn(KoinExperimentalAPI::class, ExperimentalUuidApi::class)
 @Composable
@@ -65,8 +67,15 @@ fun App() {
                     arguments = listOf(navArgument("mapId") { type = NavType.StringType } )
                 ) { backStackEntry ->
                     val mapIdString = backStackEntry.savedStateHandle.get<String>("mapId") ?: ""
+                    val mapUuid = try {
+                        Uuid.parse(mapIdString)
+                    } catch (e: Exception) {
+                        null
+                    }
 
-                    Text("Odebrano ID: $mapIdString")
+                    BuildingMapScreen(
+                        viewModel = koinViewModel { parametersOf(mapUuid) }
+                    )
                 }
             }
         }

@@ -1,7 +1,7 @@
 package data.repository
 
 import data.filesystemProviders.IoFileService
-import domain.model.BuildingMap
+import domain.model.Building
 import domain.model.Floor
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -89,7 +89,7 @@ class LocalMapRepositoryImplTest {
         repository.addMap("Test Map", map)
 
         // When
-        val retrievedMap = repository.getMap(mapId)
+        val retrievedMap = repository.getBuildingMap(mapId)
 
         // Then
         assertEquals(map.id, retrievedMap.id)
@@ -104,7 +104,7 @@ class LocalMapRepositoryImplTest {
 
         // When / Then
         assertFailsWith<IllegalArgumentException> {
-            repository.getMap(randomId)
+            repository.getBuildingMap(randomId)
         }
     }
 
@@ -151,8 +151,8 @@ class LocalMapRepositoryImplTest {
         )
     }
 
-    private fun createDummyMap(id: Uuid): BuildingMap {
-        return BuildingMap(
+    private fun createDummyMap(id: Uuid): Building {
+        return Building(
             id = id,
             floors = listOf(
                 Floor(

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.dto.BuildingMapDto
 import data.mapper.BuildingMapper
-import domain.model.BuildingMap
+import domain.model.Building
 import domain.repository.BuildingMapRepository
 import domain.repository.MapInfo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,9 +55,9 @@ class MapListViewModel(
         }
     }
 
-    fun addMap(name: String, buildingMap: BuildingMap) {
+    fun addMap(name: String, building: Building) {
         viewModelScope.launch {
-            mapRepository.addMap(name, buildingMap)
+            mapRepository.addMap(name, building)
             loadMapList()
         }
     }

@@ -4,7 +4,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-data class BuildingMap (
+data class Building (
     val id: Uuid,
     val floors: List<Floor>,
     val zoneConnections: List<ZoneConnection>

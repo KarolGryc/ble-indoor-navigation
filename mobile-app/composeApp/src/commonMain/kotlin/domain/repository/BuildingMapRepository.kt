@@ -1,14 +1,14 @@
 package domain.repository
 
-import domain.model.BuildingMap
+import domain.model.Building
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 interface BuildingMapRepository {
     suspend fun getMapsInfo(): List<MapInfo>
-    suspend fun getMap(buildingUuid: Uuid): BuildingMap
-    suspend fun addMap(name: String, building: BuildingMap)
+    suspend fun getBuildingMap(buildingUuid: Uuid): Building
+    suspend fun addMap(name: String, building: Building)
     suspend fun removeMap(buildingUuid: Uuid)
     suspend fun renameMap(buildingUuid: Uuid, newDisplayName: String)
 }
