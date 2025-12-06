@@ -83,7 +83,7 @@ class MapCreatorApp(QMainWindow):
         layers_panel = LayersPanel(self._scene)
         layers_panel.active_class_changed.connect(lambda t: setattr(self._scene, "active_item_type", t))
 
-        floor_list = AutoSyncFloorList(self._building_model)
+        floor_list = AutoSyncFloorList(self._controller)
         floor_list.floor_selected.connect(
             lambda floor: setattr(self._controller, 'current_floor', floor)
         )

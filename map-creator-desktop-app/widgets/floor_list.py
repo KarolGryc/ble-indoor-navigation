@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
@@ -6,17 +9,23 @@ from PySide6.QtWidgets import (
 
 from model import Building, Floor
 
+if TYPE_CHECKING:
+    from main_map_controller import MainMapController
+
 class AutoSyncFloorList(QWidget):
     floor_selected = Signal(Floor)
     add_floor_request = Signal()
     remove_floor_request = Signal(Floor)
     rename_floor_request = Signal(Floor)
 
-    def __init__(self, building: Building, parent=None):
+    def __init__(self, controller: MainMapController, parent=None):
         super().__init__(parent)
 
+        self._controller = controller
+        self._controller.building_changed.connect(self._on_building_changed)
+
         # assign building and connect signals
-        self._building = building
+        self._building = controller.building
         self._building.floor_added.connect(self.refresh_view)
         self._building.floor_removed.connect(self.refresh_view)
         self._building.floor_name_changed.connect(self.refresh_view)
@@ -76,6 +85,16 @@ class AutoSyncFloorList(QWidget):
         if current is not None:
             clicked_floor = current.data(Qt.UserRole)
             self.floor_selected.emit(clicked_floor)
+
+    def _on_building_changed(self, building: Building):
+        self._building.floor_added.disconnect(self.refresh_view)
+        self._building.floor_removed.disconnect(self.refresh_view)
+        self._building.floor_name_changed.disconnect(self.refresh_view)
+        self._building = building
+        self._building.floor_added.connect(self.refresh_view)
+        self._building.floor_removed.connect(self.refresh_view)
+        self._building.floor_name_changed.connect(self.refresh_view)
+        self.refresh_view()
 
     @property
     def current_floor(self) -> Floor | None:

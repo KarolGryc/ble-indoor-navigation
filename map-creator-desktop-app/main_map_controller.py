@@ -7,6 +7,7 @@ from model import Floor, MapObject, Building
 
 class MainMapController(QObject):
     pointer_canvas_moved = Signal(QPointF)
+    building_changed = Signal(Building)
 
     def __init__(self, 
                  model: Building, 
@@ -105,6 +106,7 @@ class MainMapController(QObject):
         self._undo_stack.clear()
         self._current_tool = type(self._current_tool)(self, self.scene) if self._current_tool else None
         self.model = building
+        self.building_changed.emit(self.model)
         self._current_floor = self.model.get_floor(0)
         self._redraw_scene()
 
@@ -114,9 +116,11 @@ class MainMapController(QObject):
     
     @current_floor.setter
     def current_floor(self, floor: Floor):
-        if self._current_floor:
+        try:
             self._current_floor.item_added.disconnect(self._on_item_added)
             self._current_floor.item_removed.disconnect(self._on_item_removed)
+        except TypeError:
+            pass
 
         self._current_floor = floor
         self._current_floor.item_added.connect(self._on_item_added)
