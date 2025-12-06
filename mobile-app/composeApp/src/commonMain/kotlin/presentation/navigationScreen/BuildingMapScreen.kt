@@ -1,7 +1,12 @@
 package presentation.navigationScreen
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,13 +59,22 @@ data class MapCameraState(
 fun BuildingMapScreen(
     viewModel: MapNavigationViewModel
 ) {
+    val MAX_ZOOM = 3f
+    val DEFAULT_ZOOM = 1.5f
+    val MIN_ZOOM = 0.4f
+
     val uiState by viewModel.uiState.collectAsState()
 
-    var scale by remember { mutableFloatStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    var rotation by remember { mutableFloatStateOf(0f) }
-
     val tilt = 0.6f
+    var targetScale by remember { mutableFloatStateOf(DEFAULT_ZOOM) }
+    var targetRotation by remember { mutableFloatStateOf(0f) }
+    var targetOffset by remember { mutableStateOf(Offset.Zero) }
+
+    val smoothSpec = spring<Float>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
+
+    val animatedScale by animateFloatAsState(targetValue = targetScale, animationSpec = smoothSpec)
+    val animatedRotation by animateFloatAsState(targetValue = targetRotation, animationSpec = smoothSpec)
+    val animatedOffset by animateOffsetAsState(targetValue = targetOffset, animationSpec = spring(stiffness = Spring.StiffnessMedium))
 
     Scaffold(
         topBar = {
@@ -72,11 +86,28 @@ fun BuildingMapScreen(
             .padding(innerPadding)
             .clipToBounds()
             .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        if (targetScale < MAX_ZOOM) {
+                            targetScale *= 1.5f
+                            targetScale = targetScale.coerceIn(MIN_ZOOM, MAX_ZOOM)
+                        } else {
+                            targetScale = DEFAULT_ZOOM
+                        }
+                    },
+                    onLongPress = {
+                        targetRotation = 0f
+                        targetScale = DEFAULT_ZOOM
+                        targetOffset = Offset.Zero
+                    }
+                )
+            }
+            .pointerInput(Unit) {
                 detectTransformGestures { _, pan, zoom, twist ->
-                    scale *= zoom
-                    scale = scale.coerceIn(0.5f, 5f)
-                    rotation += twist
-                    offset += pan
+                    targetScale *= zoom
+                    targetScale = targetScale.coerceIn(MIN_ZOOM, MAX_ZOOM)
+                    targetRotation += twist
+                    targetOffset += pan
                 }
             }
         ) {
@@ -87,10 +118,12 @@ fun BuildingMapScreen(
             uiState.map?.let { map ->
                 var selectedFloor by remember { mutableStateOf(map.floors.firstOrNull()) }
                 selectedFloor?.let { floor ->
-                    FloorMap(floor = floor, MapCameraState(
-                        offset = offset,
-                        scale = scale,
-                        rotation = rotation,
+                    FloorMap(
+                        floor = floor,
+                        cameraState = MapCameraState(
+                        offset = animatedOffset,
+                        scale = animatedScale,
+                        rotation = animatedRotation,
                         tilt = tilt
                         )
                     )
