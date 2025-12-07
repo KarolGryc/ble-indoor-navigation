@@ -1,6 +1,5 @@
 package domain.model
 
-import androidx.compose.ui.geometry.Rect
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

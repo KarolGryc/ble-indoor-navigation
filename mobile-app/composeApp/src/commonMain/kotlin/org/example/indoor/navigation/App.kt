@@ -6,7 +6,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,8 +34,6 @@ import kotlin.uuid.Uuid
 @Preview
 fun App() {
     MaterialTheme {
-        val snackbarHostState = remember { SnackbarHostState() }
-        val scope = rememberCoroutineScope()
         val factory = rememberPermissionsControllerFactory()
         val controller = remember(factory) {
             factory.createPermissionsController()
@@ -69,7 +66,7 @@ fun App() {
                     val mapIdString = backStackEntry.savedStateHandle.get<String>("mapId") ?: ""
                     val mapUuid = try {
                         Uuid.parse(mapIdString)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         null
                     }
 
