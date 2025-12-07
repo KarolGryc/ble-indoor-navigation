@@ -90,7 +90,7 @@ fun FloorMapPreview() {
 
     FloorMap(
         floor = floor,
-        cameraState = MapCameraState(),
+        cameraState = ViewportState(),
         zones[0],
         zones[1],
         listOf(zones[2])
@@ -101,7 +101,7 @@ fun FloorMapPreview() {
 @Composable
 fun FloorMap(
     floor: Floor,
-    cameraState: MapCameraState,
+    cameraState: ViewportState,
     currentZone: Zone? = null,
     selectedZone: Zone? = null,
     pathZones: List<Zone> = emptyList()

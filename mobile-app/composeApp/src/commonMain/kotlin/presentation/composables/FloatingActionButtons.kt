@@ -32,9 +32,10 @@ data class GeneralAction(
 @Composable
 fun FloatingActions(
     actions: List<GeneralAction> = emptyList(),
-    isExpandedDefault: Boolean = false
+    isExpandedDefault: Boolean = false,
+    isExpandable: Boolean = true
 ) {
-    var isExpanded by remember { mutableStateOf(isExpandedDefault) }
+    var isExpanded by remember { mutableStateOf(isExpandedDefault || !isExpandable) }
 
     Column {
         AnimatedVisibility(isExpanded) {
@@ -54,11 +55,13 @@ fun FloatingActions(
                 }
             }
         }
-        FloatingActionButton(
-            onClick = { isExpanded = !isExpanded }
-        ) {
-            val icon = if (isExpanded) Icons.Default.MoveDown else Icons.Default.MoveUp
-            Icon(icon, contentDescription = "Add map")
+        if (isExpandable) {
+            FloatingActionButton(
+                onClick = { isExpanded = !isExpanded }
+            ) {
+                val icon = if (isExpanded) Icons.Default.MoveDown else Icons.Default.MoveUp
+                Icon(icon, contentDescription = "Add map")
+            }
         }
     }
 }
