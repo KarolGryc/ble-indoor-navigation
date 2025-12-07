@@ -7,7 +7,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -30,6 +28,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import presentation.composables.FloorSelectionPanel
 import presentation.composables.MapCompass
 import presentation.navigationScreen.ViewportState.Companion.MAX_ZOOM
 
@@ -45,8 +44,6 @@ fun BuildingMapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedFloor = uiState.selectedFloor
-    val isTop = uiState.isTopLevel
-    val isBottom = uiState.isBottomLevel
 
     val viewportState by viewModel.viewportState.collectAsState()
     val (targetOffset, targetScale, targetRotation, targetTilt) = viewportState
@@ -71,24 +68,6 @@ fun BuildingMapScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            Column {
-                FloatingActionButton(onClick = { viewModel.resetCamera() }) {
-                    Text("Reset")
-                }
-                if (!isTop) {
-                    FloatingActionButton(onClick = { viewModel.changeFloorUp() }) {
-                        Text("Up")
-                    }
-                }
-
-                if (!isBottom) {
-                    FloatingActionButton(onClick = { viewModel.changeFloorDown() }) {
-                        Text("Down")
-                    }
-                }
-            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier
@@ -98,10 +77,10 @@ fun BuildingMapScreen(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = {
-                        if (targetScale < MAX_ZOOM) {
-                            viewModel.updateViewport(scale = viewportState.scale * 1.5f)
-                        } else {
+                        if (viewportState.scale >= MAX_ZOOM) {
                             viewModel.resetZoom()
+                        } else {
+                            viewModel.updateViewport(scale = viewportState.scale * 1.5f)
                         }
                     },
                     onLongPress = { viewModel.resetCamera() }
@@ -137,6 +116,15 @@ fun BuildingMapScreen(
                 rotation = animatedRotation,
                 onClick = { viewModel.updateViewport(rotation = 0f) },
                 modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+            )
+
+            FloorSelectionPanel(
+                floorNum = uiState.floorNum,
+                isMinFloor = uiState.isBottomLevel,
+                isMaxFloor = uiState.isTopLevel,
+                onFloorUp = { viewModel.changeFloorUp() },
+                onFloorDown = { viewModel.changeFloorDown() },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
             )
         }
     }

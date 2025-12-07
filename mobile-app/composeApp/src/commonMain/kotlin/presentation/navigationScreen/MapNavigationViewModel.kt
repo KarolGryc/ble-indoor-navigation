@@ -35,6 +35,13 @@ data class MapScreenUiState(
             val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
             return currentIndex == 0
         }
+
+    val floorNum: Int
+        get() {
+            val floors = map?.floors ?: return 0
+            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            return if (currentIndex != -1) currentIndex else 0
+        }
 }
 
 data class ViewportState(
