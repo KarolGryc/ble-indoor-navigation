@@ -6,20 +6,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import domain.model.BleDevice
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun BleDevicesList(
     devices: List<ScannedDeviceUi>,
@@ -41,35 +45,30 @@ fun BleDevicesList(
             }
         }
     } else {
+        Text(
+            text = "Detected: ${devices.size} device${if(devices.size != 1) "s" else ""}",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        )
+
         LazyColumn(
             modifier = modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            item {
-                Text(
-                    text = "Detected: ${devices.size} device ${if(devices.size > 1) "s" else ""}",
-                )
-            }
-
             items(
                 items = devices,
                 key = { it.device.platformAddress}
             ) { scannedDevice ->
-                val timeAgoText = remember(scannedDevice.lastSeen) {
-                    val secondsAgo = scannedDevice.lastSeen / 1000
-                    when {
-                        secondsAgo < 60 -> "$secondsAgo s ago"
-                        secondsAgo < 3600 -> "${secondsAgo / 60} min ago"
-                        else -> "${secondsAgo / 3600} h ago"
-                    }
-                }
-
                 BleDevicesListItem(
                     name = scannedDevice.device.name ?: "Unknown Device",
                     address = scannedDevice.device.platformAddress,
                     rssi = scannedDevice.device.rssi,
-                    lastSeen = timeAgoText,
+                    lastSeen = scannedDevice.seenAgo.toString() + " ms ago",
                     tagId = scannedDevice.device.tagId
                 )
             }
@@ -89,7 +88,7 @@ fun BleDevicesListPreview() {
                     rssi = -55,
                     tagId = 1
                 ),
-                lastSeen = 5000
+                seenAgo = 5000
             ),
             ScannedDeviceUi(
                 device = BleDevice(
@@ -98,7 +97,7 @@ fun BleDevicesListPreview() {
                     rssi = -75,
                     tagId = null
                 ),
-                lastSeen = 15000
+                seenAgo = 15000
             ),
             ScannedDeviceUi(
                 device = BleDevice(
@@ -107,7 +106,7 @@ fun BleDevicesListPreview() {
                     rssi = -85,
                     tagId = 42
                 ),
-                lastSeen = 30000
+                seenAgo = 30000
             )
         )
     )

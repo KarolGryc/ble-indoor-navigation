@@ -15,7 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.compose.BindEffect
+import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+import dev.icerock.moko.permissions.location.LOCATION
+import kotlinx.coroutines.launch
+import presentation.permissions.checkPermission
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
@@ -25,6 +33,11 @@ fun BleScannerScreen(
     viewModel: BleScanViewModel,
     onBackPressed: () -> Unit
 ) {
+    val factory = rememberPermissionsControllerFactory()
+    val controller = remember(factory) { factory.createPermissionsController() }
+    val scope = rememberCoroutineScope()
+    BindEffect(controller)
+
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -48,7 +61,17 @@ fun BleScannerScreen(
                 BleDevicesList(uiState.devices)
             }
 
-            Button(onClick = { viewModel.startScan() }) {
+            Button(onClick = {
+                scope.launch {
+                    checkPermission(
+                        permission = Permission.LOCATION,
+                        controller = controller,
+                        onGranted = {
+                            viewModel.startScan()
+                        }
+                    )
+                }
+            }) {
                 Text("Start Scan")
             }
         }

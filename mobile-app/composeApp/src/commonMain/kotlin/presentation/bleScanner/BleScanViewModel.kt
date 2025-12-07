@@ -19,39 +19,41 @@ data class BleScanUiState(
 
 data class ScannedDeviceUi(
     val device: BleDevice,
-    val lastSeen: Long
+    val seenAgo: Long
+)
+
+private data class DeviceEntry(
+    val device: BleDevice,
+    val timestamp: Long
 )
 
 @ExperimentalTime
 class BleScanViewModel(
     private val scanner: BleScanner
 ) : ViewModel() {
-    private val currentDevices = mutableMapOf<String, ScannedDeviceUi>()
-    private val _uiState = MutableStateFlow<BleScanUiState>(BleScanUiState())
+    private val currentDevices = mutableMapOf<String, DeviceEntry>()
+
+    private val _uiState = MutableStateFlow(BleScanUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             scanner.scannedDevices.collect { bleDevice ->
                 val now = Clock.System.now().toEpochMilliseconds()
-
-                val uiModel = ScannedDeviceUi(
+                currentDevices[bleDevice.platformAddress] = DeviceEntry(
                     device = bleDevice,
-                    lastSeen = now
+                    timestamp = now
                 )
-
-                currentDevices[bleDevice.platformAddress] = uiModel
-                updateDevicesList()
-            }
-
-            scanner.isScanning.collect { isScanning ->
-                _uiState.update { currentState ->
-                    currentState.copy(isScanning = isScanning)
-                }
             }
         }
 
-        startPruning()
+        viewModelScope.launch {
+            scanner.isScanning.collect { isScanning ->
+                _uiState.update { it.copy(isScanning = isScanning) }
+            }
+        }
+
+        startUiLoop()
     }
 
     fun startScan() {
@@ -62,23 +64,35 @@ class BleScanViewModel(
         scanner.stopScan()
     }
 
-    private fun startPruning() {
+    private fun startUiLoop() {
         viewModelScope.launch {
             while (true) {
-                delay(1000)
-                val now = Clock.System.now().toEpochMilliseconds()
+                delay(250)
 
-                val removed = currentDevices.values.removeAll { uiModel ->
-                    (now - uiModel.lastSeen) > 5000
+                val now = Clock.System.now().toEpochMilliseconds()
+                val timeout = 5000L
+
+                val iterator = currentDevices.entries.iterator()
+                while (iterator.hasNext()) {
+                    val entry = iterator.next()
+                    if ((now - entry.value.timestamp) > timeout) {
+                        iterator.remove()
+                    }
                 }
 
-                if (removed) updateDevicesList()
+                updateDevicesList(now)
             }
         }
     }
 
-    private fun updateDevicesList() {
+    private fun updateDevicesList(now: Long) {
         val sortedDevices = currentDevices.values
+            .map { entry ->
+                ScannedDeviceUi(
+                    device = entry.device,
+                    seenAgo = now - entry.timestamp
+                )
+            }
             .sortedByDescending { it.device.rssi }
             .toList()
 
