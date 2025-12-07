@@ -74,7 +74,8 @@ fun App() {
                     }
 
                     BuildingMapScreen(
-                        viewModel = koinViewModel { parametersOf(mapUuid) }
+                        viewModel = koinViewModel { parametersOf(mapUuid) },
+                        onClickBack = { navController.popBackStack() }
                     )
                 }
             }
