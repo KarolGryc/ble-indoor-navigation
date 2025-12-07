@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package org.example.indoor.navigation
 
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import presentation.bleScanner.BleScannerScreen
 import presentation.maplist.MapListScreen
 import presentation.navigationScreen.BuildingMapScreen
 import presentation.theme.NaviTheme
+import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -65,6 +68,7 @@ fun App() {
 
                 composable(route = "bleScanner") {
                     BleScannerScreen(
+                        viewModel = koinViewModel(),
                         onBackPressed = { navController.popBackStack() }
                     )
                 }

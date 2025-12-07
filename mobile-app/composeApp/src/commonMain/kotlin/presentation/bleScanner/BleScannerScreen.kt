@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -12,14 +13,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BleScannerScreen(
+    viewModel: BleScanViewModel,
     onBackPressed: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -37,23 +44,13 @@ fun BleScannerScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Text("Nearby BLE Devices: ")
+            if (uiState.isScanning || uiState.devices.isNotEmpty()) {
+                BleDevicesList(uiState.devices)
+            }
+
+            Button(onClick = { viewModel.startScan() }) {
+                Text("Start Scan")
+            }
         }
     }
-}
-
-@Preview
-@Composable
-fun BleScannerScreenPreview() {
-    BleScannerScreen(onBackPressed = {})
-}
-
-@Composable
-fun BleDevicesList() {
-
-}
-
-@Composable
-fun BleDevicesListItem() {
-    
 }

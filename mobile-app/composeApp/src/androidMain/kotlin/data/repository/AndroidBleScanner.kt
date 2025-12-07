@@ -61,7 +61,7 @@ class AndroidBleScanner(
         }
     }
 
-    override fun startScanning() {
+    override fun startScan() {
         if (!isScanning.value) return
 
         try {
@@ -76,7 +76,7 @@ class AndroidBleScanner(
         }
     }
 
-    override fun stopSCanning() {
+    override fun stopScan() {
         if (!isScanning.value) return
 
         try {

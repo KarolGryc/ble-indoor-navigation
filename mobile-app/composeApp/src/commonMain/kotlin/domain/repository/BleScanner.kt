@@ -15,6 +15,6 @@ interface BleScanner {
     val errors: SharedFlow<BleScanError>
     val isScanning: StateFlow<Boolean>
 
-    fun startScanning()
-    fun stopSCanning()
+    fun startScan()
+    fun stopScan()
 }
