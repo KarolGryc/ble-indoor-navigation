@@ -21,6 +21,20 @@ data class MapScreenUiState(
 ) {
     val selectedFloor: Floor?
         get() = map?.floors?.find { it.id == selectedFloorUuid }
+
+    val isTopLevel: Boolean
+        get() {
+            val floors = map?.floors ?: return false
+            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            return currentIndex == floors.size -1
+        }
+
+    val isBottomLevel: Boolean
+        get() {
+            val floors = map?.floors ?: return false
+            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            return currentIndex == 0
+        }
 }
 
 data class ViewportState(

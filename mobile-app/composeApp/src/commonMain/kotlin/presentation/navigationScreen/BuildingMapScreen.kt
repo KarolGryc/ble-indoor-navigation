@@ -36,10 +36,11 @@ fun BuildingMapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedFloor = uiState.selectedFloor
+    val isTop = uiState.isTopLevel
+    val isBottom = uiState.isBottomLevel
 
     val viewportState by viewModel.viewportState.collectAsState()
     val (targetOffset, targetScale, targetRotation, targetTilt) = viewportState
-
 
     val smoothSpec = spring<Float>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
     val animatedScale by animateFloatAsState(targetValue = targetScale, animationSpec = smoothSpec)
@@ -55,11 +56,16 @@ fun BuildingMapScreen(
                 FloatingActionButton(onClick = { viewModel.resetCamera() }) {
                     Text("Reset")
                 }
-                FloatingActionButton(onClick = { viewModel.changeFloorUp() }) {
-                    Text("Up")
+                if (!isTop) {
+                    FloatingActionButton(onClick = { viewModel.changeFloorUp() }) {
+                        Text("Up")
+                    }
                 }
-                FloatingActionButton(onClick = { viewModel.changeFloorDown() }) {
-                    Text("Down")
+
+                if (!isBottom) {
+                    FloatingActionButton(onClick = { viewModel.changeFloorDown() }) {
+                        Text("Down")
+                    }
                 }
             }
         }
