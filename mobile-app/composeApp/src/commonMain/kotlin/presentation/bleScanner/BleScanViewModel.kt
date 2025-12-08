@@ -15,7 +15,7 @@ import kotlin.time.ExperimentalTime
 
 data class BleScanUiState(
     val isScanning: Boolean = false,
-    val error: BleScanError? = null,
+    val error: BleScanError = BleScanError.None,
     val devices: List<ScannedDeviceUi> = emptyList()
 )
 
@@ -37,6 +37,9 @@ class BleScanViewModel(
 
     private val _uiState = MutableStateFlow(BleScanUiState())
     val uiState = _uiState.asStateFlow()
+
+    var filterByName: Boolean = false
+    val tagName = "InNav Tag"
 
     init {
         viewModelScope.launch {
@@ -95,6 +98,10 @@ class BleScanViewModel(
 
     private fun updateDevicesList(now: Long) {
         val sortedDevices = currentDevices.values
+            .filter {
+                if (filterByName) it.device.name?.contains(tagName, ignoreCase = true) == true
+                else true
+            }
             .map { entry ->
                 ScannedDeviceUi(
                     device = entry.device,

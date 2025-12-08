@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 sealed interface BleScanError{
+    object None : BleScanError
     object BluetoothDisabled : BleScanError
     object LocationPermissionDenied : BleScanError
     object ScanFailed : BleScanError

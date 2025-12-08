@@ -49,93 +49,6 @@ fun ScanResult.toDomain(context: Context): BleDevice {
         tagId = tagId
     )
 }
-//
-//class AndroidBleScanner(
-//    private val context: Context
-//) : BleScanner {
-//    private val _scannedDevices = MutableSharedFlow<BleDevice>(
-//        replay = 0,
-//        extraBufferCapacity = 100,
-//        onBufferOverflow = BufferOverflow.DROP_OLDEST
-//    )
-//    override val scannedDevices: Flow<BleDevice> = _scannedDevices
-//    override val isScanning = MutableStateFlow(false)
-//    override val errors = MutableSharedFlow<BleScanError>(
-//        replay = 0,
-//        extraBufferCapacity = 100,
-//        onBufferOverflow = BufferOverflow.DROP_OLDEST
-//    )
-//
-//    private val _bluetoothManager =  (context.getSystemService(BLUETOOTH_SERVICE) as? BluetoothManager)
-//    private val _bluetoothAdapter = _bluetoothManager?.adapter
-//    private val _leScanner = _bluetoothAdapter?.bluetoothLeScanner
-//
-//    private val scanCallback = object : ScanCallback() {
-//        override fun onScanResult(callbackType: Int, result: ScanResult) {
-//            val device = result.toDomain(context)
-//            _scannedDevices.tryEmit(device)
-//        }
-//
-//        override fun onScanFailed(errorCode: Int) {
-//            isScanning.value = false
-//            errors.tryEmit(BleScanError.ScanFailed)
-//        }
-//    }
-//
-//    override fun startScan() {
-//        if (_bluetoothAdapter?.isEnabled != true) {
-//            errors.tryEmit(BleScanError.BluetoothDisabled)
-//            return
-//        }
-//
-//        if (isScanning.value) return
-//
-//        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            context.checkSelfPermission(BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
-//        } else {
-//            context.checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-//        }
-//
-//        if (!hasPermission) {
-//            errors.tryEmit(BleScanError.LocationPermissionDenied)
-//            return
-//        }
-//
-//        try {
-//            _leScanner?.startScan(scanCallback)
-//
-//            isScanning.value = true
-//            Log.d("AndroidBleScanner", "BLE scan started")
-//        } catch (e: Exception) {
-//            Log.e("AndroidBleScanner", "Start scan failed", e)
-//            errors.tryEmit(BleScanError.ScanFailed)
-//            isScanning.value = false
-//        }
-//    }
-//
-//    override fun stopScan() {
-//        if (!isScanning.value) return
-//
-//        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//            context.checkSelfPermission( BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
-//        } else {
-//            context.checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-//        }
-//
-//        if (!hasPermission) {
-//            isScanning.value = false
-//            return
-//        }
-//
-//        try {
-//            _leScanner?.stopScan(scanCallback)
-//        } catch (e: Exception) {
-//            errors.tryEmit(BleScanError.ScanFailed)
-//        } finally {
-//            isScanning.value = false
-//        }
-//    }
-//}
 
 class AndroidBleScanner(
     private val context: Context
@@ -219,6 +132,7 @@ class AndroidBleScanner(
 
             scanner.startScan(scanCallback)
             isScanning.value = true
+            errors.tryEmit(BleScanError.None)
         } catch (_: Exception) {
             errors.tryEmit(BleScanError.ScanFailed)
             isScanning.value = false
@@ -246,6 +160,7 @@ class AndroidBleScanner(
             }
 
             scanner.stopScan(scanCallback)
+            errors.tryEmit(BleScanError.None)
         } catch (_: Exception) {
             errors.tryEmit(BleScanError.ScanFailed)
         } finally {
