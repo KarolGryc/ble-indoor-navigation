@@ -5,13 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
-sealed interface BleScanError{
-    object None : BleScanError
-    object BluetoothDisabled : BleScanError
-    object LocationPermissionDenied : BleScanError
-    object ScanFailed : BleScanError
-}
-
 interface BleScanner {
     val scannedDevices: Flow<BleDevice>
     val errors: SharedFlow<BleScanError>

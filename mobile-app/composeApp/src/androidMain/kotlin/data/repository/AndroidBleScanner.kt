@@ -113,11 +113,13 @@ class AndroidBleScanner(
 
         if (isScanning.value) return
 
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            context.checkSelfPermission(BLUETOOTH_SCAN) == PERMISSION_GRANTED
+        var hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context.checkSelfPermission( BLUETOOTH_SCAN) == PERMISSION_GRANTED
         } else {
-            context.checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
+            true
         }
+
+        hasPermission = hasPermission && context.checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
 
         if (!hasPermission) {
             errors.tryEmit(BleScanError.LocationPermissionDenied)
@@ -142,11 +144,13 @@ class AndroidBleScanner(
     override fun stopScan() {
         if (!isScanning.value) return
 
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        var hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.checkSelfPermission( BLUETOOTH_SCAN) == PERMISSION_GRANTED
         } else {
-            context.checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
+            true
         }
+
+        hasPermission = hasPermission && context.checkSelfPermission(ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
 
         if (!hasPermission) {
             isScanning.value = false
