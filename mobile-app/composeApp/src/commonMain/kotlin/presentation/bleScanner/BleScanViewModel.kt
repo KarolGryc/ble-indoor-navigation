@@ -3,6 +3,7 @@ package presentation.bleScanner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.BleDevice
+import domain.repository.BleScanError
 import domain.repository.BleScanner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ import kotlin.time.ExperimentalTime
 
 data class BleScanUiState(
     val isScanning: Boolean = false,
+    val error: BleScanError? = null,
     val devices: List<ScannedDeviceUi> = emptyList()
 )
 
@@ -50,6 +52,12 @@ class BleScanViewModel(
         viewModelScope.launch {
             scanner.isScanning.collect { isScanning ->
                 _uiState.update { it.copy(isScanning = isScanning) }
+            }
+        }
+
+        viewModelScope.launch {
+            scanner.errors.collect { error ->
+                _uiState.update { it.copy(error = error) }
             }
         }
 

@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
@@ -61,18 +62,32 @@ fun BleScannerScreen(
                 BleDevicesList(uiState.devices)
             }
 
-            Button(onClick = {
-                scope.launch {
-                    checkPermission(
-                        permission = Permission.LOCATION,
-                        controller = controller,
-                        onGranted = {
-                            viewModel.startScan()
-                        }
-                    )
+            if (uiState.error == null) {
+                Text(
+                    text = when {
+                        uiState.isScanning -> "Scanning for devices..."
+                        else -> "Scan stopped."
+                    },
+                    modifier = Modifier.padding(16.dp)
+                )
+                Button(onClick = {
+                    scope.launch {
+                        checkPermission(
+                            permission = Permission.LOCATION,
+                            controller = controller,
+                            onGranted = {
+                                viewModel.startScan()
+                            }
+                        )
+                    }
+                }) {
+                    Text("Start Scan")
                 }
-            }) {
-                Text("Start Scan")
+            } else {
+                Text(
+                    text = "Error: ${uiState.error}",
+                    modifier = Modifier.padding(16.dp)
+                )
             }
         }
     }
