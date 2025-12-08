@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTime::class)
-
 package org.example.indoor.navigation
 
 import androidx.compose.runtime.Composable
@@ -18,6 +16,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.parameter.parametersOf
 import presentation.bleScanner.BleScannerScreen
+import presentation.mapClassification.MapClassificationScreen
 import presentation.maplist.MapListScreen
 import presentation.navigationScreen.BuildingMapScreen
 import presentation.theme.NaviTheme
@@ -25,7 +24,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(KoinExperimentalAPI::class, ExperimentalUuidApi::class)
+@OptIn(KoinExperimentalAPI::class, ExperimentalUuidApi::class, ExperimentalTime::class)
 @Composable
 @Preview
 fun App() {
@@ -49,7 +48,8 @@ fun App() {
                         onNavigateToMap = { uuid ->
                             navController.navigate("details/$uuid")
                         },
-                        onBluetoothSearchPressed = { navController.navigate("bleScanner") }
+                        onBluetoothSearchPressed = { navController.navigate("bleScanner") },
+                        onClassifyMap = { uuid -> navController.navigate("classify/$uuid") }
                     )
                 }
 
@@ -70,6 +70,19 @@ fun App() {
                     BleScannerScreen(
                         viewModel = koinViewModel(),
                         onBackPressed = { navController.popBackStack() }
+                    )
+                }
+
+                composable(
+                    route = "classify/{mapId}",
+                    arguments = listOf(navArgument("mapId") { type = NavType.StringType } )
+                ) { backStackEntry ->
+                    val mapIdString = backStackEntry.savedStateHandle.get<String>("mapId") ?: ""
+                    val mapUuid = try { Uuid.parse(mapIdString) } catch (_: Exception) { null }
+
+                    MapClassificationScreen(
+                        viewModel = koinViewModel { parametersOf(mapUuid) },
+                        onClickBack = { navController.popBackStack() }
                     )
                 }
             }

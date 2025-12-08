@@ -3,7 +3,7 @@ package presentation.maplist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.dto.BuildingMapDto
-import data.mapper.BuildingMapper
+import data.dtoMapper.BuildingMapper
 import domain.model.Building
 import domain.repository.BuildingMapRepository
 import domain.repository.MapInfo

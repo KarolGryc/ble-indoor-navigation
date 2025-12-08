@@ -7,6 +7,7 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 interface BuildingMapRepository {
     suspend fun getMapsInfo(): List<MapInfo>
+    suspend fun getMapsInfo(uuid: Uuid): MapInfo?
     suspend fun getBuildingMap(buildingUuid: Uuid): Building
     suspend fun addMap(name: String, building: Building)
     suspend fun removeMap(buildingUuid: Uuid)

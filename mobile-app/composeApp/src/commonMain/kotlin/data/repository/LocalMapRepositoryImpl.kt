@@ -2,8 +2,8 @@ package data.repository
 
 import data.dto.BuildingMapDto
 import data.dto.UuidSerializer
+import data.dtoMapper.BuildingMapper
 import data.filesystemProviders.IoFileService
-import data.mapper.BuildingMapper
 import domain.model.Building
 import domain.repository.BuildingMapRepository
 import domain.repository.MapInfo
@@ -34,6 +34,13 @@ class LocalMapRepositoryImpl(
         return indexEntries.map { entry ->
             MapInfo(id = entry.id, name = entry.displayName)
         }
+    }
+
+    override suspend fun getMapsInfo(uuid: Uuid): MapInfo? {
+        val indexEntries = loadIndex()
+        val mapEntry = indexEntries.find { it.id == uuid } ?: return null
+
+        return MapInfo(id = mapEntry.id, name = mapEntry.displayName)
     }
 
     override suspend fun getBuildingMap(buildingUuid: Uuid): Building {

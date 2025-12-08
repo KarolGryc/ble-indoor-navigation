@@ -7,12 +7,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsBluetooth
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,10 +43,10 @@ import kotlin.uuid.Uuid
 fun MapListScreen(
     viewModel: MapListViewModel = koinViewModel(),
     onNavigateToMap: (Uuid) -> Unit = { },
+    onClassifyMap: (Uuid) -> Unit = {},
     onBluetoothSearchPressed: () -> Unit = { }
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingFile by remember {  mutableStateOf<File?>(null) }
     val picker = rememberFilePicker { pendingFile = it }
@@ -62,12 +61,10 @@ fun MapListScreen(
             FloatingActions(
                 actions = listOf(
                     GeneralAction("Add from file", Icons.Default.Add) { picker.pickFile() },
-//                    GeneralAction("Add from camera", Icons.Default.QrCode) {}
                     GeneralAction("Search BLE devices", Icons.Default.SettingsBluetooth) { onBluetoothSearchPressed() }
                 )
             )
-       },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+       }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -81,11 +78,18 @@ fun MapListScreen(
                     MapAction(
                         label = "Delete",
                         icon = Icons.Default.Delete,
-                        onClick = { info -> viewModel.removeMap(info.id) }),
+                        onClick = { info -> viewModel.removeMap(info.id) }
+                    ),
                     MapAction(
                         label = "Rename",
                         icon = Icons.Default.Edit,
-                        onClick = { info -> renamedMapInfo = info })
+                        onClick = { info -> renamedMapInfo = info }
+                    ),
+                    MapAction(
+                        label = "Classify",
+                        icon = Icons.Default.Settings,
+                        onClick = { info -> onClassifyMap(info.id) }
+                    )
                 ),
                 modifier = Modifier.weight(1f)
             )

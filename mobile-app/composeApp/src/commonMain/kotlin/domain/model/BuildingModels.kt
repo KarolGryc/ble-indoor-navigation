@@ -3,11 +3,21 @@ package domain.model
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+typealias TagId = Int
+typealias Rssi = Int
+
+@OptIn(ExperimentalUuidApi::class)
+data class ZoneFingerprint(
+    val zoneId: Uuid ,
+    val fingerprints: Map<Int, Int>
+)
+
 @OptIn(ExperimentalUuidApi::class)
 data class Building (
     val id: Uuid,
     val floors: List<Floor>,
-    val zoneConnections: List<ZoneConnection>
+    val zoneConnections: List<ZoneConnection>,
+    val fingerprintsMap: List<ZoneFingerprint>
 )
 
 @OptIn(ExperimentalUuidApi::class)

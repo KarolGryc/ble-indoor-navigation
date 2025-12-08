@@ -7,6 +7,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.KoinConfiguration
 import org.koin.dsl.module
 import presentation.bleScanner.BleScanViewModel
+import presentation.mapClassification.MapClassificationViewModel
 import presentation.maplist.MapListViewModel
 import presentation.navigationScreen.MapNavigationViewModel
 import kotlin.time.ExperimentalTime
@@ -47,12 +48,30 @@ val devicesListModule = module {
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
+val mapClassificationModule = module {
+    viewModel { (uuid: Uuid) ->
+        MapClassificationViewModel(
+            buildingId = uuid,
+            mapRepository = get(),
+            scanner = get()
+        )
+    }
+}
+
 fun createKoinConfiguration(): KoinConfiguration {
     return KoinConfiguration {
         // platform specific modules
         modules(modules = listOf(filesystemModule, bleScanModule))
 
         // common modules
-        modules(modules = listOf(mapListModule, navigationModule, devicesListModule))
+        modules(
+            modules = listOf(
+                mapListModule,
+                navigationModule,
+                devicesListModule,
+                mapClassificationModule
+            )
+        )
     }
 }

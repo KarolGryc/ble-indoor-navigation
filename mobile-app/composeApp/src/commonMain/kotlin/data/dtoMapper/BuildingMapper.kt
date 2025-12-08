@@ -1,6 +1,7 @@
-package data.mapper
+package data.dtoMapper
 
 import data.dto.BuildingMapDto
+import data.dto.FingerprintDto
 import data.dto.FloorDto
 import data.dto.NodeDto
 import data.dto.PointOfInterestDto
@@ -15,6 +16,7 @@ import domain.model.PointOfInterestType
 import domain.model.Wall
 import domain.model.Zone
 import domain.model.ZoneConnection
+import domain.model.ZoneFingerprint
 import domain.model.ZoneType
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -39,10 +41,21 @@ object BuildingMapper {
             }
         }
 
+        val mappedFingerprints = dto.fingerprints.mapNotNull { fingerprintDto ->
+            val readings = fingerprintDto.readings.mapKeys { entry ->
+                entry.key.toIntOrNull() ?: return@mapNotNull null
+            }
+            ZoneFingerprint(
+                zoneId = fingerprintDto.zoneId,
+                fingerprints = readings
+            )
+        }
+
         return Building(
             id = dto.id,
             floors = mappedFloors,
-            zoneConnections = mappedConnections
+            zoneConnections = mappedConnections,
+            fingerprintsMap = mappedFingerprints
         )
     }
 
@@ -56,10 +69,20 @@ object BuildingMapper {
             )
         }
 
+        val fingerprintsDto = domain.fingerprintsMap.map {
+            val zoneId = it.zoneId
+            val readingsDto = it.fingerprints.mapKeys { entry -> entry.key.toString() }
+            FingerprintDto(
+                zoneId = zoneId,
+                readings = readingsDto
+            )
+        }
+
         return BuildingMapDto(
             id = domain.id,
             floors = floorsDto,
-            zoneConnections = connectionsDto
+            zoneConnections = connectionsDto,
+            fingerprints = fingerprintsDto
         )
     }
 
