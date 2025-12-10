@@ -23,7 +23,7 @@ class LocalMapRepositoryImpl(
         const val INDEX_FILE_NAME = "maps_index.json"
     }
 
-    override suspend fun getMapsInfo(): List<MapInfo> {
+    override suspend fun getMapInfo(): List<MapInfo> {
         if (!fileIO.exists(MAPS_DIRECTORY, INDEX_FILE_NAME)) {
             return emptyList()
         }
@@ -36,14 +36,14 @@ class LocalMapRepositoryImpl(
         }
     }
 
-    override suspend fun getMapsInfo(uuid: Uuid): MapInfo? {
+    override suspend fun getMapInfo(uuid: Uuid): MapInfo? {
         val indexEntries = loadIndex()
         val mapEntry = indexEntries.find { it.id == uuid } ?: return null
 
         return MapInfo(id = mapEntry.id, name = mapEntry.displayName)
     }
 
-    override suspend fun getBuildingMap(buildingUuid: Uuid): Building {
+    override suspend fun getBuilding(buildingUuid: Uuid): Building {
         val indexEntries = loadIndex()
         val mapEntry = indexEntries.find { it.id == buildingUuid }
             ?: throw IllegalArgumentException("Map with ID $buildingUuid not found")

@@ -76,11 +76,6 @@ class MapNavigationViewModel(
         loadMap()
     }
 
-    // --- Floor Selection ---
-    fun selectFloor(floorId: Uuid) {
-        _uiState.value = _uiState.value.copy(selectedFloorUuid = floorId)
-    }
-
     fun changeFloorUp() {
         _uiState.value = _uiState.value.let { currentState ->
             val floors = currentState.map?.floors ?: return
@@ -131,7 +126,7 @@ class MapNavigationViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingMap = true, error = null)
             try {
-                val buildingMap = mapRepository.getBuildingMap(buildingId)
+                val buildingMap = mapRepository.getBuilding(buildingId)
                 val firstFloorId = buildingMap.floors.firstOrNull()?.id
                 _uiState.value = _uiState.value.copy(
                     map = buildingMap,

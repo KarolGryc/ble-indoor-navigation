@@ -3,20 +3,22 @@ package data.dtoMapper
 import data.dto.BuildingMapDto
 import data.dto.FingerprintDto
 import data.dto.FloorDto
+import data.dto.MeasurementDto
 import data.dto.NodeDto
 import data.dto.PointOfInterestDto
 import data.dto.WallDto
 import data.dto.ZoneConnectionDto
 import data.dto.ZoneDto
 import domain.model.Building
+import domain.model.Fingerprint
 import domain.model.Floor
+import domain.model.Measurement
 import domain.model.Node
 import domain.model.PointOfInterest
 import domain.model.PointOfInterestType
 import domain.model.Wall
 import domain.model.Zone
 import domain.model.ZoneConnection
-import domain.model.ZoneFingerprint
 import domain.model.ZoneType
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -41,21 +43,10 @@ object BuildingMapper {
             }
         }
 
-        val mappedFingerprints = dto.fingerprints.mapNotNull { fingerprintDto ->
-            val readings = fingerprintDto.readings.mapKeys { entry ->
-                entry.key.toIntOrNull() ?: return@mapNotNull null
-            }
-            ZoneFingerprint(
-                zoneId = fingerprintDto.zoneId,
-                fingerprints = readings
-            )
-        }
-
         return Building(
             id = dto.id,
             floors = mappedFloors,
-            zoneConnections = mappedConnections,
-            fingerprintsMap = mappedFingerprints
+            zoneConnections = mappedConnections
         )
     }
 
@@ -69,20 +60,10 @@ object BuildingMapper {
             )
         }
 
-        val fingerprintsDto = domain.fingerprintsMap.map {
-            val zoneId = it.zoneId
-            val readingsDto = it.fingerprints.mapKeys { entry -> entry.key.toString() }
-            FingerprintDto(
-                zoneId = zoneId,
-                readings = readingsDto
-            )
-        }
-
         return BuildingMapDto(
             id = domain.id,
             floors = floorsDto,
-            zoneConnections = connectionsDto,
-            fingerprints = fingerprintsDto
+            zoneConnections = connectionsDto
         )
     }
 
@@ -100,7 +81,7 @@ object BuildingMapper {
             return nodesMap[id] ?: throw IllegalStateException(message)
         }
 
-        val walls = dto.walls.map { wallDto ->
+        val wallsDto = dto.walls.map { wallDto ->
             Wall(
                 id = wallDto.id,
                 start = getNode(wallDto.startNodeId),
@@ -108,16 +89,17 @@ object BuildingMapper {
             )
         }
 
-        val zones = dto.zones.map { zoneDto ->
+        val zonesDto = dto.zones.map { zoneDto ->
             Zone(
                 id = zoneDto.id,
                 name = zoneDto.name,
                 boundary = zoneDto.cornerNodeIds.map { getNode(it) },
-                type = ZoneType.valueOf(zoneDto.type)
+                type = ZoneType.valueOf(zoneDto.type),
+                fingerprints = mapFingerprintsToDomain(zoneDto.fingerprints).toMutableList()
             )
         }
 
-        val pois = dto.pointsOfInterest.map { poiDto ->
+        val poisDto = dto.pointsOfInterest.map { poiDto ->
             PointOfInterest(
                 id = poiDto.id,
                 name = poiDto.name,
@@ -130,9 +112,9 @@ object BuildingMapper {
         return Floor(
             id = dto.id,
             name = dto.name,
-            walls = walls,
-            zones = zones,
-            pointsOfInterest = pois
+            walls = wallsDto,
+            zones = zonesDto,
+            pointsOfInterest = poisDto
         )
     }
 
@@ -148,28 +130,29 @@ object BuildingMapper {
             usedNodes.addAll(zone.boundary)
         }
 
-        val nodesDto = usedNodes.map { node ->
+        val nodesDtos = usedNodes.map { nodeDto ->
             NodeDto(
-                id = node.id,
-                x = node.x,
-                y = node.y
+                id = nodeDto.id,
+                x = nodeDto.x,
+                y = nodeDto.y
             )
         }
 
-        val wallsDto = floor.walls.map { wall ->
+        val wallsDtos = floor.walls.map { wallDto ->
             WallDto(
-                id = wall.id,
-                startNodeId = wall.start.id,
-                endNodeId = wall.end.id
+                id = wallDto.id,
+                startNodeId = wallDto.start.id,
+                endNodeId = wallDto.end.id
             )
         }
 
-        val zonesDto = floor.zones.map { zone ->
+        val zonesDtos = floor.zones.map { zoneDto ->
             ZoneDto(
-                id = zone.id,
-                name = zone.name,
-                type = zone.type.name,
-                cornerNodeIds = zone.boundary.map { it.id }
+                id = zoneDto.id,
+                name = zoneDto.name,
+                type = zoneDto.type.name,
+                cornerNodeIds = zoneDto.boundary.map { it.id },
+                fingerprints = mapFingerprintsToDto(zoneDto.fingerprints)
             )
         }
 
@@ -186,10 +169,40 @@ object BuildingMapper {
         return FloorDto(
             id = floor.id,
             name = floor.name,
-            nodes = nodesDto,
-            walls = wallsDto,
-            zones = zonesDto,
+            nodes = nodesDtos,
+            walls = wallsDtos,
+            zones = zonesDtos,
             pointsOfInterest = poisDto
         )
+    }
+
+    private fun mapFingerprintsToDomain(fingerprintsDtos: List<FingerprintDto>): List<Fingerprint> {
+        return fingerprintsDtos.map { fingerprintDto ->
+            val measurements = fingerprintDto.measurements.map { measurementDto ->
+                Measurement(
+                    tagId = measurementDto.tagId,
+                    rssi = measurementDto.rssi
+                )
+            }
+
+            Fingerprint(
+                measurements = measurements
+            )
+        }
+    }
+
+    private fun mapFingerprintsToDto(fingerprints: List<Fingerprint>) : List<FingerprintDto> {
+        return fingerprints.map { fingerprint ->
+            val measurementsDtos = fingerprint.measurements.map { measurement ->
+                MeasurementDto(
+                    tagId = measurement.tagId,
+                    rssi = measurement.rssi
+                )
+            }
+
+            FingerprintDto(
+                measurements = measurementsDtos
+            )
+        }
     }
 }

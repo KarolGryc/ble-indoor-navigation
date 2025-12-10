@@ -20,22 +20,12 @@ object UuidSerializer : KSerializer<Uuid> {
 
 @OptIn(ExperimentalUuidApi::class)
 @Serializable
-data class FingerprintDto(
-    @SerialName("zone_id")
-    @Serializable(with = UuidSerializer::class)
-    val zoneId: Uuid = Uuid.parse("00000000-0000-0000-0000-000000000000"),
-    val readings: Map<String, Int> = emptyMap()
-)
-
-@OptIn(ExperimentalUuidApi::class)
-@Serializable
 data class BuildingMapDto(
     @Serializable(with = UuidSerializer::class)
     val id: Uuid,
     val floors: List<FloorDto>,
     @SerialName("zone_connections")
     val zoneConnections: List<ZoneConnectionDto>,
-    val fingerprints: List<FingerprintDto> = emptyList()
 )
 
 @OptIn(ExperimentalUuidApi::class)
@@ -81,7 +71,19 @@ data class ZoneDto(
     val name: String,
     val type: String,
     @SerialName("corner_node_ids")
-    val cornerNodeIds: List<@Serializable(with = UuidSerializer::class) Uuid>
+    val cornerNodeIds: List<@Serializable(with = UuidSerializer::class) Uuid>,
+    val fingerprints: List<FingerprintDto> = emptyList()
+)
+
+@Serializable
+data class FingerprintDto(
+    val measurements: List<MeasurementDto>
+)
+
+@Serializable
+data class MeasurementDto(
+    val tagId: Int,
+    val rssi: Int
 )
 
 @OptIn(ExperimentalUuidApi::class)

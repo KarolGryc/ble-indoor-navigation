@@ -36,7 +36,7 @@ class MapListViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val maps = mapRepository.getMapsInfo()
+                val maps = mapRepository.getMapInfo()
                 _uiState.update {
                     it.copy(
                         isLoading = false,

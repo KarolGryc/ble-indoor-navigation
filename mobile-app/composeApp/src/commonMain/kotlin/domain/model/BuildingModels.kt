@@ -7,17 +7,10 @@ typealias TagId = Int
 typealias Rssi = Int
 
 @OptIn(ExperimentalUuidApi::class)
-data class ZoneFingerprint(
-    val zoneId: Uuid ,
-    val fingerprints: Map<Int, Int>
-)
-
-@OptIn(ExperimentalUuidApi::class)
 data class Building (
     val id: Uuid,
     val floors: List<Floor>,
-    val zoneConnections: List<ZoneConnection>,
-    val fingerprintsMap: List<ZoneFingerprint>
+    val zoneConnections: List<ZoneConnection>
 )
 
 @OptIn(ExperimentalUuidApi::class)
@@ -54,7 +47,17 @@ data class Zone(
     val id: Uuid,
     val name: String,
     val boundary: List<Node>,
-    val type: ZoneType
+    val type: ZoneType,
+    val fingerprints: MutableList<Fingerprint> = mutableListOf()
+)
+
+data class Fingerprint(
+    val measurements: List<Measurement>
+)
+
+data class Measurement(
+    val tagId: TagId,
+    val rssi: Rssi
 )
 
 enum class PointOfInterestType {

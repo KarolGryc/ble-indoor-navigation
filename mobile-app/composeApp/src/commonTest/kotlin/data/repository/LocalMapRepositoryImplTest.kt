@@ -46,7 +46,7 @@ class LocalMapRepositoryImplTest {
     fun `getAvailableMapsInfo returns empty list when index does not exist`() = runTest {
         // Given: Empty file system (no index file)
         // When
-        val result = repository.getMapsInfo()
+        val result = repository.getMapInfo()
 
         // Then
         assertTrue(result.isEmpty())
@@ -74,7 +74,7 @@ class LocalMapRepositoryImplTest {
             "Index file should exist"
         )
 
-        val mapsList = repository.getMapsInfo()
+        val mapsList = repository.getMapInfo()
         assertEquals(1, mapsList.size)
         assertEquals(mapName, mapsList[0].name)
         assertEquals(mapId, mapsList[0].id)
@@ -89,7 +89,7 @@ class LocalMapRepositoryImplTest {
         repository.addMap("Test Map", map)
 
         // When
-        val retrievedMap = repository.getBuildingMap(mapId)
+        val retrievedMap = repository.getBuilding(mapId)
 
         // Then
         assertEquals(map.id, retrievedMap.id)
@@ -104,7 +104,7 @@ class LocalMapRepositoryImplTest {
 
         // When / Then
         assertFailsWith<IllegalArgumentException> {
-            repository.getBuildingMap(randomId)
+            repository.getBuilding(randomId)
         }
     }
 
@@ -120,7 +120,7 @@ class LocalMapRepositoryImplTest {
         repository.addMap("Map 2", map2)
 
         // Then
-        val availableMaps = repository.getMapsInfo()
+        val availableMaps = repository.getMapInfo()
         assertEquals(2, availableMaps.size)
         assertTrue(availableMaps.any { it.id == map1.id })
         assertTrue(availableMaps.any { it.id == map2.id })
@@ -138,7 +138,7 @@ class LocalMapRepositoryImplTest {
         repository.removeMap(mapId)
 
         // Then
-        val availableMaps = repository.getMapsInfo()
+        val availableMaps = repository.getMapInfo()
         assertTrue(
             availableMaps.any { it.id == mapId},
             "Index should be empty after removal"
