@@ -46,10 +46,11 @@ import kotlin.uuid.Uuid
 @Composable
 fun MapListScreen(
     viewModel: MapListViewModel = koinViewModel(),
+    initialFile: File? = null,
     onNavigateToMap: (Uuid) -> Unit = { },
     onClassifyMap: (Uuid) -> Unit = {},
     onBluetoothSearchPressed: () -> Unit = { },
-    initialFile: File? = null
+    onFileImported: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -122,6 +123,7 @@ fun MapListScreen(
                     pendingFile?.let {
                         viewModel.addMap(name, it.content)
                         pendingFile = null
+                        onFileImported()
                     }
                 },
                 initialValue = pendingFile?.name
