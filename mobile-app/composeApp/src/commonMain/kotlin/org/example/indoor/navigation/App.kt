@@ -1,12 +1,16 @@
 package org.example.indoor.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import data.service.FileImportHandler
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import koin.createKoinConfiguration
@@ -27,29 +31,42 @@ import kotlin.uuid.Uuid
 @OptIn(KoinExperimentalAPI::class, ExperimentalUuidApi::class, ExperimentalTime::class)
 @Composable
 @Preview
-fun App() {
+fun App(
+    fileImportHandler: FileImportHandler
+) {
     NaviTheme {
         val factory = rememberPermissionsControllerFactory()
-        val controller = remember(factory) {
-            factory.createPermissionsController()
-        }
+        val controller = remember(factory) { factory.createPermissionsController() }
+        BindEffect(controller)
 
         val navController = rememberNavController()
 
-        BindEffect(controller)
+        val pendingFile by fileImportHandler.fileContent.collectAsState()
+        LaunchedEffect(pendingFile) {
+            if (pendingFile != null) {
+                navController.navigate("mapList") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
+        }
 
         KoinMultiplatformApplication(
             config = createKoinConfiguration(),
         ) {
-            NavHost(navController = navController, startDestination = "mapList") {
+            NavHost(
+                navController = navController,
+                startDestination = "mapList"
+            ) {
                 composable("mapList") {
                     MapListScreen(
-                        koinViewModel(),
-                        onNavigateToMap = { uuid ->
-                            navController.navigate("details/$uuid")
-                        },
+                        viewModel = koinViewModel(),
+                        onNavigateToMap = { uuid -> navController.navigate("details/$uuid") },
                         onBluetoothSearchPressed = { navController.navigate("bleScanner") },
-                        onClassifyMap = { uuid -> navController.navigate("classify/$uuid") }
+                        onClassifyMap = { uuid -> navController.navigate("classify/$uuid") },
+                        initialFile = pendingFile
                     )
                 }
 

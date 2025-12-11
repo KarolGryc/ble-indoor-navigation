@@ -48,11 +48,12 @@ fun MapListScreen(
     viewModel: MapListViewModel = koinViewModel(),
     onNavigateToMap: (Uuid) -> Unit = { },
     onClassifyMap: (Uuid) -> Unit = {},
-    onBluetoothSearchPressed: () -> Unit = { }
+    onBluetoothSearchPressed: () -> Unit = { },
+    initialFile: File? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var pendingFile by remember {  mutableStateOf<File?>(null) }
+    var pendingFile by remember {  mutableStateOf(initialFile) }
     val picker = rememberFilePicker { pendingFile = it }
 
     val fileSharer = rememberFileSharer()
