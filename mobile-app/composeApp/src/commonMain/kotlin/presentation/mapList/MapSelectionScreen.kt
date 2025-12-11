@@ -1,4 +1,4 @@
-package presentation.maplist
+package presentation.mapList
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsBluetooth
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -18,11 +19,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import data.filesystemProviders.File
 import data.filesystemProviders.rememberFilePicker
+import data.service.rememberFileSharer
 import domain.repository.MapInfo
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.composables.FloatingActions
 import presentation.composables.GeneralAction
@@ -50,6 +54,9 @@ fun MapListScreen(
 
     var pendingFile by remember {  mutableStateOf<File?>(null) }
     val picker = rememberFilePicker { pendingFile = it }
+
+    val fileSharer = rememberFileSharer()
+    val scope = rememberCoroutineScope()
 
     var renamedMapInfo by remember { mutableStateOf<MapInfo?>(null) }
 
@@ -89,6 +96,17 @@ fun MapListScreen(
                         label = "Classify",
                         icon = Icons.Default.Settings,
                         onClick = { info -> onClassifyMap(info.id) }
+                    ),
+                    MapAction(
+                        label = "Share",
+                        icon = Icons.Default.Share,
+                        onClick = { info ->
+                            scope.launch {
+                                viewModel.prepareBuildingToExport(info.id)?.let { file ->
+                                    fileSharer.shareFile(file)
+                                }
+                            }
+                        }
                     )
                 ),
                 modifier = Modifier.weight(1f)

@@ -17,7 +17,7 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.parameter.parametersOf
 import presentation.bleScanner.BleScannerScreen
 import presentation.mapClassification.MapClassificationScreen
-import presentation.maplist.MapListScreen
+import presentation.mapList.MapListScreen
 import presentation.navigationScreen.BuildingMapScreen
 import presentation.theme.NaviTheme
 import kotlin.time.ExperimentalTime

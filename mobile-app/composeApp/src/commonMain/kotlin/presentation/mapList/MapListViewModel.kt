@@ -1,9 +1,10 @@
-package presentation.maplist
+package presentation.mapList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.dto.BuildingMapDto
 import data.dtoMapper.BuildingMapper
+import data.filesystemProviders.File
 import domain.model.Building
 import domain.repository.BuildingMapRepository
 import domain.repository.MapInfo
@@ -26,7 +27,7 @@ class MapListViewModel(
     private val mapRepository: BuildingMapRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MapListUiState())
-    val  uiState = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
 
     init {
         loadMapList()
@@ -82,6 +83,26 @@ class MapListViewModel(
         viewModelScope.launch {
             mapRepository.renameMap(buildingUuid, newName)
             loadMapList()
+        }
+    }
+
+    suspend fun prepareBuildingToExport(buildingUuid: Uuid): File? {
+        return try {
+            val buildingInfo = mapRepository.getMapInfo(buildingUuid)
+            val building = mapRepository.getBuilding(buildingUuid)
+            val buildingDto = BuildingMapper.mapToDto(building)
+
+            val jsonFormat = Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+            }
+
+            val name = buildingInfo?.name ?: "Unknown"
+            val dataBytes = jsonFormat.encodeToString(buildingDto).encodeToByteArray()
+
+            File(name, dataBytes)
+        } catch (_: Exception) {
+            null
         }
     }
 }
