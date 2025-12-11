@@ -98,9 +98,10 @@ class MapListViewModel(
             }
 
             val name = buildingInfo?.name ?: "Unknown"
+            val nameWithExtension = "$name.inmap"
             val dataBytes = jsonFormat.encodeToString(buildingDto).encodeToByteArray()
 
-            File(name, dataBytes)
+            File(nameWithExtension, dataBytes)
         } catch (_: Exception) {
             null
         }

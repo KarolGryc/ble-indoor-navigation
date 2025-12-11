@@ -116,12 +116,13 @@ fun MapClassificationScreen(
             }
         }
 
+        val resMeasurements = (vmState.currentStage as? CalibrationStage.Result)?.fingerprint?.measurements
         AcceptRejectDialog(
             show = vmState.currentStage is CalibrationStage.Result,
             titleText = "Accept this measurement?",
             dialogText = fingerprintAsString(vmState.currentStage),
             onReject = viewModel::resetCalibrationStage,
-            onAccept = viewModel::acceptPendingFingerprint
+            onAccept = if(resMeasurements?.isNotEmpty() ?: false) viewModel::acceptPendingFingerprint else null
         )
 
         AcceptRejectDialog(

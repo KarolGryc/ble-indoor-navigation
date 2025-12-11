@@ -19,7 +19,7 @@ class LocalMapRepositoryImpl(
 ) : BuildingMapRepository {
     companion object {
         const val MAPS_DIRECTORY = "maps"
-        const val MAP_FILE_EXTENSION = "json"
+        const val MAP_FILE_EXTENSION = "inmap"
         const val INDEX_FILE_NAME = "maps_index.json"
     }
 
