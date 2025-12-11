@@ -136,8 +136,8 @@ def load_file_dialog(parent,
     return None
 
 def load_building(parent,
-                  title="Open Building File", 
-                  filter="JSON Files (*.json);;All Files (*)"):
+                  title="Open Building File",
+                  filter="Indoor Map Files (*.inmap)") -> Building | None:
     path = load_file_dialog(parent, title, filter)
     if path is None:
         return None
@@ -153,7 +153,8 @@ def load_building(parent,
     return building
 
 def save_file_dialog(parent,
-                     title="Save File", 
+                     title="Save File",
+                     extension=".json", 
                      filter="JSON Files (*.json);;All Files (*)") -> str | None:
         file_dialog = QFileDialog(parent, title)
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
@@ -163,8 +164,8 @@ def save_file_dialog(parent,
             selected_files = file_dialog.selectedFiles()
             if selected_files:
                 file_path = selected_files[0]
-                if not file_path.lower().endswith('.json'):
-                    file_path += '.json'
+                if not file_path.lower().endswith(extension):
+                    file_path += extension
                 
                 return file_path
         
@@ -172,9 +173,10 @@ def save_file_dialog(parent,
 
 def save_building(parent,
                   building: Building,
-                  title="Save Building File", 
-                  filter="JSON Files (*.json);;All Files (*)"):
-        path = save_file_dialog(parent, title, filter)
+                  title="Save Building File",
+                  extension=".inmap",
+                  filter="Indoor Map Files (*.inmap)"):
+        path = save_file_dialog(parent, title, extension, filter)
         if path is None:
             return None
     

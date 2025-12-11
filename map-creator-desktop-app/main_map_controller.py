@@ -107,7 +107,7 @@ class MainMapController(QObject):
         self._current_tool = type(self._current_tool)(self, self.scene) if self._current_tool else None
         self.model = building
         self.building_changed.emit(self.model)
-        self._current_floor = self.model.get_floor(0)
+        self.current_floor = self.model.get_floor(0)
         self._redraw_scene()
 
     @property
