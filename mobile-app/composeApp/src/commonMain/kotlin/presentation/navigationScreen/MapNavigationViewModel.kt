@@ -48,7 +48,7 @@ data class ViewportState(
     val offset: Offset = Offset.Zero,
     val scale: Float = 1.5f,
     val rotation: Float = 0.0f,
-    val tilt: Float = 0.75f
+    val tilt: Float = 1f
 ) {
     companion object {
         const val MAX_ZOOM = 3f

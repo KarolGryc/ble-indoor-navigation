@@ -4,8 +4,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,11 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import presentation.composables.FloorSelectionPanel
 import presentation.composables.MapCompass
-import presentation.navigationScreen.ViewportState.Companion.MAX_ZOOM
 
 object MapStyles {
     val backgroundColor = Color.LightGray
@@ -74,27 +70,6 @@ fun BuildingMapScreen(
             .fillMaxSize()
             .padding(innerPadding)
             .clipToBounds()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onDoubleTap = {
-                        if (viewportState.scale >= MAX_ZOOM) {
-                            viewModel.resetZoom()
-                        } else {
-                            viewModel.updateViewport(scale = viewportState.scale * 1.5f)
-                        }
-                    },
-                    onLongPress = { viewModel.resetCamera() }
-                )
-            }
-            .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, twist ->
-                    viewModel.updateViewport(
-                        offset = viewportState.offset + pan,
-                        scale = viewportState.scale * zoom,
-                        rotation = viewportState.rotation + twist,
-                    )
-                }
-            }
         ) {
             if (uiState.isLoadingMap) {
                 CircularProgressIndicator()
@@ -108,7 +83,17 @@ fun BuildingMapScreen(
                         scale = animatedScale,
                         rotation = animatedRotation,
                         tilt = targetTilt
-                    )
+                    ),
+                    onTransformGestures = { _, pan, zoom, twist ->
+                        viewModel.updateViewport(
+                            offset = viewportState.offset + pan,
+                            scale = viewportState.scale * zoom,
+                            rotation = viewportState.rotation + twist,
+                        )
+                    },
+                    onHoldGesture = {
+                        viewModel.resetCamera()
+                    }
                 )
             }
 
