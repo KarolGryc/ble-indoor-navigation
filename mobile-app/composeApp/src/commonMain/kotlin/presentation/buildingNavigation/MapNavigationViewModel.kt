@@ -53,18 +53,21 @@ class MapNavigationViewModel(
 
         scanner.startScan()
         _locationJob = viewModelScope.launch {
-            var prevEstimatedZone: Zone? = null
+            var prevEstimated: Zone? = null
+
             while(true) {
                 val measuredSignals = recordFingerprintUseCase(1000)
                 delay(1000)
+
                 _uiState.value.map?.let { building ->
-                    val location = locationService.determineLocation(measuredSignals, building)
-                    val currentZoneId = location?.id
-                    val previousZoneId = _uiState.value.currentZoneUuid
-                    if (currentZoneId != null && currentZoneId != previousZoneId && prevEstimatedZone == location) {
-                        _uiState.update { it.copy(currentZoneUuid = location.id) }
+                    val estimatedZone = locationService.determineLocation(measuredSignals, building)
+
+                    val currentZone = _uiState.value.currentZone
+                    if (estimatedZone?.id != null && estimatedZone != currentZone && prevEstimated == estimatedZone) {
+                        _uiState.update { it.copy(currentZoneUuid = estimatedZone.id) }
                     }
-                    prevEstimatedZone = location
+
+                    prevEstimated = estimatedZone
                 }
             }
         }

@@ -71,11 +71,9 @@ class MapClassificationViewModel(
                 val uiRefreshJob = launch {
                     while(true) {
                         val now = now().toEpochMilliseconds()
+                        val progress = calculateProgress(startTime, now, scanDuration)
                         updateUiState(
-                            calibrationStage = CalibrationStage.SignalsRecording(
-                                zoneUiItem = zoneUiItem,
-                                progress = calculateProgress(startTime, now, scanDuration)
-                            )
+                            calibrationStage = CalibrationStage.SignalsRecording(zoneUiItem, progress)
                         )
                         delay(100.milliseconds)
                     }
