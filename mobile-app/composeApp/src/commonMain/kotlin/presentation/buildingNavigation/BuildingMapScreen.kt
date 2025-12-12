@@ -15,7 +15,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import presentation.composables.FloorSelectionPanel
 import presentation.composables.MapCompass
@@ -84,9 +82,7 @@ fun BuildingMapScreen(
                         tilt = targetTilt
                     ),
                     onTransformGestures = { _, pan, zoom, rotation ->
-                        if (rotation != 0f) {
-                            viewModel.stopCompassMode()
-                        }
+                        if (rotation != 0f) viewModel.stopCompassMode()
 
                         viewModel.updateViewport(
                             offset = viewportState.offset + pan,
@@ -113,7 +109,16 @@ fun BuildingMapScreen(
                         else -> viewModel.updateViewport(rotation = 0f)
                     }
                 },
-                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            )
+
+            LocateUserButton(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp),
+                onClick = {}
             )
 
             FloorSelectionPanel(
