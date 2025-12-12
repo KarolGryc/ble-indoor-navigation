@@ -28,6 +28,7 @@ import data.service.rememberFileSharer
 import domain.repository.MapInfo
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+import presentation.composables.AcceptRejectDialog
 import presentation.composables.FloatingActions
 import presentation.composables.GeneralAction
 import presentation.composables.MapAction
@@ -50,17 +51,18 @@ fun MapListScreen(
     onNavigateToMap: (Uuid) -> Unit = { },
     onClassifyMap: (Uuid) -> Unit = {},
     onBluetoothSearchPressed: () -> Unit = { },
-    onFileImported: () -> Unit = {}
+    onFileHandled: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     var pendingFile by remember {  mutableStateOf(initialFile) }
-    val picker = rememberFilePicker { pendingFile = it }
+    val filePicker = rememberFilePicker { pendingFile = it }
 
     val fileSharer = rememberFileSharer()
     val scope = rememberCoroutineScope()
 
     var renamedMapInfo by remember { mutableStateOf<MapInfo?>(null) }
+    var removeMapRequested by remember { mutableStateOf<MapInfo?>(null) }
 
     Scaffold(
         topBar = {
@@ -69,7 +71,7 @@ fun MapListScreen(
         floatingActionButton = {
             FloatingActions(
                 actions = listOf(
-                    GeneralAction("Add from file", Icons.Default.Add) { picker.pickFile() },
+                    GeneralAction("Add from file", Icons.Default.Add) { filePicker.pickFile() },
                     GeneralAction("Search BLE devices", Icons.Default.SettingsBluetooth) { onBluetoothSearchPressed() }
                 )
             )
@@ -85,19 +87,14 @@ fun MapListScreen(
                 onMapSelected = onNavigateToMap,
                 actions = listOf(
                     MapAction(
-                        label = "Delete",
-                        icon = Icons.Default.Delete,
-                        onClick = { info -> viewModel.removeMap(info.id) }
+                        label = "Classify",
+                        icon = Icons.Default.Settings,
+                        onClick = { info -> onClassifyMap(info.id) }
                     ),
                     MapAction(
                         label = "Rename",
                         icon = Icons.Default.Edit,
                         onClick = { info -> renamedMapInfo = info }
-                    ),
-                    MapAction(
-                        label = "Classify",
-                        icon = Icons.Default.Settings,
-                        onClick = { info -> onClassifyMap(info.id) }
                     ),
                     MapAction(
                         label = "Share",
@@ -109,6 +106,11 @@ fun MapListScreen(
                                 }
                             }
                         }
+                    ),
+                    MapAction(
+                        label = "Delete",
+                        icon = Icons.Default.Delete,
+                        onClick = { info -> removeMapRequested = info }
                     )
                 ),
                 modifier = Modifier.weight(1f)
@@ -118,12 +120,15 @@ fun MapListScreen(
         if (pendingFile != null) {
             TextInputDialog(
                 title = "Name the added map",
-                onDismiss = { pendingFile = null },
+                onDismiss = {
+                    pendingFile = null
+                    onFileHandled()
+                },
                 onConfirm = { name ->
                     pendingFile?.let {
                         viewModel.addMap(name, it.content)
                         pendingFile = null
-                        onFileImported()
+                        onFileHandled()
                     }
                 },
                 initialValue = pendingFile?.name
@@ -142,5 +147,18 @@ fun MapListScreen(
                 initialValue = renamedMapInfo?.name
             )
         }
+
+        AcceptRejectDialog(
+            show = removeMapRequested != null,
+            title = "Delete map",
+            message = "Are you sure you want to delete the map \"${removeMapRequested?.name}\"?",
+            onAccept = {
+                removeMapRequested?.let {
+                    viewModel.removeMap(it.id)
+                    removeMapRequested = null
+                }
+            },
+            onReject = { removeMapRequested = null }
+        )
     }
 }

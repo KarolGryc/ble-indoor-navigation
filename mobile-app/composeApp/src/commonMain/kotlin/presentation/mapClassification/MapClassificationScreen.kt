@@ -22,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,15 +43,6 @@ fun MapClassificationScreen(
     var resetRequested by remember { mutableStateOf(false) }
     var unsavedDataWarning by remember { mutableStateOf(false) }
     var errorWhileLoading by remember { mutableStateOf(false) }
-
-    if (vmState.currentStage is CalibrationStage.Error) {
-        LaunchedEffect(vmState.currentStage) {
-            when(vmState.currentStage) {
-                is CalibrationStage.Error.BuildingLoadFailed -> "Failed while loading the map"
-                else -> "Unknown error"
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -119,40 +109,40 @@ fun MapClassificationScreen(
         val resMeasurements = (vmState.currentStage as? CalibrationStage.Result)?.fingerprint?.measurements
         AcceptRejectDialog(
             show = vmState.currentStage is CalibrationStage.Result,
-            titleText = "Accept this measurement?",
-            dialogText = fingerprintAsString(vmState.currentStage),
+            title = "Accept this measurement?",
+            message = fingerprintAsString(vmState.currentStage),
             onReject = viewModel::resetCalibrationStage,
             onAccept = if(resMeasurements?.isNotEmpty() ?: false) viewModel::acceptPendingFingerprint else null
         )
 
         AcceptRejectDialog(
             show = saveRequested,
-            titleText = "Saving config",
-            dialogText = "Do you want to save the new config?",
+            title = "Saving config",
+            message = "Do you want to save the new config?",
             onAccept = { viewModel.persistBuildingConfig(); saveRequested = false },
             onReject = { saveRequested = false }
         )
 
         AcceptRejectDialog(
             show = unsavedDataWarning,
-            titleText = "Unsaved progress!",
-            dialogText = "Do you want to quit without saving?\nAll unsaved progress will be lost!!!",
+            title = "Unsaved progress!",
+            message = "Do you want to quit without saving?\nAll unsaved progress will be lost!!!",
             onAccept = { onClickBack(); },
             onReject = { unsavedDataWarning = false }
         )
 
         AcceptRejectDialog(
             show = resetRequested,
-            titleText = "Reset of configuration",
-            dialogText = "Do you want to reset ${vmState.buildingName} configuration?",
+            title = "Reset of configuration",
+            message = "Do you want to reset ${vmState.buildingName} configuration?",
             onAccept = { viewModel.resetCalibration(); resetRequested = false  },
             onReject = { resetRequested = false }
         )
 
         AcceptRejectDialog(
             show = errorWhileLoading,
-            titleText = "Loading map error!",
-            dialogText = "Cannot load map ${vmState.buildingName} ☠\uFE0F",
+            title = "Loading map error!",
+            message = "Cannot load map ${vmState.buildingName} ☠\uFE0F",
             onAccept = { onClickBack() }
         )
     }

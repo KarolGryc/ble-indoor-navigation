@@ -27,8 +27,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun AcceptRejectDialog(
     show: Boolean = false,
-    titleText: String = "",
-    dialogText: String = "",
+    title: String = "",
+    message: String = "",
     onAccept: (() -> Unit)? = null,
     onReject: (() -> Unit)? = null
 ) {
@@ -46,13 +46,13 @@ fun AcceptRejectDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = titleText,
+                        text = title,
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = dialogText,
+                        text = message,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center
                     )
@@ -83,8 +83,8 @@ fun AcceptRejectDialog(
 fun AcceptRejectDialogPreview() {
     AcceptRejectDialog(
         show = true,
-        titleText = "Wanna beer?",
-        dialogText = "A cold one!",
+        title = "Wanna beer?",
+        message = "A cold one!",
         {},
         {}
     )

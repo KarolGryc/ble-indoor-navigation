@@ -44,11 +44,9 @@ fun App(
         val pendingFile by fileImportHandler.fileContent.collectAsState()
         LaunchedEffect(pendingFile) {
             if (pendingFile != null) {
-                if (navController.currentDestination?.route != "mapList") {
-                    navController.navigate("mapList") {
-                        popUpTo("mapList") { inclusive = true }
-                        launchSingleTop = true
-                    }
+                navController.navigate("mapList") {
+                    popUpTo("mapList") { inclusive = true }
+                    launchSingleTop = true
                 }
             }
         }
@@ -67,7 +65,7 @@ fun App(
                         onBluetoothSearchPressed = { navController.navigate("bleScanner") },
                         onClassifyMap = { uuid -> navController.navigate("classify/$uuid") },
                         initialFile = pendingFile,
-                        onFileImported = { fileImportHandler.clear() }
+                        onFileHandled = { fileImportHandler.clear() }
                     )
                 }
 
