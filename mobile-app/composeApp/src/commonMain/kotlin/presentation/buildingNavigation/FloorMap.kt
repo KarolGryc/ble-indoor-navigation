@@ -104,7 +104,7 @@ fun FloorMapPreview() {
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun FloorMap(
-    floor: Floor,
+    floor: Floor?,
     cameraState: ViewportState,
     currentZone: Zone? = null,
     selectedZone: Zone? = null,
@@ -149,14 +149,16 @@ fun FloorMap(
                     rotate(degrees = rotation, pivot = Offset.Zero)
                 }
             ) {
-                drawFloorPlan(floor, textMeasurer, currentZone, selectedZone, pathZones)
+                if (floor != null) {
+                    drawFloorPlan(floor, textMeasurer, currentZone, selectedZone, pathZones)
+                }
             }
 
             val rad = rotation * (kotlin.math.PI / 180.0)
             val cos = kotlin.math.cos(rad).toFloat()
             val sin = kotlin.math.sin(rad).toFloat()
 
-            floor.pointsOfInterest.forEach { poi ->
+            floor?.pointsOfInterest?.forEach { poi ->
                 val color = PoiTheme.get(poi.type).color
                 val iconPainter = poiPainters.getPainter(poi.type)
 

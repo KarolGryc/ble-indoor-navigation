@@ -35,6 +35,8 @@ fun BuildingMapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedFloor = uiState.selectedFloor
+    val currentFloor = uiState.currentFloor
+    val currentZone = uiState.currentZone
 
     val viewportState by viewModel.viewportState.collectAsState()
     val (targetOffset, targetScale, targetRotation, targetTilt) = viewportState
@@ -74,7 +76,8 @@ fun BuildingMapScreen(
 
             selectedFloor?.let {
                 FloorMap(
-                    floor = it,
+                    floor = currentFloor,
+                    currentZone = currentZone,
                     cameraState = ViewportState(
                         offset = animatedOffset,
                         scale = animatedScale,
@@ -118,15 +121,16 @@ fun BuildingMapScreen(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(16.dp),
-                onClick = {}
+                onClick = { viewModel.startLocationTracking() },
+                active = uiState.locationEnabled
             )
 
             FloorSelectionPanel(
                 floorNum = uiState.floorNum,
                 isMinFloor = uiState.isBottomLevel,
                 isMaxFloor = uiState.isTopLevel,
-                onFloorUp = { viewModel.changeFloorUp() },
-                onFloorDown = { viewModel.changeFloorDown() },
+                onFloorUp = { viewModel.incrementFloor() },
+                onFloorDown = { viewModel.decrementFloor() },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
             )
         }

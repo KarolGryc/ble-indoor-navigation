@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.Building
 import domain.model.Floor
+import domain.model.Zone
 import domain.repository.BuildingMapRepository
 import domain.service.CompassService
 import kotlinx.coroutines.Job
@@ -14,55 +15,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-
-@OptIn(ExperimentalUuidApi::class)
-data class MapScreenUiState(
-    val map: Building? = null,
-    val selectedFloorUuid: Uuid? = null,
-    val isLoadingMap: Boolean = false,
-    val error: String? = null
-) {
-    val selectedFloor: Floor?
-        get() = map?.floors?.find { it.id == selectedFloorUuid }
-
-    val isTopLevel: Boolean
-        get() {
-            val floors = map?.floors ?: return false
-            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
-            return currentIndex == floors.size -1
-        }
-
-    val isBottomLevel: Boolean
-        get() {
-            val floors = map?.floors ?: return false
-            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
-            return currentIndex == 0
-        }
-
-    val floorNum: Int
-        get() {
-            val floors = map?.floors ?: return 0
-            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
-            return if (currentIndex != -1) currentIndex else 0
-        }
-}
-
-data class ViewportState(
-    val offset: Offset = Offset.Zero,
-    val scale: Float = 1.5f,
-    val rotation: Float = 0.0f,
-    val tilt: Float = 1f
-) {
-    companion object {
-        const val MAX_ZOOM = 3f
-        const val MIN_ZOOM = 0.4f
-        const val DEFAULT_ZOOM = 1.5f
-    }
-
-    fun clampZoom(zoom: Float): Float {
-        return zoom.coerceIn(MIN_ZOOM, MAX_ZOOM)
-    }
-}
 
 @OptIn(ExperimentalUuidApi::class)
 class MapNavigationViewModel(
@@ -83,6 +35,10 @@ class MapNavigationViewModel(
 
     init {
         loadMap()
+    }
+
+    fun startLocationTracking() {
+        _uiState.update { it.copy(locationEnabled = true) }
     }
 
     fun startCompassMode() {
@@ -108,7 +64,7 @@ class MapNavigationViewModel(
         _isCompassModeEnabled.value = false
     }
 
-    fun changeFloorUp() {
+    fun incrementFloor() {
         _uiState.value = _uiState.value.let { currentState ->
             val floors = currentState.map?.floors ?: return
             val currentIndex = floors.indexOfFirst { it.id == currentState.selectedFloorUuid }
@@ -119,7 +75,7 @@ class MapNavigationViewModel(
         }
     }
 
-    fun changeFloorDown() {
+    fun decrementFloor() {
         _uiState.value = _uiState.value.let { currentState ->
             val floors = currentState.map?.floors ?: return
             val currentIndex = floors.indexOfFirst { it.id == currentState.selectedFloorUuid }
@@ -166,7 +122,8 @@ class MapNavigationViewModel(
                 _uiState.value = _uiState.value.copy(
                     map = buildingMap,
                     isLoadingMap = false,
-                    selectedFloorUuid = firstFloorId
+                    selectedFloorUuid = firstFloorId,
+                    currentFloorUuid = firstFloorId
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -182,5 +139,64 @@ class MapNavigationViewModel(
         val appliedDiff = diff * smoothing
 
         return (current + appliedDiff) % 360
+    }
+}
+
+@OptIn(ExperimentalUuidApi::class)
+data class MapScreenUiState(
+    val map: Building? = null,
+    val selectedFloorUuid: Uuid? = null,
+    val isLoadingMap: Boolean = false,
+    val error: String? = null,
+
+    val locationEnabled: Boolean = false,
+    val currentFloorUuid: Uuid? = null,
+    val currentZoneUuid: Uuid? = null
+) {
+    val selectedFloor: Floor?
+        get() = map?.floors?.find { it.id == selectedFloorUuid }
+
+    val isTopLevel: Boolean
+        get() {
+            val floors = map?.floors ?: return false
+            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            return currentIndex == floors.size - 1
+        }
+
+    val isBottomLevel: Boolean
+        get() {
+            val floors = map?.floors ?: return false
+            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            return currentIndex == 0
+        }
+
+    val floorNum: Int
+        get() {
+            val floors = map?.floors ?: return 0
+            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            return if (currentIndex != -1) currentIndex else 0
+        }
+
+    val currentFloor: Floor?
+        get() = map?.floors?.find { it.id == currentFloorUuid }
+
+    val currentZone: Zone?
+        get() = currentFloor?.zones?.find { it.id == currentZoneUuid }
+}
+
+data class ViewportState(
+    val offset: Offset = Offset.Zero,
+    val scale: Float = 1.5f,
+    val rotation: Float = 0.0f,
+    val tilt: Float = 1f
+) {
+    companion object {
+        const val MAX_ZOOM = 3f
+        const val MIN_ZOOM = 0.4f
+        const val DEFAULT_ZOOM = 1.5f
+    }
+
+    fun clampZoom(zoom: Float): Float {
+        return zoom.coerceIn(MIN_ZOOM, MAX_ZOOM)
     }
 }
