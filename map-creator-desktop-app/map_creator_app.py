@@ -172,7 +172,7 @@ class MapCreatorApp(QMainWindow):
         # File signals
         # self.menu_bar.new_file_requested.connect(self._reset_state)
         self.menu_bar.load_requested.connect(lambda: setattr(self._controller, 'building', load_building(self)))
-        self.menu_bar.save_requested.connect(lambda: save_building(self, self._building_model))
+        self.menu_bar.save_requested.connect(lambda: save_building(self, self._controller.building))
         
         # Edit signals
         self.menu_bar.redo_triggered.connect(presenter.redo)
