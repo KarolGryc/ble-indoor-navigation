@@ -44,6 +44,8 @@ fun BuildingMapScreen(
     val viewportState by viewModel.viewportState.collectAsState()
     val (targetOffset, targetScale, targetRotation, targetTilt) = viewportState
 
+    val compasModeEnabled by viewModel.isCompassModeEnabled.collectAsState()
+
     val smoothSpec = spring<Float>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
     val animatedScale by animateFloatAsState(targetValue = targetScale, animationSpec = smoothSpec)
     val animatedRotation by animateFloatAsState(targetValue = targetRotation, animationSpec = smoothSpec)
@@ -84,22 +86,36 @@ fun BuildingMapScreen(
                         rotation = animatedRotation,
                         tilt = targetTilt
                     ),
-                    onTransformGestures = { _, pan, zoom, twist ->
+                    onTransformGestures = { _, pan, zoom, rotation ->
+                        if (rotation != 0f) {
+                            viewModel.stopCompassMode()
+                        }
+
                         viewModel.updateViewport(
                             offset = viewportState.offset + pan,
                             scale = viewportState.scale * zoom,
-                            rotation = viewportState.rotation + twist,
+                            rotation = viewportState.rotation + rotation,
                         )
                     },
                     onHoldGesture = {
                         viewModel.resetCamera()
+                        viewModel.stopCompassMode()
                     }
                 )
             }
 
             MapCompass(
                 rotation = animatedRotation,
-                onClick = { viewModel.updateViewport(rotation = 0f) },
+                onClick = {
+                    when {
+                        compasModeEnabled -> {
+                            viewModel.stopCompassMode()
+                            viewModel.resetRotation()
+                        }
+                        viewportState.rotation == 0f -> viewModel.startCompassMode()
+                        else -> viewModel.updateViewport(rotation = 0f)
+                    }
+                },
                 modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
             )
 

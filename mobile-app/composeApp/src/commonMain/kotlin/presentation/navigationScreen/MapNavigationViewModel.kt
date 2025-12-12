@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import domain.model.Building
 import domain.model.Floor
 import domain.repository.BuildingMapRepository
+import domain.service.CompassService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -64,7 +67,8 @@ data class ViewportState(
 @OptIn(ExperimentalUuidApi::class)
 class MapNavigationViewModel(
     private val buildingId: Uuid,
-    private val mapRepository: BuildingMapRepository
+    private val mapRepository: BuildingMapRepository,
+    private val compassSensor: CompassService
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MapScreenUiState())
     val uiState = _uiState.asStateFlow()
@@ -72,8 +76,36 @@ class MapNavigationViewModel(
     private val _viewportState = MutableStateFlow(ViewportState())
     val viewportState = _viewportState.asStateFlow()
 
+    private val _isCompassModeEnabled = MutableStateFlow(false)
+    val isCompassModeEnabled = _isCompassModeEnabled.asStateFlow()
+
+    private var compassJob: Job? = null
+
     init {
         loadMap()
+    }
+
+    fun startCompassMode() {
+        compassJob?.cancel()
+        _isCompassModeEnabled.value = true
+
+        compassJob = viewModelScope.launch {
+            compassSensor.azimuth.collect { azimuth ->
+                val currentMapRotation = _viewportState.value.rotation
+
+                val targetMapRotation = -azimuth
+
+                val smoothedRotation = smoothAngle(currentMapRotation, targetMapRotation, smoothing = 0.1f)
+
+                _viewportState.update { it.copy(rotation = smoothedRotation) }
+            }
+        }
+    }
+
+    fun stopCompassMode() {
+        compassJob?.cancel()
+        compassJob = null
+        _isCompassModeEnabled.value = false
     }
 
     fun changeFloorUp() {
@@ -98,7 +130,6 @@ class MapNavigationViewModel(
         }
     }
 
-    // --- Viewport ---
     fun updateViewport(
         offset: Offset? = null,
         scale: Float? = null,
@@ -122,6 +153,10 @@ class MapNavigationViewModel(
         _viewportState.value = _viewportState.value.copy(scale = ViewportState.DEFAULT_ZOOM)
     }
 
+    fun resetRotation() {
+        _viewportState.value = _viewportState.value.copy(rotation = 0f)
+    }
+
     private fun loadMap() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingMap = true, error = null)
@@ -140,5 +175,12 @@ class MapNavigationViewModel(
                 )
             }
         }
+    }
+
+    private fun smoothAngle(current: Float, target: Float, smoothing: Float = 0.05f): Float {
+        val diff = (target - current + 540) % 360 - 180
+        val appliedDiff = diff * smoothing
+
+        return (current + appliedDiff) % 360
     }
 }

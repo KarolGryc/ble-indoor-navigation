@@ -16,6 +16,7 @@ import kotlin.uuid.Uuid
 
 expect val filesystemModule: Module
 expect val bleScanModule: Module
+expect val compassModule: Module
 
 val mapListModule = module {
     single<BuildingMapRepository> {
@@ -36,7 +37,8 @@ val navigationModule = module {
     viewModel { (buildingId: Uuid) ->
         MapNavigationViewModel(
             buildingId = buildingId,
-            mapRepository = get()
+            mapRepository = get(),
+            compassSensor = get()
         )
     }
 }
@@ -62,7 +64,13 @@ val mapClassificationModule = module {
 fun createKoinConfiguration(): KoinConfiguration {
     return KoinConfiguration {
         // platform specific modules
-        modules(modules = listOf(filesystemModule, bleScanModule))
+        modules(
+            modules = listOf(
+                filesystemModule,
+                bleScanModule,
+                compassModule
+            )
+        )
 
         // common modules
         modules(
