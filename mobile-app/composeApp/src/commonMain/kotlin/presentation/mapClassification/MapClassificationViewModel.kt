@@ -22,34 +22,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-sealed interface CalibrationStage {
-    data object ZoneSelect : CalibrationStage
-    data class SignalsRecording(val zoneUiItem: ZoneUiItem, val progress: Float) : CalibrationStage
-    data class Result(val zoneUiItem: ZoneUiItem, val fingerprint: Fingerprint) : CalibrationStage
-    sealed interface Error : CalibrationStage {
-        data object BuildingLoadFailed: Error
-    }
-}
-
-data class CalibrationUiState(
-    val buildingName: String = "",
-    val floors: List<FloorUiItem> = emptyList(),
-    val currentStage: CalibrationStage = CalibrationStage.ZoneSelect,
-    val unsavedData: Boolean = false
-)
-
-data class FloorUiItem(
-    val name: String,
-    val zones: List<ZoneUiItem>
-)
-
-@OptIn(ExperimentalUuidApi::class)
-data class ZoneUiItem(
-    val id: Uuid,
-    val name: String,
-    val fingerprintCount: Int = 0,
-)
-
 @OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
 class MapClassificationViewModel(
     private val mapRepository: BuildingMapRepository,
@@ -224,3 +196,31 @@ class MapClassificationViewModel(
         ) }
     }
 }
+
+sealed interface CalibrationStage {
+    data object ZoneSelect : CalibrationStage
+    data class SignalsRecording(val zoneUiItem: ZoneUiItem, val progress: Float) : CalibrationStage
+    data class Result(val zoneUiItem: ZoneUiItem, val fingerprint: Fingerprint) : CalibrationStage
+    sealed interface Error : CalibrationStage {
+        data object BuildingLoadFailed: Error
+    }
+}
+
+data class CalibrationUiState(
+    val buildingName: String = "",
+    val floors: List<FloorUiItem> = emptyList(),
+    val currentStage: CalibrationStage = CalibrationStage.ZoneSelect,
+    val unsavedData: Boolean = false
+)
+
+data class FloorUiItem(
+    val name: String,
+    val zones: List<ZoneUiItem>
+)
+
+@OptIn(ExperimentalUuidApi::class)
+data class ZoneUiItem(
+    val id: Uuid,
+    val name: String,
+    val fingerprintCount: Int = 0,
+)

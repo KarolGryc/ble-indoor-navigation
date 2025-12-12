@@ -2,14 +2,16 @@ package koin
 
 import data.repository.LocalMapRepositoryImpl
 import domain.repository.BuildingMapRepository
+import domain.service.KnnLocationService
+import domain.service.LocationService
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.KoinConfiguration
 import org.koin.dsl.module
 import presentation.bleScanner.BleScanViewModel
+import presentation.buildingNavigation.MapNavigationViewModel
 import presentation.mapClassification.MapClassificationViewModel
 import presentation.mapList.MapListViewModel
-import presentation.buildingNavigation.MapNavigationViewModel
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -34,11 +36,17 @@ val mapListModule = module {
 
 @OptIn(ExperimentalUuidApi::class)
 val navigationModule = module {
+    factory<LocationService> {
+        KnnLocationService()
+    }
+
     viewModel { (buildingId: Uuid) ->
         MapNavigationViewModel(
             buildingId = buildingId,
             mapRepository = get(),
-            compassSensor = get()
+            compassSensor = get(),
+            locationService = get(),
+            scanner = get()
         )
     }
 }

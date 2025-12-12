@@ -4,23 +4,31 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.Building
+import domain.model.Fingerprint
 import domain.model.Floor
+import domain.model.Measurement
 import domain.model.Zone
 import domain.repository.BuildingMapRepository
 import domain.service.CompassService
+import domain.service.LocationService
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
+@OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
 class MapNavigationViewModel(
     private val buildingId: Uuid,
     private val mapRepository: BuildingMapRepository,
-    private val compassSensor: CompassService
+    private val compassSensor: CompassService,
+    private val locationService: LocationService,
+    private val scanner: domain.repository.BleScanner
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MapScreenUiState())
     val uiState = _uiState.asStateFlow()
@@ -31,7 +39,8 @@ class MapNavigationViewModel(
     private val _isCompassModeEnabled = MutableStateFlow(false)
     val isCompassModeEnabled = _isCompassModeEnabled.asStateFlow()
 
-    private var compassJob: Job? = null
+    private var _compassJob: Job? = null
+    private var _locationJob: Job? = null
 
     init {
         loadMap()
@@ -39,13 +48,47 @@ class MapNavigationViewModel(
 
     fun startLocationTracking() {
         _uiState.update { it.copy(locationEnabled = true) }
+        _locationJob?.cancel()
+        _locationJob = viewModelScope.launch {
+            while(true) {
+                val measuredSignals = recordData()
+                delay(1000)
+                _uiState.value.map?.let { building ->
+                    val location = locationService.determineLocation(measuredSignals, building)
+                    val currentZoneId = location?.id
+                    val previousZoneId = _uiState.value.currentZoneUuid
+                    if (currentZoneId != null && currentZoneId != previousZoneId) {
+                        _uiState.update { it.copy(currentZoneUuid = location.id) }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun recordData(collectionTime: Long = 1000): Fingerprint = coroutineScope {
+        val measurements = mutableListOf<Measurement>()
+        scanner.startScan()
+
+        val collectionJob = launch {
+            scanner.scannedDevices.collect { device ->
+                if (device.tagId != null) {
+                    measurements.add(Measurement(device.tagId, device.rssi))
+                }
+            }
+        }
+
+        delay(collectionTime)
+        scanner.stopScan()
+        collectionJob.cancel()
+
+        Fingerprint(measurements.toList())
     }
 
     fun startCompassMode() {
-        compassJob?.cancel()
+        _compassJob?.cancel()
         _isCompassModeEnabled.value = true
 
-        compassJob = viewModelScope.launch {
+        _compassJob = viewModelScope.launch {
             compassSensor.azimuth.collect { azimuth ->
                 val currentMapRotation = _viewportState.value.rotation
 
@@ -59,8 +102,8 @@ class MapNavigationViewModel(
     }
 
     fun stopCompassMode() {
-        compassJob?.cancel()
-        compassJob = null
+        _compassJob?.cancel()
+        _compassJob = null
         _isCompassModeEnabled.value = false
     }
 
