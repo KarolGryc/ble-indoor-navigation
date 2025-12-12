@@ -4,6 +4,7 @@ import data.repository.LocalMapRepositoryImpl
 import domain.repository.BuildingMapRepository
 import domain.service.KnnLocationService
 import domain.service.LocationService
+import domain.usecase.RecordFingerprintUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.KoinConfiguration
@@ -40,12 +41,17 @@ val navigationModule = module {
         KnnLocationService()
     }
 
+    factory<RecordFingerprintUseCase> {
+        RecordFingerprintUseCase(scanner = get())
+    }
+
     viewModel { (buildingId: Uuid) ->
         MapNavigationViewModel(
             buildingId = buildingId,
             mapRepository = get(),
             compassSensor = get(),
             locationService = get(),
+            recordFingerprintUseCase = get(),
             scanner = get()
         )
     }
@@ -64,7 +70,8 @@ val mapClassificationModule = module {
         MapClassificationViewModel(
             buildingId = uuid,
             mapRepository = get(),
-            scanner = get()
+            scanner = get(),
+            recordFingerprintUseCase = get()
         )
     }
 }

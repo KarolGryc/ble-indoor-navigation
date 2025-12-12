@@ -9,6 +9,8 @@ class KnnLocationService(
     var k: Int = 3
 ) : LocationService {
     override fun determineLocation(currentSignals: Fingerprint, building: Building): Zone? {
+        if (building.floors.isEmpty() || currentSignals.measurements.isEmpty()) return null
+
         val buildingZones = building.floors.flatMap { it.zones }
         val zonesFingerprintMap = buildingZones.flatMap { zone ->
             zone.fingerprints.map { fingerprint ->

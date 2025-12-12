@@ -4,12 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.Building
 import domain.model.Fingerprint
-import domain.model.Measurement
-import domain.model.Rssi
-import domain.model.TagId
 import domain.model.Zone
 import domain.repository.BleScanner
 import domain.repository.BuildingMapRepository
+import domain.usecase.RecordFingerprintUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,9 +22,10 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
 class MapClassificationViewModel(
+    private val buildingId: Uuid,
     private val mapRepository: BuildingMapRepository,
     private val scanner: BleScanner,
-    private val buildingId: Uuid,
+    private val recordFingerprintUseCase: RecordFingerprintUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CalibrationUiState())
     val state = _state.asStateFlow()
@@ -34,8 +33,6 @@ class MapClassificationViewModel(
     private var _building: Building? = null
     private var _buildingName: String = ""
     private var _recordingJob: Job? = null
-
-    private val scanDuration = 3000L
 
     init {
         loadBuildingData()
@@ -69,36 +66,24 @@ class MapClassificationViewModel(
             scanner.startScan()
 
             try {
-                val measurements = mutableListOf<Measurement>()
-                val collectorJob = launch {
-                    scanner.scannedDevices.collect { device ->
-                        if (device.tagId != null) {
-                            val newMeasurement = Measurement(device.tagId, device.rssi)
-                            measurements.add(newMeasurement)
-                        }
+                val startTime = now().toEpochMilliseconds()
+                val scanDuration = 3000L
+                val uiRefreshJob = launch {
+                    while(true) {
+                        val now = now().toEpochMilliseconds()
+                        updateUiState(
+                            calibrationStage = CalibrationStage.SignalsRecording(
+                                zoneUiItem = zoneUiItem,
+                                progress = calculateProgress(startTime, now, scanDuration)
+                            )
+                        )
+                        delay(100.milliseconds)
                     }
                 }
 
-                val startTime = now().toEpochMilliseconds()
-                val endTime = startTime + scanDuration
-                while (now().toEpochMilliseconds() < endTime) {
-                    val now = now().toEpochMilliseconds()
-                    updateUiState(
-                        calibrationStage = CalibrationStage.SignalsRecording(
-                            zoneUiItem = zoneUiItem,
-                            progress = calculateProgress(startTime, now)
-                        )
-                    )
-                    delay(100.milliseconds)
-                }
-                collectorJob.cancel()
-
-                updateUiState(
-                    calibrationStage = CalibrationStage.Result(
-                        zoneUiItem = zoneUiItem,
-                        fingerprint = measurementsToFingerprint(measurements)
-                    )
-                )
+                val fingerprint = recordFingerprintUseCase(scanDuration)
+                uiRefreshJob.cancel()
+                updateUiState(calibrationStage = CalibrationStage.Result(zoneUiItem, fingerprint))
             } finally {
                 scanner.stopScan()
             }
@@ -152,25 +137,6 @@ class MapClassificationViewModel(
         return null
     }
 
-    private fun measurementsToFingerprint(measurements: List<Measurement>): Fingerprint {
-        val tagRssiMap = mutableMapOf<TagId, MutableList<Rssi>>()
-
-        measurements.forEach { measurement ->
-            tagRssiMap
-                .getOrPut(measurement.tagId, { mutableListOf() })
-                .add(measurement.rssi)
-        }
-
-        return Fingerprint(
-            measurements = tagRssiMap.map {
-                Measurement (
-                    tagId = it.key,
-                    rssi = it.value.average().toInt()
-                )
-            }
-        )
-    }
-
     private fun getUiFloors(building: Building?): List<FloorUiItem> {
         return building?.floors?.map { floor ->
             val floorZoneUiItems = floor.zones.map {
@@ -184,8 +150,8 @@ class MapClassificationViewModel(
         } ?: emptyList()
     }
 
-    private fun calculateProgress(startTime: Long, now: Long): Float {
-        return ((now - startTime).toFloat() / scanDuration.toFloat()).coerceIn(0f, 1f)
+    private fun calculateProgress(startTime: Long, now: Long, total: Long): Float {
+        return ((now - startTime).toFloat() / total.toFloat()).coerceIn(0f, 1f)
     }
 
     private fun updateUiState(calibrationStage: CalibrationStage) {
