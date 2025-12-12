@@ -32,13 +32,8 @@ enum class ZoneState(val color: Color) {
 
 fun DrawScope.drawZone(
     zone: Zone,
-    textMeasurer: TextMeasurer,
     state: ZoneState = ZoneState.NONE,
     opacity: Float = ZoneStyles.opacity,
-    fontColor: Color = ZoneStyles.fontColor,
-    fontBorderColor: Color = ZoneStyles.fontBorderColor,
-    fontSize: TextUnit = ZoneStyles.fontSize,
-    fontBorderThickness: Float = ZoneStyles.fontBorderThickness
 ) {
     val cornerPoints = zone.boundary
     if (cornerPoints.isEmpty()) {
@@ -58,6 +53,17 @@ fun DrawScope.drawZone(
 
     val zoneColor = state.color
     drawPath(path = path, color = zoneColor, alpha = opacity)
+}
+
+fun DrawScope.drawZoneLabel(
+    zone: Zone,
+    textMeasurer: TextMeasurer,
+    fontColor: Color = ZoneStyles.fontColor,
+    fontBorderColor: Color = ZoneStyles.fontBorderColor,
+    fontSize: TextUnit = ZoneStyles.fontSize,
+    fontBorderThickness: Float = ZoneStyles.fontBorderThickness
+) {
+    val cornerPoints = zone.boundary
 
     val minX = cornerPoints.minBy { it.x }.x
     val maxX = cornerPoints.maxBy { it.x }.x

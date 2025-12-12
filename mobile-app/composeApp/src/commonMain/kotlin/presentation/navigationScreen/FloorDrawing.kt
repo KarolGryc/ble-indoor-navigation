@@ -23,6 +23,10 @@ fun DrawScope.drawFloorPlan(
             it in pathZones -> ZoneState.PATH
             else -> ZoneState.NONE
         }
-        drawZone(it, textMeasurer, zoneState)
+        drawZone(it, zoneState)
+    }
+
+    floor.zones.forEach {
+        drawZoneLabel(it, textMeasurer)
     }
 }
