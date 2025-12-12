@@ -1,4 +1,4 @@
-package presentation.navigationScreen
+package presentation.buildingNavigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoorFront

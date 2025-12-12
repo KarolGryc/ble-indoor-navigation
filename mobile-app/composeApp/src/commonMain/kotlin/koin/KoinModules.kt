@@ -9,7 +9,7 @@ import org.koin.dsl.module
 import presentation.bleScanner.BleScanViewModel
 import presentation.mapClassification.MapClassificationViewModel
 import presentation.mapList.MapListViewModel
-import presentation.navigationScreen.MapNavigationViewModel
+import presentation.buildingNavigation.MapNavigationViewModel
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid

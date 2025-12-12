@@ -1,4 +1,4 @@
-package presentation.navigationScreen
+package presentation.buildingNavigation
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -137,7 +138,7 @@ fun FloorMap(
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MapStyles.backgroundColor)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             val center = Offset(size.width / 2.0f, size.height / 2.0f)
 

@@ -1,4 +1,4 @@
-package presentation.navigationScreen
+package presentation.buildingNavigation
 
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer

@@ -1,4 +1,4 @@
-package presentation.navigationScreen
+package presentation.buildingNavigation
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -24,7 +24,7 @@ object ZoneStyles {
 }
 
 enum class ZoneState(val color: Color) {
-    NONE(Color(0xADFFFFFF)),
+    NONE(Color(0xC9CBFFEE)),
     SELECTED(Color(0xffff0000)),
     CURRENT(Color(0xff2e75ff)),
     PATH(Color(0xffffa46b))

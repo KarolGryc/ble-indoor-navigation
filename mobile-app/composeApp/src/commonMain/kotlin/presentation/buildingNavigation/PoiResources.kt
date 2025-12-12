@@ -1,4 +1,4 @@
-package presentation.navigationScreen
+package presentation.buildingNavigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

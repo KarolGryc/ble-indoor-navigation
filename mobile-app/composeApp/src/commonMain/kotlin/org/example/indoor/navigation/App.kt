@@ -22,7 +22,7 @@ import org.koin.core.parameter.parametersOf
 import presentation.bleScanner.BleScannerScreen
 import presentation.mapClassification.MapClassificationScreen
 import presentation.mapList.MapListScreen
-import presentation.navigationScreen.BuildingMapScreen
+import presentation.buildingNavigation.BuildingMapScreen
 import presentation.theme.NaviTheme
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
