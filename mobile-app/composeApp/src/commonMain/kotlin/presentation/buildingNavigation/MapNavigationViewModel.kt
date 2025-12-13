@@ -17,7 +17,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import utils.Filter
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -56,46 +58,69 @@ class MapNavigationViewModel(
         viewModelScope.launch {
             scanner.errors.collect { error ->
                 when (error) {
-                    is BleScanError.BluetoothDisabled ->
+                    is BleScanError.BluetoothDisabled -> {
                         setErrorMessage(
                             title = "Bluetooth Disabled",
                             message = "Please enable Bluetooth to use location tracking."
                         )
-                    is BleScanError.LocationPermissionDenied ->
+                        _uiState.update { it.copy(locationEnabled = false) }
+                    }
+                    is BleScanError.LocationPermissionDenied -> {
                         setErrorMessage(
                             title = "Permission Denied",
                             message = "Required permissions were denied. Please grant them to use location tracking."
                         )
+                        _uiState.update { it.copy(locationEnabled = false) }
+                    }
                     else -> { /* No action */ }
                 }
-                _uiState.update { it.copy(locationEnabled = false) }
             }
         }
     }
 
     fun startLocationTracking() {
-        _uiState.update { it.copy(locationEnabled = true) }
         _locationJob?.cancel()
+        _uiState.update { it.copy(locationEnabled = true) }
 
-        scanner.startScan()
         _locationJob = viewModelScope.launch {
-            var prevEstimated: Zone? = null
+            val filter = Filter<Zone>(2)
 
-            while(true) {
-                val measuredSignals = recordFingerprintUseCase(1000)
-                delay(1000)
+            try {
+                scanner.startScan()
 
-                _uiState.value.map?.let { building ->
-                    val estimatedZone = locationService.determineLocation(measuredSignals, building)
+                while (isActive) {
+                    val currentMap = _uiState.value.map
 
-                    val currentZone = _uiState.value.currentZone
-                    if (estimatedZone?.id != null && estimatedZone != currentZone && prevEstimated == estimatedZone) {
-                        _uiState.update { it.copy(currentZoneUuid = estimatedZone.id) }
+                    if (currentMap == null) {
+                        delay(500)
+                        continue
                     }
 
-                    prevEstimated = estimatedZone
+                    val measuredSignals = recordFingerprintUseCase(1000)
+
+                    val estimatedZone = locationService.determineLocation(measuredSignals, currentMap)
+                    val stableZone = filter.getNewValue(estimatedZone)
+
+                    if (stableZone != null && stableZone != _uiState.value.currentZone) {
+                        _uiState.update { it.copy(currentZoneUuid = stableZone.id) }
+                    }
                 }
+            } finally {
+                scanner.stopScan()
             }
+        }
+    }
+
+    fun stopLocationTracking() {
+        _locationJob?.cancel()
+        _locationJob = null
+        scanner.stopScan()
+        _uiState.update {
+            it.copy(
+                locationEnabled = false,
+                currentZoneUuid = null,
+                currentFloorUuid = null
+            )
         }
     }
 
@@ -179,6 +204,12 @@ class MapNavigationViewModel(
 
     fun resetRotation() {
         _viewportState.value = _viewportState.value.copy(rotation = 0f)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopCompassMode()
+        stopLocationTracking()
     }
 
     private fun loadMap() {

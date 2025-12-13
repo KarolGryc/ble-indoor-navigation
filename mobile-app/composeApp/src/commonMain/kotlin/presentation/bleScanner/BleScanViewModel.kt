@@ -72,6 +72,11 @@ class BleScanViewModel(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        scanner.stopScan()
+    }
+
     private fun startUiLoop() {
         viewModelScope.launch {
             while (true) {
