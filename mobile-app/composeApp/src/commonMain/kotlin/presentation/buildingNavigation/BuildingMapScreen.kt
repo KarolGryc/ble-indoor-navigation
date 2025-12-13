@@ -77,6 +77,8 @@ fun BuildingMapScreen(
                     active = isSearching,
                     onActiveChange = { viewModel.setIsSearching(it) },
                     searchResults = uiState.filteredSearchResults,
+                    onItemSearched = { item -> viewModel.showSearchedItem(item) },
+                    onItemNavigatedTo = { }
                 )
             } else {
                 CenterAlignedTopAppBar(
@@ -153,7 +155,7 @@ fun BuildingMapScreen(
                     .padding(16.dp),
                 onClick = {
                     if (uiState.locationEnabled) {
-                        viewModel.moveCameraToCurrentZone()
+                        viewModel.showCurrentZone()
                         return@LocateUserButton
                     }
 

@@ -62,6 +62,8 @@ fun MapSearchBar(
     active: Boolean,
     onActiveChange: (Boolean) -> Unit,
     searchResults: List<MapSearchResult>,
+    onItemSearched: (MapSearchResult) -> Unit,
+    onItemNavigatedTo: (MapSearchResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     SearchBar(
@@ -118,14 +120,24 @@ fun MapSearchBar(
                     },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = {}) {
+                            IconButton(
+                                onClick = {
+                                    onActiveChange(false)
+                                    onItemSearched(result)
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.TravelExplore,
                                     contentDescription = "Show ${result.title} on map"
                                 )
                             }
 
-                            IconButton(onClick = {}) {
+                            IconButton(
+                                onClick = {
+                                    onActiveChange(false)
+                                    onItemNavigatedTo(result)
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Navigation,
                                     contentDescription = "Navigate to ${result.title}"

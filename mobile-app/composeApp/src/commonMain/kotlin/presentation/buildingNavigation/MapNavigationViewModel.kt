@@ -87,6 +87,22 @@ class MapNavigationViewModel(
         _uiState.update { it.copy(searchQuery = query) }
     }
 
+    fun showSearchedItem(item: MapSearchResult) {
+        when (item) {
+            is MapSearchResult.ZoneResult -> {
+                _uiState.update { it.copy(currentFloorUuid = item.floor.id) }
+
+                val (x, y) = item.zone.centerPos
+                moveCameraToPos(x, y)
+            }
+            is MapSearchResult.PoiResult -> {
+                _uiState.update { it.copy(currentFloorUuid = item.floor.id) }
+
+                moveCameraToPos(item.poi.x, item.poi.y)
+            }
+        }
+    }
+
     fun startLocationTracking() {
         _locationJob?.cancel()
         _uiState.update { it.copy(locationEnabled = true) }
@@ -115,7 +131,7 @@ class MapNavigationViewModel(
                         _uiState.update { it.copy(currentZoneUuid = stableZone.id) }
 
                         if (!initialMove) {
-                            moveCameraToCurrentZone()
+                            showCurrentZone()
                             initialMove = true
                         }
                     }
@@ -139,16 +155,18 @@ class MapNavigationViewModel(
         }
     }
 
-    fun moveCameraToCurrentZone() {
-        _uiState.value.currentZone?.let { moveCameraToZone(it) }
+    fun showCurrentZone() {
+        _uiState.value.currentZone?.let { zone ->
+            val (x, y) = zone.centerPos
+            moveCameraToPos(x, y)
+            _uiState.update { it.copy(currentFloorUuid = zone.floor?.id) }
+        }
     }
 
-    fun moveCameraToZone(zone: Zone) {
-        val (posX, posY) = zone.centerPos
+    fun moveCameraToPos(x: Float, y: Float) {
         val scale = _viewportState.value.scale
-        val scaledX = -posX * scale // TODO: fix the inverted axis
-        val scaledY = -posY * scale
-        _uiState.update { it.copy(currentFloorUuid = zone.floor?.id) }
+        val scaledX = -x * scale // TODO: fix the inverted axis
+        val scaledY = -y * scale
         _viewportState.update { it.copy(offset = Offset(scaledX, scaledY)) }
     }
 
