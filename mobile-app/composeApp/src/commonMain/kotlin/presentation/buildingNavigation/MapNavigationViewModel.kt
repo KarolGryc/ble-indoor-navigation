@@ -139,6 +139,7 @@ class MapNavigationViewModel(
         val scale = _viewportState.value.scale
         val scaledX = -posX * scale // TODO: fix the inverted axis
         val scaledY = -posY * scale
+        _uiState.update { it.copy(currentFloorUuid = zone.floor?.id) }
         _viewportState.update { it.copy(offset = Offset(scaledX, scaledY)) }
     }
 
@@ -176,25 +177,23 @@ class MapNavigationViewModel(
     }
 
     fun incrementFloor() {
-        _uiState.value = _uiState.value.let { currentState ->
-            val floors = currentState.map?.floors ?: return
-            val currentIndex = floors.indexOfFirst { it.id == currentState.selectedFloorUuid }
+        val currentState = _uiState.value
+        val floors = currentState.map?.floors ?: return
+        val currentIndex = floors.indexOfFirst { it.id == currentState.currentFloorUuid }
 
-            val newIdx = currentIndex + 1
-            if (newIdx >= floors.size) return
-            currentState.copy(selectedFloorUuid = floors[newIdx].id)
-        }
+        val newIdx = currentIndex + 1
+        if (newIdx >= floors.size) return
+        _uiState.update { it.copy(currentFloorUuid = floors[newIdx].id) }
     }
 
     fun decrementFloor() {
-        _uiState.value = _uiState.value.let { currentState ->
-            val floors = currentState.map?.floors ?: return
-            val currentIndex = floors.indexOfFirst { it.id == currentState.selectedFloorUuid }
+        val currentState = _uiState.value
+        val floors = currentState.map?.floors ?: return
+        val currentIndex = floors.indexOfFirst { it.id == currentState.currentFloorUuid }
 
-            val newIdx = currentIndex - 1
-            if (newIdx < 0) return
-            currentState.copy(selectedFloorUuid = floors[newIdx].id)
-        }
+        val newIdx = currentIndex - 1
+        if (newIdx < 0) return
+        _uiState.update { it.copy(currentFloorUuid = floors[newIdx].id) }
     }
 
     fun updateViewport(
@@ -239,7 +238,6 @@ class MapNavigationViewModel(
                 _uiState.value = _uiState.value.copy(
                     map = buildingMap,
                     isLoadingMap = false,
-                    selectedFloorUuid = firstFloorId,
                     currentFloorUuid = firstFloorId
                 )
             } catch (e: Exception) {
@@ -264,7 +262,6 @@ data class ErrorMessage(val title: String, val message: String)
 @OptIn(ExperimentalUuidApi::class)
 data class MapScreenUiState(
     val map: Building? = null,
-    val selectedFloorUuid: Uuid? = null,
     val isLoadingMap: Boolean = false,
     val error: String? = null,
 
@@ -274,27 +271,24 @@ data class MapScreenUiState(
 
     val uiErrorMessage: ErrorMessage? = null
 ) {
-    val selectedFloor: Floor?
-        get() = map?.floors?.find { it.id == selectedFloorUuid }
-
     val isTopLevel: Boolean
         get() {
             val floors = map?.floors ?: return false
-            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            val currentIndex = floors.indexOfFirst { it.id == currentFloorUuid }
             return currentIndex == floors.size - 1
         }
 
     val isBottomLevel: Boolean
         get() {
             val floors = map?.floors ?: return false
-            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            val currentIndex = floors.indexOfFirst { it.id == currentFloorUuid }
             return currentIndex == 0
         }
 
     val floorNum: Int
         get() {
             val floors = map?.floors ?: return 0
-            val currentIndex = floors.indexOfFirst { it.id == selectedFloorUuid }
+            val currentIndex = floors.indexOfFirst { it.id == currentFloorUuid }
             return if (currentIndex != -1) currentIndex else 0
         }
 
@@ -302,7 +296,9 @@ data class MapScreenUiState(
         get() = map?.floors?.find { it.id == currentFloorUuid }
 
     val currentZone: Zone?
-        get() = currentFloor?.zones?.find { it.id == currentZoneUuid }
+        get() = map?.floors?.firstNotNullOfOrNull { floor ->
+                floor.zones.find { zone -> zone.id == currentZoneUuid }
+            }
 }
 
 data class ViewportState(

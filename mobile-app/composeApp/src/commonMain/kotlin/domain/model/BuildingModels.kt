@@ -1,5 +1,6 @@
 package domain.model
 
+import kotlin.jvm.Transient
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -20,7 +21,11 @@ data class Floor (
     val walls: List<Wall>,
     val zones: List<Zone>,
     val pointsOfInterest: List<PointOfInterest>
-)
+) {
+    init {
+        zones.forEach { it.floor = this }
+    }
+}
 
 @OptIn(ExperimentalUuidApi::class)
 data class Node(
@@ -48,8 +53,11 @@ data class Zone(
     val name: String,
     val boundary: List<Node>,
     val type: ZoneType,
-    val fingerprints: MutableList<Fingerprint> = mutableListOf()
+    val fingerprints: MutableList<Fingerprint> = mutableListOf(),
 ) {
+    @Transient
+    var floor: Floor? = null
+
     val centerPos: Pair<Float, Float>
         get() {
             val cornerPoints = boundary

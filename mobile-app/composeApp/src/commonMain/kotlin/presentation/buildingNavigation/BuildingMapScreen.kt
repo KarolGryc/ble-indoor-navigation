@@ -52,7 +52,6 @@ fun BuildingMapScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val errorMessage = uiState.uiErrorMessage
-    val selectedFloor = uiState.selectedFloor
     val currentFloor = uiState.currentFloor
     val currentZone = uiState.currentZone
 
@@ -69,7 +68,7 @@ fun BuildingMapScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(selectedFloor?.name ?: "Unnamed") },
+                title = { Text(currentFloor?.name ?: "Unnamed") },
                 navigationIcon = {
                     IconButton(onClick = onClickBack){
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription ="Back")
@@ -92,7 +91,7 @@ fun BuildingMapScreen(
                 CircularProgressIndicator()
             }
 
-            selectedFloor?.let {
+            currentFloor?.let {
                 FloorMap(
                     floor = currentFloor,
                     currentZone = currentZone,

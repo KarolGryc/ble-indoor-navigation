@@ -86,8 +86,8 @@ fun FloorMapPreview() {
 
     val pois = listOf(
         PointOfInterest(id = Uuid.random(), name = "Shop", x = 0f, y = 0f, type = PointOfInterestType.SHOP),
-        PointOfInterest(Uuid.random(), name = "Generic", x = 200f, y = 200f, type = PointOfInterestType.GENERIC),
-        PointOfInterest(Uuid.random(), name = "Toilet", x = -200f, y = -200f, type = PointOfInterestType.TOILET),
+        PointOfInterest(id = Uuid.random(), name = "Generic", x = 200f, y = 200f, type = PointOfInterestType.GENERIC),
+        PointOfInterest(id = Uuid.random(), name = "Toilet", x = -200f, y = -200f, type = PointOfInterestType.TOILET),
         PointOfInterest(id = Uuid.random(), name = "Exit", x = 200f, y = -200f, type = PointOfInterestType.EXIT),
         PointOfInterest(id = Uuid.random(), name = "Restaurant", x = -200f, y = 200f, type = PointOfInterestType.RESTAURANT)
     )
@@ -106,7 +106,7 @@ fun FloorMapPreview() {
 @OptIn(ExperimentalUuidApi::class)
 @Composable
 fun FloorMap(
-    floor: Floor?,
+    floor: Floor,
     cameraState: ViewportState,
     currentZone: Zone? = null,
     selectedZone: Zone? = null,
@@ -152,13 +152,11 @@ fun FloorMap(
                     rotate(degrees = rotation, pivot = Offset.Zero)
                 }
             ) {
-                if (floor != null) {
-                    drawFloorPlan(floor, textMeasurer, currentZone, selectedZone, pathZones)
-                }
+                drawFloorPlan(floor, textMeasurer, currentZone, selectedZone, pathZones)
             }
 
 
-            floor?.pointsOfInterest?.forEach { poi ->
+            floor.pointsOfInterest.forEach { poi ->
                 val color = PoiTheme.get(poi.type).color
                 val iconPainter = poiPainters.getPainter(poi.type)
 
@@ -172,16 +170,15 @@ fun FloorMap(
                 }
             }
 
-            currentZone?.centerPos?.let { pos ->
-                val (x, y) = pos
-                val (pX, pY) = calculateTransformedPosition(Offset(x, y), center, offset, scale, rotation, tilt)
-                withTransform({
-                    translate(left = pX, top = pY)
-                }) {
-                    drawUserLocationBillboard(
-                        textMeasurer = textMeasurer,
-                        billboardColor = billboardColor
-                    )
+            if (floor.zones.contains(currentZone)) {
+                currentZone?.centerPos?.let { pos ->
+                    val (x, y) = pos
+                    val (pX, pY) = calculateTransformedPosition(Offset(x, y), center, offset, scale, rotation, tilt)
+                    withTransform({
+                        translate(left = pX, top = pY)
+                    }) {
+                        drawUserLocationBillboard(textMeasurer, billboardColor)
+                    }
                 }
             }
         }
