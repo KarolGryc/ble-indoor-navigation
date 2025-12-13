@@ -35,21 +35,9 @@ fun DrawScope.drawZone(
     state: ZoneState = ZoneState.NONE,
     opacity: Float = ZoneStyles.opacity,
 ) {
-    val cornerPoints = zone.boundary
-    if (cornerPoints.isEmpty()) {
-        return
-    }
+    if (zone.boundary.isEmpty()) return
 
-    val path = Path().apply {
-        val startPoint = cornerPoints.first()
-        moveTo(startPoint.x, startPoint.y)
-
-        for (i in 1..< cornerPoints.size) {
-            val pos = cornerPoints[i]
-            lineTo(pos.x, pos.y)
-        }
-        close()
-    }
+    val path = getZonePath(zone)
 
     val zoneColor = state.color
     drawPath(path = path, color = zoneColor, alpha = opacity)
@@ -63,16 +51,7 @@ fun DrawScope.drawZoneLabel(
     fontSize: TextUnit = ZoneStyles.fontSize,
     fontBorderThickness: Float = ZoneStyles.fontBorderThickness
 ) {
-    val cornerPoints = zone.boundary
-
-    val minX = cornerPoints.minBy { it.x }.x
-    val maxX = cornerPoints.maxBy { it.x }.x
-    val minY = cornerPoints.minBy { it.y }.y
-    val maxY = cornerPoints.maxBy { it.y }.y
-
-    val centerX = (minX + maxX) / 2
-    val centerY = (minY + maxY) / 2
-
+    val (posX, posY) = zone.centerPos
 
     val nameEmote = when(zone.type) {
         ZoneType.STAIRS -> "\uD80C\uDE8D"
@@ -82,8 +61,8 @@ fun DrawScope.drawZoneLabel(
     val baseStyle = TextStyle(fontSize = fontSize, fontWeight = FontWeight.Medium, color = Color.Unspecified)
     val textLayoutResult = textMeasurer.measure(text = "${zone.name} $nameEmote", style = baseStyle)
     val textOffset = Offset(
-        x = centerX - textLayoutResult.size.width / 2,
-        y = centerY - textLayoutResult.size.height / 2
+        x = posX - textLayoutResult.size.width / 2,
+        y = posY - textLayoutResult.size.height / 2
     )
 
     drawText(
@@ -99,4 +78,18 @@ fun DrawScope.drawZoneLabel(
         topLeft = textOffset,
         drawStyle = Fill
     )
+}
+
+private fun getZonePath(zone: Zone): Path {
+    return Path().apply {
+        val cornerPoints = zone.boundary
+        val startPoint = cornerPoints.first()
+        moveTo(startPoint.x, startPoint.y)
+
+        for (i in 1..< cornerPoints.size) {
+            val pos = cornerPoints[i]
+            lineTo(pos.x, pos.y)
+        }
+        close()
+    }
 }

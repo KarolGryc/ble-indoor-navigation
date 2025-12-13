@@ -88,6 +88,7 @@ class MapNavigationViewModel(
             try {
                 scanner.startScan()
 
+                var initialMove = false
                 while (isActive) {
                     val currentMap = _uiState.value.map
 
@@ -103,6 +104,11 @@ class MapNavigationViewModel(
 
                     if (stableZone != null && stableZone != _uiState.value.currentZone) {
                         _uiState.update { it.copy(currentZoneUuid = stableZone.id) }
+
+                        if (!initialMove) {
+                            moveCameraToCurrentZone()
+                            initialMove = true
+                        }
                     }
                 }
             } finally {
@@ -122,6 +128,18 @@ class MapNavigationViewModel(
                 currentFloorUuid = null
             )
         }
+    }
+
+    fun moveCameraToCurrentZone() {
+        _uiState.value.currentZone?.let { moveCameraToZone(it) }
+    }
+
+    fun moveCameraToZone(zone: Zone) {
+        val (posX, posY) = zone.centerPos
+        val scale = _viewportState.value.scale
+        val scaledX = -posX * scale // TODO: fix the inverted axis
+        val scaledY = -posY * scale
+        _viewportState.update { it.copy(offset = Offset(scaledX, scaledY)) }
     }
 
     fun startCompassMode() {
@@ -291,7 +309,7 @@ data class ViewportState(
     val offset: Offset = Offset.Zero,
     val scale: Float = 1.5f,
     val rotation: Float = 0.0f,
-    val tilt: Float = 1f
+    val tilt: Float = 1.0f
 ) {
     companion object {
         const val MAX_ZOOM = 3f

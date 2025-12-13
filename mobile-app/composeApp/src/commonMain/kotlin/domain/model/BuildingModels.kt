@@ -49,7 +49,22 @@ data class Zone(
     val boundary: List<Node>,
     val type: ZoneType,
     val fingerprints: MutableList<Fingerprint> = mutableListOf()
-)
+) {
+    val centerPos: Pair<Float, Float>
+        get() {
+            val cornerPoints = boundary
+
+            val minX = cornerPoints.minBy { it.x }.x
+            val maxX = cornerPoints.maxBy { it.x }.x
+            val minY = cornerPoints.minBy { it.y }.y
+            val maxY = cornerPoints.maxBy { it.y }.y
+
+            val centerX = (minX + maxX) / 2
+            val centerY = (minY + maxY) / 2
+
+            return Pair(centerX, centerY)
+        }
+}
 
 data class Fingerprint(
     val measurements: List<Measurement>

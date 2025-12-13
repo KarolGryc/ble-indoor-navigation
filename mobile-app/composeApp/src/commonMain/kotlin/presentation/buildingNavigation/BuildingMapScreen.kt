@@ -140,6 +140,11 @@ fun BuildingMapScreen(
                     .align(Alignment.TopStart)
                     .padding(16.dp),
                 onClick = {
+                    if (uiState.locationEnabled) {
+                        viewModel.moveCameraToCurrentZone()
+                        return@LocateUserButton
+                    }
+
                     scope.launch {
                         val permissionResult = checkPermissions(
                             permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),

@@ -21,6 +21,8 @@ import domain.model.Wall
 import domain.model.Zone
 import domain.model.ZoneType
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -116,6 +118,7 @@ fun FloorMap(
 ) {
     val textMeasurer = rememberTextMeasurer()
     val poiPainters = rememberPoiPainters()
+    val billboardColor = MaterialTheme.colorScheme.primary
 
     val (offset, scale, rotation, tilt) = cameraState
 
@@ -154,27 +157,54 @@ fun FloorMap(
                 }
             }
 
-            val rad = rotation * (kotlin.math.PI / 180.0)
-            val cos = kotlin.math.cos(rad).toFloat()
-            val sin = kotlin.math.sin(rad).toFloat()
 
             floor?.pointsOfInterest?.forEach { poi ->
                 val color = PoiTheme.get(poi.type).color
                 val iconPainter = poiPainters.getPainter(poi.type)
 
-                val rotatedX = poi.x * cos - poi.y * sin
-                val rotatedY = poi.x * sin + poi.y * cos
-
-                val finalX = center.x + offset.x + (rotatedX * scale)
-                val finalY = center.y + offset.y + (rotatedY * scale * tilt)
-
+                val (x, y) = (poi.x to poi.y)
+                val (pX, pY) = calculateTransformedPosition(Offset(x, y), center, offset, scale, rotation, tilt)
                 withTransform({
-                    translate(left = finalX, top = finalY)
+                    translate(left = pX, top = pY)
                 }) {
                     val localPoi = poi.copy(x = 0f, y = 0f)
                     drawPoiPin(localPoi, textMeasurer, iconPainter, color)
                 }
             }
+
+            currentZone?.centerPos?.let { pos ->
+                val (x, y) = pos
+                val (pX, pY) = calculateTransformedPosition(Offset(x, y), center, offset, scale, rotation, tilt)
+                withTransform({
+                    translate(left = pX, top = pY)
+                }) {
+                    drawUserLocationBillboard(
+                        textMeasurer = textMeasurer,
+                        billboardColor = billboardColor
+                    )
+                }
+            }
         }
     }
+}
+
+private fun calculateTransformedPosition(
+    point: Offset,
+    center: Offset,
+    offset: Offset,
+    scale: Float,
+    rotation: Float,
+    tilt: Float
+): Offset {
+    val rad = rotation * (kotlin.math.PI / 180.0)
+    val cos = cos(rad).toFloat()
+    val sin = sin(rad).toFloat()
+
+    val rotatedX = point.x * cos - point.y * sin
+    val rotatedY = point.x * sin + point.y * cos
+
+    val finalX = center.x + offset.x + (rotatedX * scale)
+    val finalY = center.y + offset.y + (rotatedY * scale * tilt)
+
+    return Offset(finalX, finalY)
 }
