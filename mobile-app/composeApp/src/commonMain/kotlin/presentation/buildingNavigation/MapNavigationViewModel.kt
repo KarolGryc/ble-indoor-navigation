@@ -49,13 +49,26 @@ class MapNavigationViewModel(
 
         viewModelScope.launch {
             scanner.isScanning.collect { isScanning ->
-                _uiState.update { it.copy(isPositioning = isScanning) }
+                _uiState.update { it.copy(locationEnabled = isScanning) }
             }
         }
 
         viewModelScope.launch {
             scanner.errors.collect { error ->
-                _uiState.update { it.copy(scannerError = error) }
+                when (error) {
+                    is BleScanError.BluetoothDisabled ->
+                        setErrorMessage(
+                            title = "Bluetooth Disabled",
+                            message = "Please enable Bluetooth to use location tracking."
+                        )
+                    is BleScanError.LocationPermissionDenied ->
+                        setErrorMessage(
+                            title = "Permission Denied",
+                            message = "Required permissions were denied. Please grant them to use location tracking."
+                        )
+                    else -> { /* No action */ }
+                }
+                _uiState.update { it.copy(locationEnabled = false) }
             }
         }
     }
@@ -209,9 +222,6 @@ data class MapScreenUiState(
     val locationEnabled: Boolean = false,
     val currentFloorUuid: Uuid? = null,
     val currentZoneUuid: Uuid? = null,
-
-    val isPositioning: Boolean = false,
-    val scannerError: BleScanError = BleScanError.None,
 
     val uiErrorMessage: ErrorMessage? = null
 ) {

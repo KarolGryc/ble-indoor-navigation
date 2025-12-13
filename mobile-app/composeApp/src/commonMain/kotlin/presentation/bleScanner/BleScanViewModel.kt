@@ -10,24 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import presentation.buildingNavigation.ErrorMessage
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-
-data class BleScanUiState(
-    val isScanning: Boolean = false,
-    val error: BleScanError = BleScanError.None,
-    val devices: List<ScannedDeviceUi> = emptyList()
-)
-
-data class ScannedDeviceUi(
-    val device: BleDevice,
-    val seenAgo: Long
-)
-
-private data class DeviceEntry(
-    val device: BleDevice,
-    val timestamp: Long
-)
 
 @ExperimentalTime
 class BleScanViewModel(
@@ -75,6 +60,18 @@ class BleScanViewModel(
         }
     }
 
+    fun setErrorMessage(message: ErrorMessage?) {
+        _uiState.update { currentState ->
+            currentState.copy(errorMessage = message)
+        }
+    }
+
+    fun clearErrorMessage() {
+        _uiState.update { currentState ->
+            currentState.copy(errorMessage = null)
+        }
+    }
+
     private fun startUiLoop() {
         viewModelScope.launch {
             while (true) {
@@ -116,3 +113,21 @@ class BleScanViewModel(
         }
     }
 }
+
+data class BleScanUiState(
+    val isScanning: Boolean = false,
+    val error: BleScanError = BleScanError.None,
+    val devices: List<ScannedDeviceUi> = emptyList(),
+
+    val errorMessage: ErrorMessage? = null
+)
+
+data class ScannedDeviceUi(
+    val device: BleDevice,
+    val seenAgo: Long
+)
+
+private data class DeviceEntry(
+    val device: BleDevice,
+    val timestamp: Long
+)

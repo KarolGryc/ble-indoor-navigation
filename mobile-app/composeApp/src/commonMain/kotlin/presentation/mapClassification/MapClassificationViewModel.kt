@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import presentation.buildingNavigation.ErrorMessage
 import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
@@ -123,6 +124,14 @@ class MapClassificationViewModel(
         updateUiState(CalibrationStage.ZoneSelect)
     }
 
+    fun setErrorMessage(errorMessage: ErrorMessage?) {
+        _state.update { it.copy(errorMessage = errorMessage) }
+    }
+
+    fun clearErrorMessage() {
+        _state.update { it.copy(errorMessage = null) }
+    }
+
     private fun getZoneWithId(zoneId: Uuid): Zone? {
         for (floor in _building?.floors ?: emptyList()) {
             for (zone in floor.zones) {
@@ -174,7 +183,9 @@ data class CalibrationUiState(
     val buildingName: String = "",
     val floors: List<FloorUiItem> = emptyList(),
     val currentStage: CalibrationStage = CalibrationStage.ZoneSelect,
-    val unsavedData: Boolean = false
+    val unsavedData: Boolean = false,
+
+    val errorMessage: ErrorMessage? = null
 )
 
 data class FloorUiItem(

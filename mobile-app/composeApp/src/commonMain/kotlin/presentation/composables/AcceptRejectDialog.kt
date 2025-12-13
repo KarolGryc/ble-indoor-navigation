@@ -13,20 +13,15 @@ fun AcceptRejectDialog(
     onAccept: (() -> Unit)? = null,
     onReject: (() -> Unit)? = null
 ) {
+    val options = mutableListOf<DialogOption>()
+    onAccept?.let { options.add(DialogOption("Accept") { onAccept() }) }
+    onReject?.let { options.add(DialogOption("Reject") { onReject() }) }
+
     if (show) {
         DialogWithOptions(
             title = title,
             message = message,
-            options = listOf(
-                DialogOption(
-                    label = "Accept",
-                    onSelect = { onAccept?.invoke() }
-                ),
-                DialogOption(
-                    label = "Reject",
-                    onSelect = { onReject?.invoke() }
-                )
-            ),
+            options = options,
             onDismiss = onReject
         )
     }

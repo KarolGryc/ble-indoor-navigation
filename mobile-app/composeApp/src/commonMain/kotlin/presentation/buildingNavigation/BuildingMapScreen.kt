@@ -175,7 +175,6 @@ fun BuildingMapScreen(
                 message = errorMessage?.message ?: "",
                 onAccept = { viewModel.clearErrorMessage() }
             )
-
         }
     }
 }

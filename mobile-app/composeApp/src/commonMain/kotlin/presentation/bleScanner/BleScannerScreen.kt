@@ -47,6 +47,9 @@ import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.permissions.location.LOCATION
 import domain.repository.BleScanError
 import kotlinx.coroutines.launch
+import presentation.buildingNavigation.ErrorMessage
+import presentation.composables.DialogOption
+import presentation.composables.DialogWithOptions
 import presentation.permissions.PermissionCheckResult
 import presentation.permissions.checkPermissions
 import kotlin.time.ExperimentalTime
@@ -79,13 +82,21 @@ fun BleScannerScreen(
                 uiState = uiState,
                 onScanButtonPressed = {
                     scope.launch {
-                        val checkResult = checkPermissions(
+                        val permissionResult = checkPermissions(
                             permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),
                             controller = controller,
                         )
 
-                        if (checkResult == PermissionCheckResult.Granted) {
-                            viewModel.toggleScanButton()
+                        when (permissionResult) {
+                            PermissionCheckResult.Granted -> viewModel.toggleScanButton()
+                            PermissionCheckResult.PermanentlyDenied ->
+                                viewModel.setErrorMessage(
+                                    ErrorMessage(
+                                        "Permissions Denied",
+                                        "Location and Bluetooth permissions are permanently denied. Please enable them in settings."
+                                    )
+                                )
+                            else -> {}
                         }
                     }
                 },
@@ -136,6 +147,17 @@ fun BleScannerScreen(
                         Text("Press start to search", color = MaterialTheme.colorScheme.outline)
                     }
                 }
+            }
+
+            if (uiState.errorMessage != null) {
+                DialogWithOptions(
+                    title = uiState.errorMessage?.title ?: "",
+                    message = uiState.errorMessage?.message ?: "",
+                    options = listOf(
+                        DialogOption(text = "OK", onClick = { viewModel.clearErrorMessage() })
+                    ),
+                    onDismiss = { viewModel.clearErrorMessage() }
+                )
             }
         }
     }

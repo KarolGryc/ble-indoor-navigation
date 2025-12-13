@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class DialogOption(
-    val label: String,
-    val onSelect: () -> Unit
+    val text: String,
+    val onClick: () -> Unit
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,8 +67,8 @@ fun DialogWithOptions(
                     horizontalArrangement = Arrangement.End
                 ) {
                     options.forEachIndexed { index, option ->
-                        TextButton(onClick = { option.onSelect() }) {
-                            Text(text = option.label)
+                        TextButton(onClick = { option.onClick() }) {
+                            Text(text = option.text)
                         }
                         if (index < options.size - 1) {
                             Spacer(modifier = Modifier.width(8.dp))

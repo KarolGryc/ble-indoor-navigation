@@ -36,7 +36,10 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.permissions.location.LOCATION
 import kotlinx.coroutines.launch
+import presentation.buildingNavigation.ErrorMessage
 import presentation.composables.AcceptRejectDialog
+import presentation.composables.DialogOption
+import presentation.composables.DialogWithOptions
 import presentation.permissions.PermissionCheckResult
 import presentation.permissions.checkPermissions
 import kotlin.uuid.ExperimentalUuidApi
@@ -53,7 +56,7 @@ fun MapClassificationScreen(
     val controller = remember(factory) { factory.createPermissionsController() }
     BindEffect(controller)
 
-    val vmState by viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
     var saveRequested by remember { mutableStateOf(false) }
     var resetRequested by remember { mutableStateOf(false) }
     var unsavedDataWarning by remember { mutableStateOf(false) }
@@ -65,12 +68,12 @@ fun MapClassificationScreen(
                 title = {
                     Column {
                         Text(text = "Classify map zones", style = MaterialTheme.typography.titleMedium)
-                        Text(text = vmState.buildingName, style = MaterialTheme.typography.labelMedium)
+                        Text(text = uiState.buildingName, style = MaterialTheme.typography.labelMedium)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        if(vmState.unsavedData) unsavedDataWarning = true
+                        if(uiState.unsavedData) unsavedDataWarning = true
                         else onClickBack()
                     }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
@@ -100,13 +103,13 @@ fun MapClassificationScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            vmState.floors.forEach { floor ->
+            uiState.floors.forEach { floor ->
                 item(key = "header_${floor.name}") {
                     FloorHeader(floorName = floor.name)
                 }
 
                 items(items = floor.zones, key = { it.id }) { zone ->
-                    val asRecordingState = vmState.currentStage as? CalibrationStage.SignalsRecording
+                    val asRecordingState = uiState.currentStage as? CalibrationStage.SignalsRecording
 
                     ZoneItem(
                         zone = zone,
@@ -116,15 +119,20 @@ fun MapClassificationScreen(
                         onRecordClick = {
                             scope.launch {
                                 val permissionResult = checkPermissions(
-                                    permissions = listOf(
-                                        Permission.LOCATION,
-                                        Permission.BLUETOOTH_SCAN
-                                    ),
+                                    permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),
                                     controller = controller
                                 )
 
-                                if (permissionResult == PermissionCheckResult.Granted) {
-                                    viewModel.recordData(zone.id)
+                                when (permissionResult) {
+                                    PermissionCheckResult.Granted -> viewModel.recordData(zone.id)
+                                    PermissionCheckResult.PermanentlyDenied ->
+                                        viewModel.setErrorMessage(
+                                            ErrorMessage(
+                                                "Permissions Denied",
+                                                "Location and Bluetooth permissions are permanently denied. Please enable them in settings."
+                                            )
+                                        )
+                                    else -> {}
                                 }
                             }
                         }
@@ -135,11 +143,11 @@ fun MapClassificationScreen(
             }
         }
 
-        val resMeasurements = (vmState.currentStage as? CalibrationStage.Result)?.fingerprint?.measurements
+        val resMeasurements = (uiState.currentStage as? CalibrationStage.Result)?.fingerprint?.measurements
         AcceptRejectDialog(
-            show = vmState.currentStage is CalibrationStage.Result,
+            show = uiState.currentStage is CalibrationStage.Result,
             title = "Accept this measurement?",
-            message = fingerprintAsString(vmState.currentStage),
+            message = fingerprintAsString(uiState.currentStage),
             onReject = viewModel::resetCalibrationStage,
             onAccept = if(resMeasurements?.isNotEmpty() ?: false) viewModel::acceptPendingFingerprint else null
         )
@@ -163,7 +171,7 @@ fun MapClassificationScreen(
         AcceptRejectDialog(
             show = resetRequested,
             title = "Reset of configuration",
-            message = "Do you want to reset ${vmState.buildingName} configuration?",
+            message = "Do you want to reset ${uiState.buildingName} configuration?",
             onAccept = { viewModel.resetCalibration(); resetRequested = false  },
             onReject = { resetRequested = false }
         )
@@ -171,9 +179,20 @@ fun MapClassificationScreen(
         AcceptRejectDialog(
             show = errorWhileLoading,
             title = "Loading map error!",
-            message = "Cannot load map ${vmState.buildingName} ☠\uFE0F",
+            message = "Cannot load map ${uiState.buildingName} ☠\uFE0F",
             onAccept = { onClickBack() }
         )
+
+        if (uiState.errorMessage != null) {
+            DialogWithOptions(
+                title = uiState.errorMessage?.title ?: "",
+                message = uiState.errorMessage?.message ?: "",
+                options = listOf(
+                    DialogOption(text = "OK", onClick = { viewModel.clearErrorMessage() })
+                ),
+                onDismiss = { viewModel.clearErrorMessage() }
+            )
+        }
     }
 }
 
