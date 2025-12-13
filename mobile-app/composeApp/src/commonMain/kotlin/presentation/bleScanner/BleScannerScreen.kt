@@ -41,13 +41,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.permissions.Permission
-import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.bluetooth.BLUETOOTH_SCAN
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.permissions.location.LOCATION
 import domain.repository.BleScanError
 import kotlinx.coroutines.launch
+import presentation.permissions.PermissionCheckResult
 import presentation.permissions.checkPermissions
 import kotlin.time.ExperimentalTime
 
@@ -57,6 +57,8 @@ fun BleScannerScreen(
     viewModel: BleScanViewModel,
     onBackPressed: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     val factory = rememberPermissionsControllerFactory()
     val controller = remember(factory) { factory.createPermissionsController() }
     BindEffect(controller)
@@ -74,10 +76,19 @@ fun BleScannerScreen(
 
         sheetContent = {
             BleScannerBottomSheet(
-                controller = controller,
                 uiState = uiState,
-                onScanStarted = { viewModel.startScan() },
-                onScanStopped = { viewModel.stopScan() },
+                onScanButtonPressed = {
+                    scope.launch {
+                        val checkResult = checkPermissions(
+                            permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),
+                            controller = controller,
+                        )
+
+                        if (checkResult == PermissionCheckResult.Granted) {
+                            viewModel.toggleScanButton()
+                        }
+                    }
+                },
                 onFilterByNameChanged = { shouldFilter -> viewModel.filterByName = shouldFilter }
             )
         },
@@ -132,10 +143,8 @@ fun BleScannerScreen(
 
 @Composable
 fun BleScannerBottomSheet(
-    controller: PermissionsController,
     uiState: BleScanUiState,
-    onScanStarted: () -> Unit,
-    onScanStopped: () -> Unit,
+    onScanButtonPressed: () -> Unit = {},
     onFilterByNameChanged: (Boolean) -> Unit
 ) {
     Column(
@@ -144,12 +153,7 @@ fun BleScannerBottomSheet(
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ScanningEnableButton(
-            controller = controller,
-            uiState = uiState,
-            onScanStarted = onScanStarted,
-            onScanStopped = onScanStopped
-        )
+        ScanningEnableButton(uiState = uiState, onClick = onScanButtonPressed)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -169,31 +173,14 @@ fun BleScannerBottomSheet(
 
 @Composable
 fun ScanningEnableButton(
-    controller: PermissionsController,
     uiState: BleScanUiState,
-    onScanStarted: () -> Unit,
-    onScanStopped: () -> Unit
+    onClick: () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
     Button(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
-        onClick = {
-            scope.launch {
-                checkPermissions(
-                    permissions = listOf(
-                        Permission.LOCATION,
-                        Permission.BLUETOOTH_SCAN
-                    ),
-                    controller = controller,
-                    onGranted = {
-                        if (uiState.isScanning) onScanStopped()
-                        else onScanStarted()
-                    }
-                )
-            }
-        },
+        onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = if(uiState.error != BleScanError.None) {
                 MaterialTheme.colorScheme.error

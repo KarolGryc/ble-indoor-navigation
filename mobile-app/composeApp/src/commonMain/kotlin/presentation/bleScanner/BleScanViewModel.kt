@@ -67,11 +67,19 @@ class BleScanViewModel(
         startUiLoop()
     }
 
-    fun startScan() {
+    fun toggleScanButton() {
+        if (_uiState.value.isScanning) {
+            stopScan()
+        } else {
+            startScan()
+        }
+    }
+
+    private fun startScan() {
         scanner.startScan()
     }
 
-    fun stopScan() {
+    private fun stopScan() {
         scanner.stopScan()
     }
 
