@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import domain.model.Building
 import domain.model.Floor
 import domain.model.Zone
+import domain.repository.BleScanError
 import domain.repository.BleScanner
 import domain.repository.BuildingMapRepository
 import domain.service.CompassService
@@ -45,6 +46,18 @@ class MapNavigationViewModel(
 
     init {
         loadMap()
+
+        viewModelScope.launch {
+            scanner.isScanning.collect { isScanning ->
+                _uiState.update { it.copy(isPositioning = isScanning) }
+            }
+        }
+
+        viewModelScope.launch {
+            scanner.errors.collect { error ->
+                _uiState.update { it.copy(scannerError = error) }
+            }
+        }
     }
 
     fun startLocationTracking() {
@@ -94,6 +107,16 @@ class MapNavigationViewModel(
         _compassJob?.cancel()
         _compassJob = null
         _isCompassModeEnabled.value = false
+    }
+
+    fun setErrorMessage(title: String, message: String) {
+        _uiState.value = _uiState.value.copy(
+            uiErrorMessage = ErrorMessage(title, message)
+        )
+    }
+
+    fun clearErrorMessage() {
+        _uiState.value = _uiState.value.copy(uiErrorMessage = null)
     }
 
     fun incrementFloor() {
@@ -174,6 +197,8 @@ class MapNavigationViewModel(
     }
 }
 
+data class ErrorMessage(val title: String, val message: String)
+
 @OptIn(ExperimentalUuidApi::class)
 data class MapScreenUiState(
     val map: Building? = null,
@@ -183,7 +208,12 @@ data class MapScreenUiState(
 
     val locationEnabled: Boolean = false,
     val currentFloorUuid: Uuid? = null,
-    val currentZoneUuid: Uuid? = null
+    val currentZoneUuid: Uuid? = null,
+
+    val isPositioning: Boolean = false,
+    val scannerError: BleScanError = BleScanError.None,
+
+    val uiErrorMessage: ErrorMessage? = null
 ) {
     val selectedFloor: Floor?
         get() = map?.floors?.find { it.id == selectedFloorUuid }

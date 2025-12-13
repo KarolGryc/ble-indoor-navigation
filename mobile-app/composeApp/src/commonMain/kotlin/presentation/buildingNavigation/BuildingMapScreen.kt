@@ -32,6 +32,7 @@ import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.permissions.location.LOCATION
 import kotlinx.coroutines.launch
+import presentation.composables.AcceptRejectDialog
 import presentation.composables.FloorSelectionPanel
 import presentation.composables.MapCompass
 import presentation.permissions.PermissionCheckResult
@@ -50,6 +51,7 @@ fun BuildingMapScreen(
     BindEffect(controller)
 
     val uiState by viewModel.uiState.collectAsState()
+    val errorMessage = uiState.uiErrorMessage
     val selectedFloor = uiState.selectedFloor
     val currentFloor = uiState.currentFloor
     val currentZone = uiState.currentZone
@@ -144,8 +146,14 @@ fun BuildingMapScreen(
                             controller = controller,
                         )
 
-                        if (permissionResult == PermissionCheckResult.Granted) {
-                            viewModel.startLocationTracking()
+                        when (permissionResult) {
+                            PermissionCheckResult.Granted -> viewModel.startLocationTracking()
+                            PermissionCheckResult.PermanentlyDenied ->
+                                viewModel.setErrorMessage(
+                                    "Permissions Denied",
+                                    "Location and Bluetooth permissions are permanently denied. Please enable them in settings."
+                                )
+                            else -> {}
                         }
                     }
                 },
@@ -160,6 +168,14 @@ fun BuildingMapScreen(
                 onFloorDown = { viewModel.decrementFloor() },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
             )
+
+            AcceptRejectDialog(
+                show = errorMessage != null,
+                title = errorMessage?.title ?: "",
+                message = errorMessage?.message ?: "",
+                onAccept = { viewModel.clearErrorMessage() }
+            )
+
         }
     }
 }
