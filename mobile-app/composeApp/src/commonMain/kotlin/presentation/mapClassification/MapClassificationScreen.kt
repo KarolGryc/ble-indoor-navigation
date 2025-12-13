@@ -26,10 +26,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.bluetooth.BLUETOOTH_SCAN
+import dev.icerock.moko.permissions.compose.BindEffect
+import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+import dev.icerock.moko.permissions.location.LOCATION
+import kotlinx.coroutines.launch
 import presentation.composables.AcceptRejectDialog
+import presentation.permissions.PermissionCheckResult
+import presentation.permissions.checkPermissions
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class, ExperimentalMaterial3Api::class)
@@ -38,6 +47,12 @@ fun MapClassificationScreen(
     viewModel: MapClassificationViewModel,
     onClickBack: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
+    val factory = rememberPermissionsControllerFactory()
+    val controller = remember(factory) { factory.createPermissionsController() }
+    BindEffect(controller)
+
     val vmState by viewModel.state.collectAsState()
     var saveRequested by remember { mutableStateOf(false) }
     var resetRequested by remember { mutableStateOf(false) }
@@ -98,7 +113,21 @@ fun MapClassificationScreen(
                         isGlobalRecording = asRecordingState != null,
                         isRecorded = asRecordingState?.zoneUiItem?.id == zone.id,
                         progress = asRecordingState?.progress ?: 0f,
-                        onRecordClick = { viewModel.recordData(zone.id) }
+                        onRecordClick = {
+                            scope.launch {
+                                val permissionResult = checkPermissions(
+                                    permissions = listOf(
+                                        Permission.LOCATION,
+                                        Permission.BLUETOOTH_SCAN
+                                    ),
+                                    controller = controller
+                                )
+
+                                if (permissionResult == PermissionCheckResult.Granted) {
+                                    viewModel.recordData(zone.id)
+                                }
+                            }
+                        }
                     )
                 }
 

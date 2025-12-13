@@ -20,12 +20,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.bluetooth.BLUETOOTH_SCAN
+import dev.icerock.moko.permissions.compose.BindEffect
+import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+import dev.icerock.moko.permissions.location.LOCATION
+import kotlinx.coroutines.launch
 import presentation.composables.FloorSelectionPanel
 import presentation.composables.MapCompass
+import presentation.permissions.PermissionCheckResult
+import presentation.permissions.checkPermissions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +43,12 @@ fun BuildingMapScreen(
     viewModel: MapNavigationViewModel,
     onClickBack: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
+    val factory = rememberPermissionsControllerFactory()
+    val controller = remember(factory) { factory.createPermissionsController() }
+    BindEffect(controller)
+
     val uiState by viewModel.uiState.collectAsState()
     val selectedFloor = uiState.selectedFloor
     val currentFloor = uiState.currentFloor
@@ -121,7 +137,18 @@ fun BuildingMapScreen(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(16.dp),
-                onClick = { viewModel.startLocationTracking() },
+                onClick = {
+                    scope.launch {
+                        val permissionResult = checkPermissions(
+                            permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),
+                            controller = controller,
+                        )
+
+                        if (permissionResult == PermissionCheckResult.Granted) {
+                            viewModel.startLocationTracking()
+                        }
+                    }
+                },
                 active = uiState.locationEnabled
             )
 
