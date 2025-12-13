@@ -3,6 +3,7 @@ package presentation.bleScanner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.BleDevice
+import domain.model.ErrorMessage
 import domain.repository.BleScanError
 import domain.repository.BleScanner
 import kotlinx.coroutines.delay
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import presentation.buildingNavigation.ErrorMessage
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 

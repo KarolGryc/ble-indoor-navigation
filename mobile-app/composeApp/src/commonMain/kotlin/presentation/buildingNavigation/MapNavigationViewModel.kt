@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.Building
+import domain.model.ErrorMessage
 import domain.model.Floor
 import domain.model.Zone
 import domain.repository.BleScanError
@@ -76,6 +77,14 @@ class MapNavigationViewModel(
                 }
             }
         }
+    }
+
+    fun setIsSearching(isEnabled: Boolean) {
+        _uiState.update { it.copy(isSearching = isEnabled) }
+    }
+
+    fun setSearchQuery(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
     }
 
     fun startLocationTracking() {
@@ -257,8 +266,6 @@ class MapNavigationViewModel(
     }
 }
 
-data class ErrorMessage(val title: String, val message: String)
-
 @OptIn(ExperimentalUuidApi::class)
 data class MapScreenUiState(
     val map: Building? = null,
@@ -268,6 +275,9 @@ data class MapScreenUiState(
     val locationEnabled: Boolean = false,
     val currentFloorUuid: Uuid? = null,
     val currentZoneUuid: Uuid? = null,
+
+    val isSearching: Boolean = false,
+    val searchQuery: String = "",
 
     val uiErrorMessage: ErrorMessage? = null
 ) {
@@ -299,6 +309,31 @@ data class MapScreenUiState(
         get() = map?.floors?.firstNotNullOfOrNull { floor ->
                 floor.zones.find { zone -> zone.id == currentZoneUuid }
             }
+
+    val allSearchableItems: List<MapSearchResult>
+        get() {
+            return map?.floors?.flatMap { floor ->
+                val zoneResults = floor.zones.map { zone ->
+                    MapSearchResult.ZoneResult(zone = zone, floor = floor)
+                }
+                val poiResults = floor.pointsOfInterest.map { poi ->
+                    MapSearchResult.PoiResult(poi = poi, floor = floor)
+                }
+                zoneResults + poiResults
+            } ?: emptyList()
+        }
+
+    val filteredSearchResults: List<MapSearchResult>
+        get() {
+            if (searchQuery.isBlank()) {
+                return allSearchableItems
+            }
+            val queryLower = searchQuery.lowercase()
+            return allSearchableItems.filter { item ->
+                item.title.lowercase().contains(queryLower) ||
+                        item.subtitle.lowercase().contains(queryLower)
+            }
+        }
 }
 
 data class ViewportState(

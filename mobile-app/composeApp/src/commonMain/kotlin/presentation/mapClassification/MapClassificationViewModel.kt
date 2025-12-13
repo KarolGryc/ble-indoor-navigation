@@ -3,6 +3,7 @@ package presentation.mapClassification
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import domain.model.Building
+import domain.model.ErrorMessage
 import domain.model.Fingerprint
 import domain.model.Zone
 import domain.repository.BleScanner
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import presentation.buildingNavigation.ErrorMessage
 import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime

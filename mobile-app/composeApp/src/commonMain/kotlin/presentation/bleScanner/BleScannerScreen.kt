@@ -45,9 +45,9 @@ import dev.icerock.moko.permissions.bluetooth.BLUETOOTH_SCAN
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.permissions.location.LOCATION
+import domain.model.ErrorMessage
 import domain.repository.BleScanError
 import kotlinx.coroutines.launch
-import presentation.buildingNavigation.ErrorMessage
 import presentation.composables.DialogOption
 import presentation.composables.DialogWithOptions
 import presentation.permissions.PermissionCheckResult

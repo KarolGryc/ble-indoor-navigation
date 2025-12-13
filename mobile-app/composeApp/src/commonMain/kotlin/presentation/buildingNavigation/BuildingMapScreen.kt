@@ -55,6 +55,9 @@ fun BuildingMapScreen(
     val currentFloor = uiState.currentFloor
     val currentZone = uiState.currentZone
 
+    val isSearching = uiState.isSearching
+    val searchQuery = uiState.searchQuery
+
     val viewportState by viewModel.viewportState.collectAsState()
     val (targetOffset, targetScale, targetRotation, targetTilt) = viewportState
 
@@ -67,19 +70,29 @@ fun BuildingMapScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(currentFloor?.name ?: "Unnamed") },
-                navigationIcon = {
-                    IconButton(onClick = onClickBack){
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription ="Back")
+            if (isSearching) {
+                MapSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { viewModel.setSearchQuery(it) },
+                    active = isSearching,
+                    onActiveChange = { viewModel.setIsSearching(it) },
+                    searchResults = uiState.filteredSearchResults,
+                )
+            } else {
+                CenterAlignedTopAppBar(
+                    title = { Text(currentFloor?.name ?: "Unnamed") },
+                    navigationIcon = {
+                        IconButton(onClick = onClickBack){
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription ="Back")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick={ viewModel.setIsSearching(true) }){
+                            Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                        }
                     }
-                },
-                actions = {
-                    IconButton(onClick={}){
-                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-                    }
-                }
-            )
+                )
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier
