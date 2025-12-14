@@ -16,11 +16,16 @@ fun DrawScope.drawFloorPlan(
         drawWall(it)
     }
 
+    val beforeCurrentPath = pathZones.takeWhile { it != currentZone }
     floor.zones.forEach {
         val zoneState = when {
             it === selectedZone -> ZoneState.SELECTED
             it === currentZone -> ZoneState.CURRENT
-            it in pathZones -> ZoneState.PATH
+            it in pathZones -> when {
+                pathZones.last() == it -> ZoneState.PATH_GOAL
+                !beforeCurrentPath.contains(it) -> ZoneState.PATH
+                else -> ZoneState.NONE
+            }
             else -> ZoneState.NONE
         }
         drawZone(it, zoneState)

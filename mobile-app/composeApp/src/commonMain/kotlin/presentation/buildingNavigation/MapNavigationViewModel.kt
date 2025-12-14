@@ -47,6 +47,7 @@ class MapNavigationViewModel(
 
     private var _compassJob: Job? = null
     private var _locationJob: Job? = null
+    private var _navigationJob: Job? = null
 
 
     init {
@@ -105,16 +106,78 @@ class MapNavigationViewModel(
         }
     }
 
-    fun findPath(startZone: Zone, endZone: Zone) {
-        val currentMap = _uiState.value.map ?: return
-        val path = findPathBetweenUseCase(currentMap, startZone, endZone)
+    fun startNavigation(goal: MapSearchResult) {
+        when (goal) {
+            is MapSearchResult.ZoneResult -> {
+                startNavigation(goal.zone)
+            }
+            is MapSearchResult.PoiResult -> {
+                val poiZone = goal.floor.zones.find { zone ->
+                    zone.contains(goal.poi.x, goal.poi.y)
+                }
+
+                if (poiZone != null) {
+                    startNavigation(poiZone)
+                } else {
+                    setErrorMessage(
+                        title = "Navigation Error",
+                        message = "Could not find a zone containing the selected point of interest."
+                    )
+                }
+            }
+        }
+    }
+
+    fun startNavigation(goal: Zone) {
+        _navigationJob = viewModelScope.launch {
+            while(isActive && _uiState.value.currentZone == null) {
+                delay(500)
+            }
+
+            _uiState.update { it.copy(isNavigating = true) }
+
+            val currentMap = _uiState.value.map ?: return@launch
+            val startZone = _uiState.value.currentZone ?: return@launch
+
+            var path = findPathBetweenUseCase(currentMap, startZone, goal)?.path
+            _uiState.update { it.copy(currentPath = path) }
+
+            while(isActive) {
+                if (path == null) {
+                    setErrorMessage(
+                        title = "Navigation Error",
+                        message = "No path found from current location to the selected destination."
+                    )
+                    stopNavigation()
+                    return@launch
+                }
+
+                val currentZone = _uiState.value.currentZone ?: continue
+
+                if (currentZone == goal) {
+                    break
+                } else if (!path.contains(currentZone)) {
+                    path = findPathBetweenUseCase(currentMap, currentZone, goal)?.path
+                    _uiState.update { it.copy(currentPath = path) }
+                }
+                delay(2000)
+            }
+
+            stopNavigation()
+        }
+    }
+
+    fun stopNavigation() {
+        _navigationJob?.cancel()
+        _navigationJob = null
         _uiState.update {
             it.copy(
-                currentPath = path?.path
+                isNavigating = false,
+                currentPath = null
             )
         }
     }
-    
+
     fun startLocationTracking() {
         _locationJob?.cancel()
         _uiState.update { it.copy(locationEnabled = true) }
@@ -266,6 +329,7 @@ class MapNavigationViewModel(
         super.onCleared()
         stopCompassMode()
         stopLocationTracking()
+        stopNavigation()
     }
 
     private fun loadMap() {
@@ -306,6 +370,7 @@ data class MapScreenUiState(
     val currentFloorUuid: Uuid? = null,
     val currentZoneUuid: Uuid? = null,
 
+    val isNavigating: Boolean = false,
     val currentPath: List<Zone>? = null,
 
     val isSearching: Boolean = false,
@@ -365,6 +430,15 @@ data class MapScreenUiState(
                 item.title.lowercase().contains(queryLower) ||
                         item.subtitle.lowercase().contains(queryLower)
             }
+        }
+
+    val nextNavigatedLocation: Zone?
+        get() {
+            val path = currentPath ?: return null
+            val currentZone = currentZone ?: return null
+            val currentIndex = path.indexOfFirst { it.id == currentZone.id }
+            val nextIndex = currentIndex + 1
+            return if (nextIndex in path.indices) path[nextIndex] else null
         }
 }
 

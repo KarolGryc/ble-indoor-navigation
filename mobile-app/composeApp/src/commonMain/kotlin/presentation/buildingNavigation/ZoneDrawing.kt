@@ -27,7 +27,8 @@ enum class ZoneState(val color: Color) {
     NONE(Color(0xC9CBFFEE)),
     SELECTED(Color(0xffff0000)),
     CURRENT(Color(0xff2e75ff)),
-    PATH(Color(0xffffa46b))
+    PATH(Color(0xBC6EFFF4)),
+    PATH_GOAL(Color(0xff00ff00))
 }
 
 fun DrawScope.drawZone(

@@ -27,14 +27,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.bluetooth.BLUETOOTH_SCAN
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.permissions.location.LOCATION
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import presentation.composables.AcceptRejectDialog
 import presentation.composables.FloorSelectionPanel
 import presentation.composables.MapCompass
+import presentation.composables.NavigationTargetCapsule
 import presentation.permissions.PermissionCheckResult
 import presentation.permissions.checkPermissions
 
@@ -79,11 +82,15 @@ fun BuildingMapScreen(
                     searchResults = uiState.filteredSearchResults,
                     onItemSearched = { item -> viewModel.showSearchedItem(item) },
                     onItemNavigatedTo = { item ->
-                        if (currentZone != null) {
-                            if (item is MapSearchResult.ZoneResult) {
-                                viewModel.findPath(currentZone, item.zone)
+                        getPermissionsExecute(
+                            viewModel = viewModel,
+                            controller = controller,
+                            scope = scope,
+                            onSuccess = {
+                                viewModel.startLocationTracking()
+                                viewModel.startNavigation(item)
                             }
-                        }
+                        )
                     }
                 )
             } else {
@@ -163,24 +170,14 @@ fun BuildingMapScreen(
                 onClick = {
                     if (uiState.locationEnabled) {
                         viewModel.showCurrentZone()
-                        return@LocateUserButton
                     }
-
-                    scope.launch {
-                        val permissionResult = checkPermissions(
-                            permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),
+                    else {
+                        getPermissionsExecute(
+                            viewModel = viewModel,
                             controller = controller,
+                            scope = scope,
+                            onSuccess = viewModel::startLocationTracking
                         )
-
-                        when (permissionResult) {
-                            PermissionCheckResult.Granted -> viewModel.startLocationTracking()
-                            PermissionCheckResult.PermanentlyDenied ->
-                                viewModel.setErrorMessage(
-                                    "Permissions Denied",
-                                    "Location and Bluetooth permissions are permanently denied. Please enable them in settings."
-                                )
-                            else -> {}
-                        }
                     }
                 },
                 active = uiState.locationEnabled
@@ -195,12 +192,46 @@ fun BuildingMapScreen(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
             )
 
+            if (uiState.isNavigating) {
+                NavigationTargetCapsule(
+                    destinationName = uiState.nextNavigatedLocation?.name ?: "",
+                    onCloseClick = { viewModel.stopNavigation() },
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(16.dp)
+                )
+            }
+
             AcceptRejectDialog(
                 show = errorMessage != null,
                 title = errorMessage?.title ?: "",
                 message = errorMessage?.message ?: "",
                 onAccept = { viewModel.clearErrorMessage() }
             )
+        }
+    }
+}
+
+private fun getPermissionsExecute(
+    viewModel: MapNavigationViewModel,
+    controller: PermissionsController,
+    scope: CoroutineScope,
+    onSuccess: () -> Unit
+) {
+    scope.launch {
+        val permissionResult = checkPermissions(
+            permissions = listOf(Permission.LOCATION, Permission.BLUETOOTH_SCAN),
+            controller = controller,
+        )
+
+        when (permissionResult) {
+            PermissionCheckResult.Granted -> onSuccess()
+            PermissionCheckResult.PermanentlyDenied ->
+                viewModel.setErrorMessage(
+                    "Permissions Denied",
+                    "Location and Bluetooth permissions are permanently denied. Please enable them in settings."
+                )
+            else -> {}
         }
     }
 }

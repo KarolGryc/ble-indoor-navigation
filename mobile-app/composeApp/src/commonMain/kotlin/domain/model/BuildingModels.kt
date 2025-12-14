@@ -85,6 +85,30 @@ data class Zone(
 
             return Pair(centerX, centerY)
         }
+
+    fun contains(x: Float, y: Float): Boolean {
+        var inside = false
+        val points = this.boundary
+        var j = points.size - 1
+
+        for (i in points.indices) {
+            val pi = points[i]
+            val pj = points[j]
+
+            val intersectY = (pi.y > y) != (pj.y > y)
+
+            if (intersectY) {
+                val intersectX = (pj.x - pi.x) * (y - pi.y) / (pj.y - pi.y) + pi.x
+
+                if (x < intersectX) {
+                    inside = !inside
+                }
+            }
+            j = i
+        }
+
+        return inside
+    }
 }
 
 data class Fingerprint(
