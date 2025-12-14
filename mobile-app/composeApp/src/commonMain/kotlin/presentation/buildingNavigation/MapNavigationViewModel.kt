@@ -12,6 +12,7 @@ import domain.repository.BleScanner
 import domain.repository.BuildingMapRepository
 import domain.service.CompassService
 import domain.service.LocationService
+import domain.usecase.FindPathBetweenUseCase
 import domain.usecase.RecordFingerprintUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -32,6 +33,7 @@ class MapNavigationViewModel(
     private val compassSensor: CompassService,
     private val locationService: LocationService,
     private val recordFingerprintUseCase: RecordFingerprintUseCase,
+    private val findPathBetweenUseCase: FindPathBetweenUseCase,
     private val scanner: BleScanner
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MapScreenUiState())
@@ -103,6 +105,16 @@ class MapNavigationViewModel(
         }
     }
 
+    fun findPath(startZone: Zone, endZone: Zone) {
+        val currentMap = _uiState.value.map ?: return
+        val path = findPathBetweenUseCase(currentMap, startZone, endZone)
+        _uiState.update {
+            it.copy(
+                currentPath = path?.path
+            )
+        }
+    }
+    
     fun startLocationTracking() {
         _locationJob?.cancel()
         _uiState.update { it.copy(locationEnabled = true) }
@@ -293,6 +305,8 @@ data class MapScreenUiState(
     val locationEnabled: Boolean = false,
     val currentFloorUuid: Uuid? = null,
     val currentZoneUuid: Uuid? = null,
+
+    val currentPath: List<Zone>? = null,
 
     val isSearching: Boolean = false,
     val searchQuery: String = "",

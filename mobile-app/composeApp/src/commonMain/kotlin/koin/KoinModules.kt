@@ -4,6 +4,7 @@ import data.repository.LocalMapRepositoryImpl
 import domain.repository.BuildingMapRepository
 import domain.service.KnnLocationService
 import domain.service.LocationService
+import domain.usecase.FindPathBetweenUseCase
 import domain.usecase.RecordFingerprintUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
@@ -45,6 +46,10 @@ val navigationModule = module {
         RecordFingerprintUseCase(scanner = get())
     }
 
+    factory<FindPathBetweenUseCase> {
+        FindPathBetweenUseCase()
+    }
+
     viewModel { (buildingId: Uuid) ->
         MapNavigationViewModel(
             buildingId = buildingId,
@@ -52,6 +57,7 @@ val navigationModule = module {
             compassSensor = get(),
             locationService = get(),
             recordFingerprintUseCase = get(),
+            findPathBetweenUseCase = get(),
             scanner = get()
         )
     }

@@ -12,7 +12,20 @@ data class Building (
     val id: Uuid,
     val floors: List<Floor>,
     val zoneConnections: List<ZoneConnection>
-)
+) {
+    val connectionsMap: Map<Zone, List<Zone>>
+        get() {
+            val map = mutableMapOf<Zone, MutableList<Zone>>()
+            zoneConnections.forEach { connection ->
+                map.getOrPut(connection.zoneA) { mutableListOf() }.add(connection.zoneB)
+                map.getOrPut(connection.zoneB) { mutableListOf() }.add(connection.zoneA)
+            }
+            return map
+        }
+
+    val zones: List<Zone>
+        get() = floors.flatMap { it.zones }
+}
 
 @OptIn(ExperimentalUuidApi::class)
 data class Floor (

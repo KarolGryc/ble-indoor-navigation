@@ -78,7 +78,13 @@ fun BuildingMapScreen(
                     onActiveChange = { viewModel.setIsSearching(it) },
                     searchResults = uiState.filteredSearchResults,
                     onItemSearched = { item -> viewModel.showSearchedItem(item) },
-                    onItemNavigatedTo = { }
+                    onItemNavigatedTo = { item ->
+                        if (currentZone != null) {
+                            if (item is MapSearchResult.ZoneResult) {
+                                viewModel.findPath(currentZone, item.zone)
+                            }
+                        }
+                    }
                 )
             } else {
                 CenterAlignedTopAppBar(
@@ -128,7 +134,8 @@ fun BuildingMapScreen(
                     onHoldGesture = {
                         viewModel.resetCamera()
                         viewModel.stopCompassMode()
-                    }
+                    },
+                    pathZones = uiState.currentPath ?: emptyList()
                 )
             }
 
