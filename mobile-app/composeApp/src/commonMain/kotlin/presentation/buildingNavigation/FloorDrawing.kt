@@ -10,7 +10,7 @@ fun DrawScope.drawFloorPlan(
     textMeasurer: TextMeasurer,
     currentZone: Zone? = null,
     selectedZone: Zone? = null,
-    pathZones: List<Zone> = emptyList()
+    pathZones: List<Zone> = emptyList(),
 ) {
     floor.walls.forEach {
         drawWall(it)

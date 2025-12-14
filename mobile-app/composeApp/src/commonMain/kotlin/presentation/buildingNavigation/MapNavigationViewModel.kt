@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import utils.Filter
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -129,9 +130,19 @@ class MapNavigationViewModel(
     }
 
     fun startNavigation(goal: Zone) {
+        _navigationJob?.cancel()
         _navigationJob = viewModelScope.launch {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val timeoutTime = 10000L
             while(isActive && _uiState.value.currentZone == null) {
                 delay(500)
+                if (Clock.System.now().toEpochMilliseconds() - now > timeoutTime) {
+                    setErrorMessage(
+                        title = "Navigation Error",
+                        message = "Current location could not be determined. Please ensure location tracking is enabled."
+                    )
+                    return@launch
+                }
             }
 
             _uiState.update { it.copy(isNavigating = true) }
@@ -239,10 +250,7 @@ class MapNavigationViewModel(
     }
 
     fun moveCameraToPos(x: Float, y: Float) {
-        val scale = _viewportState.value.scale
-        val scaledX = -x * scale // TODO: fix the inverted axis
-        val scaledY = -y * scale
-        _viewportState.update { it.copy(offset = Offset(scaledX, scaledY)) }
+        _viewportState.update{ it.copy(offset = Offset(-x, -y)) }
     }
 
     fun startCompassMode() {

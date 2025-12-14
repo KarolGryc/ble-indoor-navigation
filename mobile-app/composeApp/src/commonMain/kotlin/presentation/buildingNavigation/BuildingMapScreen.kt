@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
@@ -40,6 +41,7 @@ import presentation.composables.MapCompass
 import presentation.composables.NavigationTargetCapsule
 import presentation.permissions.PermissionCheckResult
 import presentation.permissions.checkPermissions
+import kotlin.math.PI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,10 +134,25 @@ fun BuildingMapScreen(
                     onTransformGestures = { _, pan, zoom, rotation ->
                         if (rotation != 0f) viewModel.stopCompassMode()
 
+                        val currentState = viewportState
+
+                        val angleRad = -currentState.rotation * (PI / 180f).toFloat()
+                        val cosAngle = kotlin.math.cos(angleRad)
+                        val sinAngle = kotlin.math.sin(angleRad)
+
+                        val rotatedPanX = pan.x * cosAngle - pan.y * sinAngle
+                        val rotatedPanY = pan.x * sinAngle + pan.y * cosAngle
+
+                        val deltaX = rotatedPanX / currentState.scale
+                        val deltaY = rotatedPanY / currentState.scale
+
                         viewModel.updateViewport(
-                            offset = viewportState.offset + pan,
-                            scale = viewportState.scale * zoom,
-                            rotation = viewportState.rotation + rotation,
+                            offset = Offset(
+                                x = currentState.offset.x + deltaX,
+                                y = currentState.offset.y + deltaY
+                            ),
+                            scale = currentState.scale * zoom,
+                            rotation = currentState.rotation + rotation
                         )
                     },
                     onHoldGesture = {

@@ -21,8 +21,6 @@ import domain.model.Wall
 import domain.model.Zone
 import domain.model.ZoneType
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -147,35 +145,33 @@ fun FloorMap(
 
             withTransform(
                 transformBlock = {
-                    translate(left = center.x + offset.x, top = center.y + offset.y)
+                    translate(left = center.x, top = center.y)
                     scale(scaleX = scale, scaleY = scale * tilt, pivot = Offset.Zero)
                     rotate(degrees = rotation, pivot = Offset.Zero)
+                    translate(left = offset.x, top = offset.y)
                 }
             ) {
                 drawFloorPlan(floor, textMeasurer, currentZone, selectedZone, pathZones)
-            }
 
+                floor.pointsOfInterest.forEach { poi ->
+                    val color = PoiTheme.get(poi.type).color
+                    val iconPainter = poiPainters.getPainter(poi.type)
 
-            floor.pointsOfInterest.forEach { poi ->
-                val color = PoiTheme.get(poi.type).color
-                val iconPainter = poiPainters.getPainter(poi.type)
-
-                val (x, y) = (poi.x to poi.y)
-                val (pX, pY) = calculateTransformedPosition(Offset(x, y), center, offset, scale, rotation, tilt)
-                withTransform({
-                    translate(left = pX, top = pY)
-                }) {
-                    val localPoi = poi.copy(x = 0f, y = 0f)
-                    drawPoiPin(localPoi, textMeasurer, iconPainter, color)
-                }
-            }
-
-            if (floor.zones.contains(currentZone)) {
-                currentZone?.centerPos?.let { pos ->
-                    val (x, y) = pos
-                    val (pX, pY) = calculateTransformedPosition(Offset(x, y), center, offset, scale, rotation, tilt)
                     withTransform({
-                        translate(left = pX, top = pY)
+                        translate(left = poi.x, top = poi.y)
+                        rotate(degrees = -rotation, pivot = Offset.Zero)
+                        scale(scaleX = 1f / scale, scaleY = 1f / (scale * tilt), pivot = Offset.Zero)
+                    }) {
+                        drawPoiPin(poi.name, textMeasurer, iconPainter, color)
+                    }
+                }
+
+                if (currentZone != null && floor.zones.contains(currentZone)) {
+                    val (x, y) = currentZone.centerPos
+                    withTransform({
+                        translate(left = x, top = y)
+                        rotate(degrees = -rotation, pivot = Offset.Zero)
+                        scale(scaleX = 1f / scale, scaleY = 1f / (scale * tilt), pivot = Offset.Zero)
                     }) {
                         drawUserLocationBillboard(textMeasurer, billboardColor)
                     }
@@ -183,25 +179,4 @@ fun FloorMap(
             }
         }
     }
-}
-
-private fun calculateTransformedPosition(
-    point: Offset,
-    center: Offset,
-    offset: Offset,
-    scale: Float,
-    rotation: Float,
-    tilt: Float
-): Offset {
-    val rad = rotation * (kotlin.math.PI / 180.0)
-    val cos = cos(rad).toFloat()
-    val sin = sin(rad).toFloat()
-
-    val rotatedX = point.x * cos - point.y * sin
-    val rotatedY = point.x * sin + point.y * cos
-
-    val finalX = center.x + offset.x + (rotatedX * scale)
-    val finalY = center.y + offset.y + (rotatedY * scale * tilt)
-
-    return Offset(finalX, finalY)
 }

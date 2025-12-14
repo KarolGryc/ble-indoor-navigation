@@ -17,7 +17,6 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import domain.model.PointOfInterest
 
 object PoiPinStyles {
     val pinRadius = 16.dp
@@ -26,7 +25,7 @@ object PoiPinStyles {
 }
 
 fun DrawScope.drawPoiPin(
-    poi: PointOfInterest,
+    name: String,
     textMeasurer: TextMeasurer,
     iconPainter: VectorPainter,
     color: Color = Color.Red,
@@ -38,7 +37,7 @@ fun DrawScope.drawPoiPin(
     pinHeight: Float = PoiPinStyles.pinHeight.toPx(),
     iconSize: Float = PoiPinStyles.iconSize.toPx()
 ) {
-    val tip = Offset(poi.x, poi.y)
+    val tip = Offset.Zero
     val pinPath = createPinPath(tip, pinRadius, pinHeight)
 
     translate(left = 2f, top = 2f) {
@@ -53,9 +52,9 @@ fun DrawScope.drawPoiPin(
         style = Stroke(width = 3.dp.toPx())
     )
 
-    val headCenterY = poi.y - pinHeight + pinRadius
+    val headCenterY = -pinHeight + pinRadius
 
-    translate(left = poi.x - iconSize / 2, top = headCenterY - iconSize / 2) {
+    translate(left = -iconSize / 2, top = headCenterY - iconSize / 2) {
         with(iconPainter) {
             draw(
                 size = Size(iconSize, iconSize),
@@ -66,10 +65,10 @@ fun DrawScope.drawPoiPin(
 
     val textStyle = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Unspecified)
 
-    val textLayoutResult = textMeasurer.measure(text = poi.name, style = textStyle)
+    val textLayoutResult = textMeasurer.measure(text = name, style = textStyle)
 
     val margin = 8.dp.toPx()
-    val textLeft = poi.x + pinRadius + margin
+    val textLeft = pinRadius + margin
     val textTop = headCenterY - (textLayoutResult.size.height / 2)
     val textOffset = Offset(textLeft, textTop)
 

@@ -1,17 +1,24 @@
 package presentation.mapList
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsBluetooth
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +28,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import data.filesystemProviders.File
 import data.filesystemProviders.rememberFilePicker
 import data.service.rememberFileSharer
@@ -80,41 +91,71 @@ fun MapListScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            MapList(
-                mapInfos = uiState.mapData,
-                onMapSelected = onNavigateToMap,
-                actions = listOf(
-                    MapAction(
-                        label = "Classify",
-                        icon = Icons.Default.Settings,
-                        onClick = { info -> onClassifyMap(info.id) }
-                    ),
-                    MapAction(
-                        label = "Rename",
-                        icon = Icons.Default.Edit,
-                        onClick = { info -> renamedMapInfo = info }
-                    ),
-                    MapAction(
-                        label = "Share",
-                        icon = Icons.Default.Share,
-                        onClick = { info ->
-                            scope.launch {
-                                viewModel.prepareBuildingToExport(info.id)?.let { file ->
-                                    fileSharer.shareFile(file)
+            if (uiState.mapData.isEmpty()) {
+                Icon(
+                    imageVector = Icons.Default.Map,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .padding(bottom = 16.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                )
+
+                Text(
+                    text = "No maps available",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Please add a map using + option from the menu in the bottom right corner",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                MapList(
+                    mapInfos = uiState.mapData,
+                    onMapSelected = onNavigateToMap,
+                    actions = listOf(
+                        MapAction(
+                            label = "Classify",
+                            icon = Icons.Default.Settings,
+                            onClick = { info -> onClassifyMap(info.id) }
+                        ),
+                        MapAction(
+                            label = "Rename",
+                            icon = Icons.Default.Edit,
+                            onClick = { info -> renamedMapInfo = info }
+                        ),
+                        MapAction(
+                            label = "Share",
+                            icon = Icons.Default.Share,
+                            onClick = { info ->
+                                scope.launch {
+                                    viewModel.prepareBuildingToExport(info.id)?.let { file ->
+                                        fileSharer.shareFile(file)
+                                    }
                                 }
                             }
-                        }
+                        ),
+                        MapAction(
+                            label = "Delete",
+                            icon = Icons.Default.Delete,
+                            onClick = { info -> removeMapRequested = info }
+                        )
                     ),
-                    MapAction(
-                        label = "Delete",
-                        icon = Icons.Default.Delete,
-                        onClick = { info -> removeMapRequested = info }
-                    )
-                ),
-                modifier = Modifier.weight(1f)
-            )
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
         if (pendingFile != null) {

@@ -7,8 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoveDown
-import androidx.compose.material.icons.filled.MoveUp
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -59,7 +59,7 @@ fun FloatingActions(
             FloatingActionButton(
                 onClick = { isExpanded = !isExpanded }
             ) {
-                val icon = if (isExpanded) Icons.Default.MoveDown else Icons.Default.MoveUp
+                val icon = if (isExpanded) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward
                 Icon(icon, contentDescription = "Add map")
             }
         }
