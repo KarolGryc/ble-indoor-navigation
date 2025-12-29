@@ -25,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.permissions.Permission
@@ -214,7 +215,8 @@ fun BuildingMapScreen(
                     destinationName = uiState.nextNavigatedLocation?.name ?: "",
                     onCloseClick = { viewModel.stopNavigation() },
                     modifier = Modifier
-                        .align(Alignment.BottomStart)
+                        .align(Alignment.TopCenter)
+                        .scale(1.5f)
                         .padding(16.dp)
                 )
             }

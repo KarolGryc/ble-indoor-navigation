@@ -1,17 +1,18 @@
-package domain.service
+package domain.usecase
 
 import domain.model.Building
 import domain.model.Fingerprint
 import domain.model.Zone
 import kotlin.math.sqrt
 
-class KnnLocationService(
-    var k: Int = 3
-) : LocationService {
-    override fun determineLocation(currentSignals: Fingerprint, building: Building): Zone? {
+class DetermineLocationUseCase(
+    private val k: Int = 3
+) {
+    operator fun invoke(currentSignals: Fingerprint, building: Building): Zone? {
         if (building.floors.isEmpty() || currentSignals.measurements.isEmpty()) return null
 
         val buildingZones = building.floors.flatMap { it.zones }
+
         val zonesFingerprintMap = buildingZones.flatMap { zone ->
             zone.fingerprints.map { fingerprint ->
                 zone to fingerprint
@@ -27,7 +28,7 @@ class KnnLocationService(
             val distance = euclideanDistance(currentSignals, fingerprint, uniqueTagIds)
             zone to distance
         }
-
+        
         return zoneDistances
             .sortedBy { (_, distance) -> distance }
             .take(k)
@@ -38,6 +39,8 @@ class KnnLocationService(
 
     private fun euclideanDistance(fp1: Fingerprint, fp2: Fingerprint, tagIds: Set<Int>): Double {
         var sum = 0.0
+        val minRssi = -100
+
         for (tagId in tagIds) {
             val rssi1 = fp1.measurements.find { it.tagId == tagId }?.rssi ?: minRssi
             val rssi2 = fp2.measurements.find { it.tagId == tagId }?.rssi ?: minRssi
@@ -46,6 +49,4 @@ class KnnLocationService(
 
         return sqrt(sum)
     }
-
-    private val minRssi = -100
 }

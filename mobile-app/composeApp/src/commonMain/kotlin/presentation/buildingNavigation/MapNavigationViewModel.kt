@@ -11,7 +11,7 @@ import domain.repository.BleScanError
 import domain.repository.BleScanner
 import domain.repository.BuildingMapRepository
 import domain.service.CompassService
-import domain.service.LocationService
+import domain.usecase.DetermineLocationUseCase
 import domain.usecase.FindPathBetweenUseCase
 import domain.usecase.RecordFingerprintUseCase
 import kotlinx.coroutines.Job
@@ -32,7 +32,7 @@ class MapNavigationViewModel(
     private val buildingId: Uuid,
     private val mapRepository: BuildingMapRepository,
     private val compassSensor: CompassService,
-    private val locationService: LocationService,
+    private val locationUseCase: DetermineLocationUseCase,
     private val recordFingerprintUseCase: RecordFingerprintUseCase,
     private val findPathBetweenUseCase: FindPathBetweenUseCase,
     private val scanner: BleScanner
@@ -210,7 +210,7 @@ class MapNavigationViewModel(
 
                     val measuredSignals = recordFingerprintUseCase(1000)
 
-                    val estimatedZone = locationService.determineLocation(measuredSignals, currentMap)
+                    val estimatedZone = locationUseCase(measuredSignals, currentMap)
                     val stableZone = filter.getNewValue(estimatedZone)
 
                     if (stableZone != null && stableZone != _uiState.value.currentZone) {

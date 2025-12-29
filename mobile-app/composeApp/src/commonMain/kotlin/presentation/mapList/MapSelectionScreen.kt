@@ -82,8 +82,8 @@ fun MapListScreen(
         floatingActionButton = {
             FloatingActions(
                 actions = listOf(
+                    GeneralAction("Search BLE devices", Icons.Default.SettingsBluetooth) { onBluetoothSearchPressed() },
                     GeneralAction("Add from file", Icons.Default.Add) { filePicker.pickFile() },
-                    GeneralAction("Search BLE devices", Icons.Default.SettingsBluetooth) { onBluetoothSearchPressed() }
                 )
             )
        }

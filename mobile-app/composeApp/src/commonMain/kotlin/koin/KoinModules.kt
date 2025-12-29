@@ -2,8 +2,7 @@ package koin
 
 import data.repository.LocalMapRepositoryImpl
 import domain.repository.BuildingMapRepository
-import domain.service.KnnLocationService
-import domain.service.LocationService
+import domain.usecase.DetermineLocationUseCase
 import domain.usecase.FindPathBetweenUseCase
 import domain.usecase.RecordFingerprintUseCase
 import org.koin.core.module.Module
@@ -38,10 +37,6 @@ val mapListModule = module {
 
 @OptIn(ExperimentalUuidApi::class)
 val navigationModule = module {
-    factory<LocationService> {
-        KnnLocationService()
-    }
-
     factory<RecordFingerprintUseCase> {
         RecordFingerprintUseCase(scanner = get())
     }
@@ -50,12 +45,16 @@ val navigationModule = module {
         FindPathBetweenUseCase()
     }
 
+    factory<DetermineLocationUseCase> {
+        DetermineLocationUseCase(k = 3)
+    }
+
     viewModel { (buildingId: Uuid) ->
         MapNavigationViewModel(
             buildingId = buildingId,
             mapRepository = get(),
             compassSensor = get(),
-            locationService = get(),
+            locationUseCase = get(),
             recordFingerprintUseCase = get(),
             findPathBetweenUseCase = get(),
             scanner = get()
